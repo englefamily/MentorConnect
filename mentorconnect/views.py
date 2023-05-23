@@ -5,7 +5,7 @@ from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 
 def index(request):
-    return HttpResponse("Welcome to MentorConnect!")
+    return HttpResponse("Welcome to MentorConnect! from hananel")
 
 
 @csrf_exempt
