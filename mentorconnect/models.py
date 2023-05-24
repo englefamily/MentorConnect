@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
@@ -77,4 +78,16 @@ class Course(models.Model):
 
 
 class FeedBack(models.Model):
-    pass
+    fb_title = models.CharField(null=False, max_length=50)
+    fb_content = models.CharField(null=False, max_length=128)
+    fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    student = models.OneToOneField(Student, on_delete=models.CASCADE, related_name='feedback')
+    mentor = models.OneToOneField(Mentor, on_delete=models.CASCADE, related_name='feedback')
+    course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name='feedback')
+
+    class Meta:
+        db_table = 'feedback'
+
+    def __str__(self):
+        return f"ID: {self.pk} Feedback for {self.mentor}, {self.course}: {self.fb_title} - {self.fb_content}. " \
+               f"From: {self.student}"
