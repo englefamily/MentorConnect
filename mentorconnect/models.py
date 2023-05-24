@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
+
 class UserModel(models.Model):
     email = models.EmailField(max_length=50, null=False, blank=True, db_index=True)
     password = models.CharField(max_length=30, validators=[validate_password], null=False)
@@ -91,3 +92,11 @@ class FeedBack(models.Model):
     def __str__(self):
         return f"ID: {self.pk} Feedback for {self.mentor}, {self.course}: {self.fb_title} - {self.fb_content}. " \
                f"From: {self.student}"
+
+
+class Accounts(models.Model):
+    pass
+
+
+class TimeTable(models.Model):
+    pass
