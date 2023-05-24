@@ -26,6 +26,8 @@ class Mentor(models.Model):
     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors')
     courses = models.ManyToManyField('Course', related_name='mentors')
+    #  TODO: add - `mentor_hourly_rate = models.DecimalField(max_digits=3, decimal_places=2, null=False)`?
+    #   that would linked to `Payment` & `Report` classes?
 
     class Meta:
         db_table = 'mentor'
@@ -94,16 +96,15 @@ class FeedBack(models.Model):
                f"From: {self.student}"
 
 
-# This is just temporary. Just realising how difficult this will be to consider different banks worldwide.
-# Todo: Check with `Stripe` API to see what info is needed and if they provide the `model`s
-class Accounting(models.Model):
-    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='accounting')
-    card_holder_name = models.CharField(max_length=50, null=False)
-    card_number = models.IntegerField(max_length=16, null=False)
-    cvc_number = models.IntegerField(max_length=3, null=False)
+class Chat(models.Model):
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='chats')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='chats')
+    message = models.CharField(max_length=256, null=False)
+    #  TODO: course_work = .... logic for send/ receive files ....
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        db_table = 'accounting'
+        db = 'chat'
 
 
 class TimeTable(models.Model):
@@ -130,3 +131,46 @@ class TimeTable(models.Model):
 #
 # class Meta:
 #     db_table = 'booking'
+
+
+# This is just temporary. Just realising how difficult this will be to consider different banks worldwide.
+# Todo: Check with `Stripe` API to see what info is needed and if they provide the `model`s
+class Accounting(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='accounting')
+    card_holder_name = models.CharField(max_length=50, null=False)
+    card_number = models.IntegerField(max_length=16, null=False)
+    cvc_number = models.IntegerField(max_length=3, null=False)
+
+    class Meta:
+        db_table = 'accounting'
+
+
+# This too is temporary.
+# Todo: Check with `Stripe` API...
+class Payment(models.Model):
+    PAYMENT_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Paid', 'Paid'),
+        ('Failed', 'Failed'),
+    ]
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='payments')
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='payments')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=4, decimal_places=2, null=False)
+    status = models.CharField(choices=PAYMENT_CHOICES, max_length=20, null=False)
+
+    class Meta:
+        db_table = 'payment'
+
+
+# Todo: payment_due/ received should be linked to `Payment` class?
+class Report(models.Model):
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='reports')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='reports')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='reports')
+    duration = models.DurationField(null=False)
+    payment_due = models.DecimalField(max_digits=4, decimal_places=2, null=False)
+    payment_received = models.DecimalField(max_digits=4, decimal_places=2, null=False)
+
+    class Meta:
+        db_table = 'report'
