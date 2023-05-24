@@ -94,9 +94,39 @@ class FeedBack(models.Model):
                f"From: {self.student}"
 
 
-class Accounts(models.Model):
-    pass
+# This is just temporary. Just realising how difficult this will be to consider different banks worldwide.
+# Todo: Check with `Stripe` API to see what info is needed and if they provide the `model`s
+class Accounting(models.Model):
+    user = models.ForeignKey(UserModel, on_delete=models.CASCADE, related_name='accounting')
+    card_holder_name = models.CharField(max_length=50, null=False)
+    card_number = models.IntegerField(max_length=16, null=False)
+    cvc_number = models.IntegerField(max_length=3, null=False)
+
+    class Meta:
+        db_table = 'accounting'
 
 
 class TimeTable(models.Model):
-    pass
+    MENTOR_AVAILABILITY = [
+        ('Available', 'Available'),
+        ('Not Available', 'Not Available'),
+    ]
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='timetables')
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='timetables')
+    # Make a `booking` `intermediate table` to track which student booked the mentor's available block? See below...
+    start_time = models.DateTimeField(null=False)
+    end_time = models.DateTimeField(null=False)
+    availability = models.CharField(choices=MENTOR_AVAILABILITY, max_length=13, null=False)
+
+    class Meta:
+        db_table = 'timetable'
+
+# Todo: decide if needed.
+# `intermediate table` continued... Looks like good idea to me - but is it needed?
+# class Booking(models.Model):
+#     student = models.ForeignKey(Student, on_delete=models.CASCADE)
+#     timetable = models.ForeignKey(Timetable, on_delete=models.CASCADE)
+#     booked_at = models.DateTimeField(auto_now_add=True)
+#
+# class Meta:
+#     db_table = 'booking'
