@@ -4,8 +4,8 @@ from django.contrib.auth.password_validation import validate_password
 # Create your models here.
 
 class UserModel(models.Model):
-    email = models.EmailField(max_length=64, null=False, blank=True, db_index=True)
-    password = models.CharField(max_length=64, validators=[validate_password], null=False)
+    email = models.EmailField(max_length=50, null=False, blank=True, db_index=True)
+    password = models.CharField(max_length=30, validators=[validate_password], null=False)
     #  TODO: Password validation to ensure complexity level for security. Possibly also validate emails
 
     def __str__(self):
@@ -19,8 +19,11 @@ class Mentor(models.Model):
     last_name = models.CharField(null=False, max_length=50)
     age = models.IntegerField(null=False)
     address = models.CharField(null=False, max_length=128)
+    about_me = models.CharField(null=False, max_length=256) # Space to write about experience, education etc...
+    #  TODO: profile_pic = .... upload picture routine ....
     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='mentor', null=False)
-    #  TODO: profile_pic = ....
+    students = models.ManyToManyField('Student', related_name='mentors')
+    courses = models.ManyToManyField('Course', related_name='mentors')
 
     class Meta:
         db_table = 'mentor'
@@ -40,8 +43,11 @@ class Student(models.Model):
     last_name = models.CharField(null=False, max_length=50)
     age = models.IntegerField(null=False)
     address = models.CharField(null=False, max_length=128)
+    about_me = models.CharField(null=False, max_length=64) # brief description, ex. `12th Grade @ x High School`
+    #  TODO: profile_pic = .... upload picture routine ....
     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='student', null=False)
-    #  TODO: profile_pic = ....
+    mentors = models.ManyToManyField('Mentor', related_name='students')
+    courses = models.ManyToManyField('Course', related_name='students')
 
     class Meta:
         db_table = 'student'
@@ -52,3 +58,23 @@ class Student(models.Model):
 
         # Otherwise:
         return f"ID: {self.pk} Student: {self.first_name} {self.last_name}"
+
+
+class CourseCategory(models.Model):
+    course_category = models.CharField(null=False, max_length=50)
+
+
+class Course(models.Model):
+    course_title = models.CharField(null=False, max_length=50)
+    course_desc = models.CharField(null=False, max_length=128)
+    category = models.ForeignKey(CourseCategory, on_delete=models.RESTRICT, related_name='courses', null=False)
+
+    class Meta:
+        db_table = 'course'
+
+    def __str__(self):
+        return f"ID: {self.pk} Course: {self.course_title} Description: {self.course_desc}"
+
+
+class FeedBack(models.Model):
+    pass
