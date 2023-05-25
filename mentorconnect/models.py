@@ -19,15 +19,17 @@ class Mentor(models.Model):
     # identity_number = models.CharField(null=False, max_length=9, db_index=True)
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
+    #  TODO: Change to DOB with dropdown list:
     age = models.IntegerField(null=False)
+    #  TODO: Change to city with dropdown list CITY_CHOICES:
     address = models.CharField(null=False, max_length=128)
     about_me = models.CharField(null=False, max_length=256) # Space to write about experience, education etc...
     #  TODO: profile_pic = .... upload picture routine ....
     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors')
     courses = models.ManyToManyField('Course', related_name='mentors')
-    #  TODO: add - `mentor_hourly_rate = models.DecimalField(max_digits=3, decimal_places=2, null=False)`?
-    #   that would linked to `Payment` & `Report` classes?
+    mentor_hourly_rate = models.DecimalField(max_digits=3, decimal_places=2, null=False)
+    #  TODO: link to `Payment` & `Report` classes?
 
     class Meta:
         db_table = 'mentor'
@@ -45,7 +47,9 @@ class Student(models.Model):
     # identity_number = models.CharField(null=False, max_length=9, db_index=True)
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
+    #  TODO: Change to DOB with dropdown list:
     age = models.IntegerField(null=False)
+    #  TODO: Change to city with dropdown list CITY_CHOICES:
     address = models.CharField(null=False, max_length=128)
     about_me = models.CharField(null=False, max_length=64) # brief description, ex. `12th Grade @ x High School`
     #  TODO: profile_pic = .... upload picture routine ....
