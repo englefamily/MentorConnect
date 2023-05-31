@@ -2,7 +2,9 @@ from django.contrib import admin
 from .models import User, Mentor, Student, FeedBack, LearningTopic, LearningSubTopic
 # Register your models here.
 
-admin.site.register(User)
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    pass
 admin.site.register(Mentor)
 admin.site.register(Student)
 admin.site.register(LearningTopic)

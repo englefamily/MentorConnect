@@ -110,21 +110,11 @@ class FeedBack(models.Model):
     fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
-    # sub_topic = models.CharField(max_length=100, choices=[], null=True, blank=True)
+    sub_topic = models.ManyToManyField('LearningSubTopic', related_name='feedbacks',  blank=True)
 
     class Meta:
         db_table = 'feedback'
 
     def __str__(self):
         return f"ID: {self.pk} Feedback: {self.fb_content}"
-
-    # def save(self, *args, **kwargs):
-    #     mentor_sub_topics = self.mentor.sub_topics.all()
-    #     self._meta.get_field('sub_topic').choices = [(topic.sub_topic_name, topic.sub_topic_name) for topic in mentor_sub_topics]
-    #     super(FeedBack, self).save(*args, **kwargs)
-
-    def __init__(self, *args, **kwargs):
-        mentor_sub_topics = self.mentor.sub_topics.all()
-        self._meta.get_field('sub_topic').choices = [('a', 'a'), ('b', 'b')]
-        super().__init__(*args, **kwargs)
 
