@@ -1,7 +1,7 @@
 const APP_ID = "de3b68dea39d4e2ea71981a4e5277def";
 const TOKEN =
-  "007eJxTYNDgbvrGGpRckxd1cL81+7KNk5fzLM1s9/7xkMXho5Kg/zcFhpRU4yQzi5TURGPLFJNUo9REc0NLC8NEk1RTI3PzlNQ0lrq8lIZARoZ3he1MjAwQCOILMvim5hXllzjn5+WlJpc4ZySWMDAAALGxI8I=";
-const CHANNEL = "MenrotConnectChat";
+  "007eJxTYNjjEDalIHDOLtv0PvuwsxfXzIvuDl14c+9+a/7SaduiNUQUGFJSjZPMLFJSE40tU0xSjVITzQ0tLQwTTVJNjczNU1LT5J6XpDQEMjIkbupmZGSAQBBfkME3Na8kv8g5Py8vNbnEOSOxhIEBADhjJRM=";
+const CHANNEL = "MentorConnectChat";
 
 const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
 
@@ -102,8 +102,6 @@ let toggleCamera = async (e) => {
 };
 
 document.getElementById("join-btn").addEventListener("click", joinStream);
-document
-  .getElementById("leave-btn")
-  .addEventListener("click", leaveAndRemoveLocalStream);
+document.getElementById("leave-btn").addEventListener("click", leaveAndRemoveLocalStream);
 document.getElementById("mic-btn").addEventListener("click", toggleMic);
 document.getElementById("camera-btn").addEventListener("click", toggleCamera);
