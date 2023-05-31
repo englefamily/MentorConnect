@@ -74,6 +74,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mcproject.wsgi.application'
 
+AUTH_USER_MODEL = 'mentorconnect.User'
+
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
