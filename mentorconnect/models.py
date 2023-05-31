@@ -110,7 +110,7 @@ class FeedBack(models.Model):
     fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
-    sub_topic = models.CharField(max_length=100, choices=[], null=True, blank=True)
+    # sub_topic = models.CharField(max_length=100, choices=[], null=True, blank=True)
 
     class Meta:
         db_table = 'feedback'
