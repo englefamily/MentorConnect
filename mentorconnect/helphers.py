@@ -1,3 +1,5 @@
+AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
+
 CITIES_CHOICES = [("Jerusalem", "ירושלים"),
           ("Tel Aviv-Yafo", "תל אביב-יפו"),
           ("Haifa", "חיפה"),
