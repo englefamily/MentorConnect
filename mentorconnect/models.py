@@ -1,7 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-from django.contrib.auth.password_validation import validate_password
-from django.core.validators import MaxValueValidator, MinValueValidator
+# from django.contrib.auth.password_validation import validate_password
+# from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
@@ -26,15 +26,22 @@ class CustomUserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, email, password=None):
+        return self.create_user(email, password)
+
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
     is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)  # Add this line for is_staff attribute
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
+
+    class Meta:
+        db_table = 'user'
 
     def __str__(self):
         return self.email
@@ -56,7 +63,10 @@ class Mentor(models.Model):
     #  TODO: Add other fields from Chananel's Models:
     #  TODO: link to `Payment` & `Report` classes?
     user = models.OneToOneField(CustomUser, on_delete=models.RESTRICT, related_name='mentor', null=False)
-    students = models.ManyToManyField("Student", through="Course")
+    students = models.ManyToManyField("Student")
+
+    class Meta:
+        db_table = 'mentor'
 
     def __str__(self):
         return f"Mentor: {self.last_name}, {self.first_name} {self.user.email}"
@@ -101,6 +111,9 @@ class Student(models.Model):
     #  TODO: link to `Payment` & `Report` classes?
     user = models.OneToOneField(CustomUser, on_delete=models.RESTRICT, related_name='student', null=False)
 
+    class Meta:
+        db_table = 'student'
+
     def __str__(self):
         return f"Student: {self.last_name}, {self.first_name} {self.user.email}"
 
@@ -138,9 +151,6 @@ class CourseCategory(models.Model):
 
     class Meta:
         db_table = 'course_category'
-
-    def __str__(self):
-        return f"ID: {self.pk} Category {self.course_category}"
 
 
 class Course(models.Model):
