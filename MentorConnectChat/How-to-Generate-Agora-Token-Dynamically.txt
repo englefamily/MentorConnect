@@ -1,0 +1,42 @@
+Generating Agora Tokens Dynamically
+
+# https://pypi.org/project/agora-token-builder
+
+# install:
+pip install agora-token-builder
+
+# import into project - views.py:
+from agora_token_builder import RtcTokenBuilder
+# to handle json:
+from django.http import JsonResponse
+# to generate number for uid
+from random 
+# to configure experation times for tokens
+import time
+
+# Build token with uid
+token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, uid, role, privilegeExpiredTs)
+
+# create function:
+def getToken(request):
+    token = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channelName, uid, role, privilegeExpiredTs)
+    appId = 'de3b68dea39d4e2ea71981a4e5277def'
+    appCertificate = 'b059577cccdb41a69817e2bdf98112c2' # Needs to be kept secret - Move to 'Enviroment Variables'
+    channelName = request.GET.get('channel')
+    uid = random.randint(1,230)
+    expirationTimeInSeconds = 3600 * 24
+    currentTimeStamp = time.time()
+    privilegeExpiredTs = currentTimeStamp + expirationTimeInSeconds
+    role = 1 # 1 = host, 2 = guest
+    return JsonResponse({'token':token, 'uid':uid}, safe=false)
+
+
+## urls.py:
+from django.urls import path
+from . import views
+
+
+urlpatterns = [
+    # ... ,
+    path('get_token/', views.getToken),
+]
