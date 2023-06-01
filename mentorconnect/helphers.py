@@ -1,5 +1,8 @@
 AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
 
+EDUCATION_START = [(str(year), str(year)) for year in range(1983, 2024)]
+EDUCATION_COMPLETE = [(str(year), str(year)) for year in range(1984, 2031)]
+
 CITIES_CHOICES = [("Jerusalem", "ירושלים"),
           ("Tel Aviv-Yafo", "תל אביב-יפו"),
           ("Haifa", "חיפה"),
@@ -78,3 +81,20 @@ CITIES_CHOICES = [("Jerusalem", "ירושלים"),
           ("Ariel", "אריאל"),
           ("Or Akiva", "אור עקיבא"),
           ("Beit She'an", "בית שאן")]
+
+
+EDUCATION_LEVEL = [
+    ('bachelors_degree', 'תואר ראשון'),
+    ('masters_degree', 'תואר שני'),
+    ('doctorate', 'דוקטורט'),
+    ('teaching_certificate', 'תעודת הוראה'),
+    ('diploma', 'לימודי תעודה'),
+    ('high_school', 'תיכון'),
+]
+
+TEACH_OPTIONS = [
+    ('online', 'online'),
+    ('mentor_place', 'mentor_place'),
+    ('student_place', 'student_place'),
+]
+
