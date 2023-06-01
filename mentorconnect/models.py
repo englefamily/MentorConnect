@@ -1,91 +1,160 @@
 from django.db import models
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.password_validation import validate_password
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 # Create your models here.
 
+# class UserModel(models.Model):
+#     # Ori says the get_user_model is better for the authentication etc that we will want to do
+#     email = models.EmailField(max_length=50, null=False, blank=True, db_index=True)
+#     password = models.CharField(max_length=30, validators=[validate_password], null=False)
+#     #  TODO: Password validation to ensure complexity level for security. Possibly also validate emails
+#
+#     def __str__(self):
+#         return self.email
 
-class UserModel(models.Model):
-    # Ori says the get_user_model is better for the authentication etc that we will want to do
-    email = models.EmailField(max_length=50, null=False, blank=True, db_index=True)
-    password = models.CharField(max_length=30, validators=[validate_password], null=False)
-    #  TODO: Password validation to ensure complexity level for security. Possibly also validate emails
+
+# Creating CustomUser Models - Manager & object - after this is done `User` (variable) is used like other Django Models
+class CustomUserManager(BaseUserManager):
+    def create_user(self, email, password=None):
+        if not email:
+            raise ValueError('The Email field must be set')
+        email = self.normalize_email(email)
+        user = self.model(email=email)
+        user.set_password(password)
+        user.save(using=self._db)
+        return user
+
+
+class CustomUser(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(unique=True)
+    is_active = models.BooleanField(default=True)
+
+    objects = CustomUserManager()
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
 
     def __str__(self):
         return self.email
 
 
+# Mentor model
 class Mentor(models.Model):
-    # Really would only relevant if used here
-    # identity_number = models.CharField(null=False, max_length=9, db_index=True)
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
-    #  TODO: Change to DOB with dropdown list:
-    age = models.IntegerField(null=False)
-    #  TODO: Change to city with dropdown list CITY_CHOICES:
-    address = models.CharField(null=False, max_length=128)
-    about_me = models.CharField(null=False, max_length=256) # Space to write about experience, education etc...
-    #  TODO: profile_pic = .... upload picture routine ....
-    user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='mentor', null=False)
-    students = models.ManyToManyField('Student', related_name='mentors')
-    courses = models.ManyToManyField('Course', related_name='mentors')
     mentor_hourly_rate = models.DecimalField(max_digits=3, decimal_places=2, null=False)
+    #  TODO: Add About_me_title:
+    #  TODO: Add About_me_content:
+    #  TODO: Add DOB dropdown list:
+    #  TODO: Add education_degree dropdown list:
+    #  TODO: Add education_start dropdown list:
+    #  TODO: Add education_end dropdown list:
+    #  TODO: city with dropdown list CITY_CHOICES:
+    #  TODO: profile_pic = .... upload picture routine ....
+    #  TODO: Add other fields from Chananel's Models:
     #  TODO: link to `Payment` & `Report` classes?
-
-    class Meta:
-        db_table = 'mentor'
+    user = models.OneToOneField(CustomUser, on_delete=models.RESTRICT, related_name='mentor', null=False)
+    students = models.ManyToManyField("Student", through="Course")
 
     def __str__(self):
-        # If we use TZ number
-        # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+        return f"Mentor: {self.last_name}, {self.first_name} {self.user.email}"
 
-        # Otherwise:
-        return f"ID: {self.pk} Mentor: {self.first_name} {self.last_name}"
+# class Mentor(models.Model):
+#     # Really would only relevant if used here
+#     # identity_number = models.CharField(null=False, max_length=9, db_index=True)
+#     first_name = models.CharField(null=False, max_length=50)
+#     last_name = models.CharField(null=False, max_length=50)
+#     #  TODO: Change to DOB with dropdown list:
+#     age = models.IntegerField(null=False)
+#     #  TODO: Change to city with dropdown list CITY_CHOICES:
+#     address = models.CharField(null=False, max_length=128)
+#     about_me = models.CharField(null=False, max_length=256) # Space to write about experience, education etc...
+#     #  TODO: profile_pic = .... upload picture routine ....
+#     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='mentor', null=False)
+#     students = models.ManyToManyField('Student', related_name='mentors')
+#     courses = models.ManyToManyField('Course', related_name='mentors')
+#     mentor_hourly_rate = models.DecimalField(max_digits=3, decimal_places=2, null=False)
+#     #  TODO: link to `Payment` & `Report` classes?
+#
+#     class Meta:
+#         db_table = 'mentor'
+#
+#     def __str__(self):
+#         # If we use TZ number
+#         # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+#
+#         # Otherwise:
+#         return f"ID: {self.pk} Mentor: {self.first_name} {self.last_name}"
 
 
 class Student(models.Model):
-    # Really would only relevant if used here
-    # identity_number = models.CharField(null=False, max_length=9, db_index=True)
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
-    #  TODO: Change to DOB with dropdown list:
-    age = models.IntegerField(null=False)
-    #  TODO: Change to city with dropdown list CITY_CHOICES:
-    address = models.CharField(null=False, max_length=128)
-    about_me = models.CharField(null=False, max_length=64) # brief description, ex. `12th Grade @ x High School`
+    #  TODO: Add About_me_title?
+    #  TODO: Add About_me_content?
+    #  TODO: Add DOB dropdown list:
+    #  TODO: city with dropdown list CITY_CHOICES:
     #  TODO: profile_pic = .... upload picture routine ....
-    user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='student', null=False)
-    # Ori says we probably do Not need this as student is already connect to mentor by the Mentor's connection to Student
-    # we can check this in python shell by creating a student.mentor object
-    # mentors = models.ManyToManyField('Mentor', related_name='students')
-    # but he says we do need this as a student can have more than one course
-    courses = models.ManyToManyField('Course', related_name='students')
-
-    class Meta:
-        db_table = 'student'
+    #  TODO: Add other fields from Chananel's Models:
+    #  TODO: link to `Payment` & `Report` classes?
+    user = models.OneToOneField(CustomUser, on_delete=models.RESTRICT, related_name='student', null=False)
 
     def __str__(self):
-        # If we use TZ number
-        # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+        return f"Student: {self.last_name}, {self.first_name} {self.user.email}"
 
-        # Otherwise:
-        return f"ID: {self.pk} Student: {self.first_name} {self.last_name}"
+# class Student(models.Model):
+#     # Really would only relevant if used here
+#     # identity_number = models.CharField(null=False, max_length=9, db_index=True)
+#     first_name = models.CharField(null=False, max_length=50)
+#     last_name = models.CharField(null=False, max_length=50)
+#     #  TODO: Change to DOB with dropdown list:
+#     age = models.IntegerField(null=False)
+#     #  TODO: Change to city with dropdown list CITY_CHOICES:
+#     address = models.CharField(null=False, max_length=128)
+#     about_me = models.CharField(null=False, max_length=64) # brief description, ex. `12th Grade @ x High School`
+#     #  TODO: profile_pic = .... upload picture routine ....
+#     user = models.OneToOneField(UserModel, on_delete=models.RESTRICT, related_name='student', null=False)
+#     # Ori says we probably do Not need this as student is already connect to mentor by the Mentor's connection to Student
+#     # we can check this in python shell by creating a student.mentor object
+#     # mentors = models.ManyToManyField('Mentor', related_name='students')
+#     # but he says we do need this as a student can have more than one course
+#     courses = models.ManyToManyField('Course', related_name='students')
+#
+#     class Meta:
+#         db_table = 'student'
+#
+#     def __str__(self):
+#         # If we use TZ number
+#         # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+#
+#         # Otherwise:
+#         return f"ID: {self.pk} Student: {self.first_name} {self.last_name}"
 
 
 class CourseCategory(models.Model):
     course_category = models.CharField(null=False, max_length=50)
+
+    class Meta:
+        db_table = 'course_category'
+
+    def __str__(self):
+        return f"ID: {self.pk} Category {self.course_category}"
 
 
 class Course(models.Model):
     course_title = models.CharField(null=False, max_length=50)
     course_desc = models.CharField(null=False, max_length=128)
     category = models.ForeignKey(CourseCategory, on_delete=models.RESTRICT, related_name='courses', null=False)
+    mentor = models.ForeignKey(Mentor, on_delete=models.RESTRICT, null=False)
+    students = models.ManyToManyField("Student", related_name="courses")
 
     class Meta:
         db_table = 'course'
 
     def __str__(self):
-        return f"ID: {self.pk} Course: {self.course_title} Description: {self.course_desc}"
+        return f"ID: {self.pk} Course: {self.course_title} by {self.mentor}"
 
 
 # class FeedBack(models.Model):
