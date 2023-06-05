@@ -98,3 +98,39 @@ TEACH_OPTIONS = [
     ('student_place', 'student_place'),
 ]
 
+
+
+
+
+
+# api for mentor
+# {
+#     "user": {
+#         "email": "test18@gmail.com",
+#         "password": "123"
+#     },
+#     "gender": "female",
+#     "first_name": "אורי",
+#     "last_name": "גשר",
+#     "phone_num": "0553001034",
+#     "education": "bachelors_degree",
+#     "education_start_year": "2010",
+#     "education_completion_year": "2014",
+#     "year_of_birth": "1987",
+#     "address_city": "Jerusalem",
+#     "study_cities": "Jerusalem",
+#     "short_description": "מסביר נהדר",
+#     "long_description": "מלמד פייתון וכו",
+#     "cost_hour_min": 150,
+#     "cost_hour_max": 201,
+#     "teach_in": "online", // Provide
+# teach_in as a
+# string
+# with comma - separated values
+# "experience_with": "",
+# "group_teaching": true,
+# "sub_topics": [4],
+# "students": [4]
+# }
+
+
