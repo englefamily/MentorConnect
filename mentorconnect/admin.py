@@ -5,6 +5,8 @@ from .models import User, Mentor, Student, FeedBack, Topic, SubTopic
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     pass
+
+
 admin.site.register(Mentor)
 admin.site.register(Student)
 admin.site.register(Topic)

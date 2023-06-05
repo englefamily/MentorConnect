@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import User, Student, Mentor, FeedBack, Topic, SubTopic
+from .helphers import CITIES_CHOICES, TEACH_OPTIONS
+from django.contrib.auth.hashers import make_password
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -7,6 +9,13 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('email', 'password')  # Add any other fields you want to include
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            hashed_password = make_password(password)
+            instance.password = hashed_password
+        return super().update(instance, validated_data)
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -35,6 +44,8 @@ class StudentSerializer(serializers.ModelSerializer):
 
 class MentorSerializer(serializers.ModelSerializer):
     user = UserSerializer(partial=True)  # Embed the UserSerializer inside the StudentSerializer
+    study_cities = serializers.MultipleChoiceField(choices=CITIES_CHOICES)
+    teach_in = serializers.MultipleChoiceField(choices=TEACH_OPTIONS)
 
     class Meta:
         model = Mentor

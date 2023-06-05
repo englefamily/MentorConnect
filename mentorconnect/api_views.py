@@ -339,7 +339,7 @@ def sub_topic(request):
                         status=status.HTTP_201_CREATED,
                         data={
                             "status": 'success',
-                            'message': 'car has been created',
+                            'message': 'sub topic has been created',
                             'sub _topic': new_sub_topic.data
                         }
                     )

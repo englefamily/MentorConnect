@@ -42,7 +42,6 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField(_('email address'), unique=True)
-    date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
 
@@ -68,7 +67,7 @@ class Mentor(models.Model):
     teach_in = MultiSelectField(choices=TEACH_OPTIONS, max_length=30)
     experience_with = MultiSelectField(choices=[('adhd', 'adhd'), ('teaching', 'teaching')], max_length=30, null=True, blank=True)
     group_teaching = models.BooleanField(null=False, default=False)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
+    user = models.OneToOneField(User, on_delete=models.RESTRICT, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors', blank=True)
     sub_topics = models.ManyToManyField('SubTopic', related_name='mentors')
 
@@ -80,13 +79,12 @@ class Mentor(models.Model):
 
 
 class Student(models.Model):
-    #todo error in studends update and create in phone_number and email
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
     phone_num = models.CharField(null=True, blank=True, unique=True, max_length=10)
     year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
     short_description = models.CharField(null=False, max_length=256)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
+    user = models.OneToOneField(User, on_delete=models.RESTRICT, related_name='student', null=False)
     sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
 
     class Meta:
@@ -108,7 +106,7 @@ class Topic(models.Model):
 
 class SubTopic(models.Model):
     sub_topic_name = models.CharField(null=False, max_length=50)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='courses', null=False)
+    topic = models.ForeignKey(Topic, on_delete=models.RESTRICT, related_name='courses', null=False)
 
     class Meta:
         db_table = 'sub_topic'
@@ -133,4 +131,4 @@ class FeedBack(models.Model):
     def clean(self):
         super().clean()
         if self.student not in self.mentor.students.all():
-            raise ValidationError("Invalid feedback: The student is not associated with the mentor 2.")
+            raise ValidationError("Invalid feedback: The student is not associated with the mentor.")
