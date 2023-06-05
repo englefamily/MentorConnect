@@ -67,6 +67,7 @@ class MentorSerializer(serializers.ModelSerializer):
             us.save()
         return super().update(instance, validated_data)
 
+
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Topic
