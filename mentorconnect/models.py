@@ -133,4 +133,4 @@ class FeedBack(models.Model):
     def clean(self):
         super().clean()
         if self.student not in self.mentor.students.all():
-            raise ValidationError("Invalid feedback: The student is not associated with the mentor 1.")
+            raise ValidationError("Invalid feedback: The student is not associated with the mentor 2.")
