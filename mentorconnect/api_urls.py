@@ -9,4 +9,6 @@ urlpatterns = [
     path('topic/', api_views.topic),
     path('sub-topic/', api_views.sub_topic),
     path('token/', obtain_auth_token),
+    path('register/', api_views.register, name='register'),
+    path('login/', api_views.login, name='login'),
 ]

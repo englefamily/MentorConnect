@@ -9,7 +9,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from multiselectfield import MultiSelectField
 
 
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 
@@ -121,6 +120,7 @@ class FeedBack(models.Model):
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
     sub_topic = models.ManyToManyField('SubTopic', related_name='feedbacks',  blank=True)
+    #sub_topic = models.ManyToManyField('SubTopic', through='FeedbackSubTopic', related_name='feedbacks',  blank=True)
 
     class Meta:
         db_table = 'feedback'

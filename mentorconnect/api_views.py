@@ -1,16 +1,16 @@
 from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, SubTopicSerializer, FeedbackSerializer
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from .models import User, Student, Mentor, Topic, SubTopic, FeedBack
+from .forms import RegistrationForm, LoginForm
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from django.shortcuts import render
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from django.views.decorators.cache import cache_page
-from django.core.cache import cache
-
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def mentor(request):
@@ -411,6 +411,25 @@ def sub_topic(request):
             }
         )
 
+
+def register(request):
+    form = RegistrationForm()
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            form.save()
+        context = {'form': form}
+        return render(request, 'register.html', context)
+
+
+def login(request):
+    form = LoginForm()
+    if request.method == "POST":
+        form = LoginForm(request.POST)
+        if form.is_valid():
+            form.save()
+        context = {'form': form}
+        return render(request, 'login.html', context)
 
 
 # @api_view(['GET', 'POST', 'PUT', 'DELETE'])
