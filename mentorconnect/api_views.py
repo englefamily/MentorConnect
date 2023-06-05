@@ -1,7 +1,7 @@
 from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, SubTopicSerializer, FeedbackSerializer
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from .models import User, Student, Mentor, Topic, SubTopic, FeedBack
+from .models import User, Student, Mentor, Topic, SubTopic, Feedback
 from rest_framework.views import APIView
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
@@ -339,7 +339,7 @@ def sub_topic(request):
                         status=status.HTTP_201_CREATED,
                         data={
                             "status": 'success',
-                            'message': 'car has been created',
+                            'message': 'Sub topic has been created',
                             'sub _topic': new_sub_topic.data
                         }
                     )
@@ -365,7 +365,7 @@ def sub_topic(request):
                     data={
                         'status': 'success',
                         'message': 'retrieved all topics',
-                        'sub_topic': sub_topic_json.data # convert to JSON compatible format
+                        'sub_topic': sub_topic_json.data
                     }
                 )
 
@@ -412,184 +412,93 @@ def sub_topic(request):
         )
 
 
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def feedback(request):
+    try:
+        match request.method:
+            case 'POST':
+                new_feedback = FeedbackSerializer(data=request.data)
+                if new_feedback.is_valid():
+                    new_feedback.save()
+                    return Response(
+                        status=status.HTTP_201_CREATED,
+                        data={
+                            "status": 'success',
+                            'message': 'Feedback has been created',
+                            'feedback': new_feedback.data
+                        }
+                    )
+                else:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'the data provided is incorrect',
+                            'error': new_feedback.errors
+                        }
+                    )
+            case 'GET':
+                feedback_id = request.query_params.get("id")
+                if feedback_id:
+                    feedback = Feedback.objects.get(pk=feedback_id)
+                    feedback_json = FeedbackSerializer(feedback)
+                else:
+                    feedback = Feedback.objects.all()
+                    feedback_json = FeedbackSerializer(feedback, many=True)
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'retrieved all feedbacks',
+                        'feedback': feedback_json.data
+                    }
+                )
 
-# @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-# def rent(request):
-#     try:
-#         match request.method:
-#             case 'POST':
-#                 # create a new bike instance
-#                 new_rent = RentSerializer(data=request.data)
-#                 # bike_serializer = BikeSerializer(data=request.data, context={'factory': factory})
-#                 if new_rent.is_valid():
-#                     new_rent.save()
-#                     return Response(
-#                         status=status.HTTP_201_CREATED,
-#                         data={
-#                             "status": 'success',
-#                             'message': 'car has been created',
-#                             'rent': new_rent.data
-#                         }
-#                     )
-#                 else:
-#                     return Response(
-#                         status=status.HTTP_400_BAD_REQUEST,
-#                         data={
-#                             'status': 'fail',
-#                             'message': 'the data provided is incorrect',
-#                             'error': new_rent.errors
-#                         }
-#                     )
-#             case 'GET':
-#                 rent_id = request.query_params.get("id")
-#                 if rent_id:
-#                     rent = Rent.objects.get(pk=rent_id)
-#                     rent_json = RentSerializer(rent)
-#                 else:
-#                     rents = Rent.objects.all()
-#                     rent_json = RentSerializer(rents, many=True)
-#                 return Response(
-#                     status=status.HTTP_200_OK,
-#                     data={
-#                         'status': 'success',
-#                         'message': 'retrieved all persons',
-#                         'car': rent_json.data # convert to JSON compatible format
-#                     }
-#                 )
-#
-#             case 'PUT':
-#                 try:
-#                     rent_id = request.query_params.get("id")
-#                     rent_instance = Rent.objects.get(pk=rent_id)
-#                     rs = RentSerializer(instance=rent_instance, data=request.data, partial=True)
-#                     if rs.is_valid():
-#                         rs.save()
-#                         return Response("Rent Update")
-#                     else:
-#                         return Response({"Error": rs.errors}, status=500)
-#                 except Exception as e:
-#                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#
-#             case 'DELETE':
-#                 try:
-#                     rent_id = request.query_params.get("id")
-#                     rent_instance = Rent.objects.get(pk=rent_id)
-#                     rent_instance.delete()
-#                     return Response("Rent Deleted")
-#                 except Exception as e:
-#                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-#
-#             case _:
-#                 return Response(
-#                     status=status.HTTP_400_BAD_REQUEST,
-#                     data={
-#                         'status': 'fail',
-#                         'message': f'the method {request.method} is not allowed for this url'
-#                     }
-#                 )
-#
-#     except Exception as ex:
-#         print(ex)
-#         return Response(
-#             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             data={
-#                 'status': 'fail',
-#                 'message': 'a server error was thrown',
-#                 'error': str(ex) # convert to string to make it JSON serializable
-#             }
-#         )
-#
-# @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-# def login(request):
-#     try:
-#         match request.method:
-#             case 'POST':
-#                 # create a new bike instance
-#                 user = User.objects.filter(username=request.data['username'], password=request.data['password'])
-#                 if user:
-#                     token, _ = Token.objects.get_or_create(user=user[0])
-#                     return Response(
-#                         status=status.HTTP_201_CREATED,
-#                         data={
-#                             "status": 'success',
-#                             'message': 'car has been created',
-#                             'token': token.key,
-#                         }
-#                     )
-#                 else:
-#                     return Response(
-#                         status=status.HTTP_400_BAD_REQUEST,
-#                         data={
-#                             'status': 'fail',
-#                             'message': 'the data provided is incorrect',
-#                             'error': 'One or more of the data is incorrect'
-#                         }
-#                     )
-#     except Exception as ex:
-#         print(ex)
-#         return Response(
-#             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-#             data={
-#                 'status': 'fail',
-#                 'message': 'a server error was thrown',
-#                 'error': str(ex) # convert to string to make it JSON serializable
-#             }
-#         )
-#
-#
-#
-# @api_view(['GET', 'POST', 'PUT'])
-# def pong_game(request):
-#     if request.method == 'GET':
-#         for_ = request.query_params.get("f")
-#         player = Pong_game.objects.first()
-#         if for_ == 'a':
-#             return Response({'x': player.paddleA_x, 'y': player.paddleA_y})
-#         if for_ == 'b':
-#             return Response({'x': player.paddleB_x, 'y': player.paddleB_y})
-#         if for_ == 'c':
-#             return Response({'x': player.pong_x, 'y': player.pong_y})
-#
-#         return Response(PongSerializer(player).data)
-#
-#     if request.method == 'PUT':
-#         instancePlayer = Pong_game.objects.first()
-#         pong = PongSerializer(instance=instancePlayer, data=request.data, partial=True)
-#         if pong.is_valid():
-#             pong.save()
-#
-#         return Response(pong.data)
-#
-#     if request.method == 'POST':
-#         new_game = PongSerializer(data=request.data)
-#         if new_game.is_valid():
-#             new_game.save()
-#             return Response(new_game.data)
-#
-# @api_view(['GET', 'POST'])
-# def test(req):
-#     if req.method == 'POST':
-#         t = TestSerializer(data=req.data)
-#         # bike_serializer = BikeSerializer(data=request.data, context={'factory': factory})
-#         if t.is_valid():
-#             t.save()
-#             return Response(
-#                 status=status.HTTP_201_CREATED,
-#                 data={
-#                     "status": 'success',
-#                     'message': 'car has been created',
-#                     'car': t.data
-#                 }
-#             )
-#     if req.method == 'GET':
-#         users = Test.objects.first()
-#         user_json = TestSerializer(users)
-#         return Response(
-#             status=status.HTTP_200_OK,
-#             data={
-#                 'status': 'success',
-#                 'message': 'retrieved all persons',
-#                 'car': user_json.data  # convert to JSON compatible format
-#             }
-#         )
-#
+            case 'PUT':
+                try:
+                    feedback_id = request.query_params.get("id")
+                    feedback_instance = Feedback.objects.get(pk=feedback_id)
+                    fs = FeedbackSerializer(instance=feedback_instance, data=request.data, partial=True)
+                    if fs.is_valid():
+                        fs.save()
+                        return Response(
+                            status=status.HTTP_200_OK,
+                            data={
+                                'status': 'success',
+                                'message': 'Feedback',
+                                'feedback': fs.data
+                            }
+                        )
+                    else:
+                        return Response({"Error": fs.errors}, status=500)
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            case 'DELETE':
+                try:
+                    feedback_id = request.query_params.get("id")
+                    feedback_instance = Feedback.objects.get(pk=feedback_id)
+                    feedback_instance.delete()
+                    return Response("Feedback Deleted")
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            case _:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={
+                        'status': 'fail',
+                        'message': f'the method {request.method} is not allowed for this url'
+                    }
+                )
+
+    except Exception as ex:
+        print(ex)
+        return Response(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            data={
+                'status': 'fail',
+                'message': 'a server error was thrown',
+                'error': str(ex)
+            }
+        )

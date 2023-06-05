@@ -8,5 +8,6 @@ urlpatterns = [
     path('student/', api_views.student),
     path('topic/', api_views.topic),
     path('sub-topic/', api_views.sub_topic),
+    path('feedback/', api_views.feedback),
     path('token/', obtain_auth_token),
 ]
