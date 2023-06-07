@@ -9,7 +9,6 @@ from django.contrib.auth.base_user import BaseUserManager
 from multiselectfield import MultiSelectField
 
 
-
 class UserManager(BaseUserManager):
     use_in_migrations = True
 

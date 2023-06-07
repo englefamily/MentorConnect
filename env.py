@@ -9,5 +9,5 @@ from mentorconnect.models import User, Topic, SubTopic, Mentor, Student, Feedbac
 # u.set_password('123')
 # u.email = 'test2@gmail.com'
 # u.save()
-# print(User.objects.all()[1].password)
+print(User.objects.all()[1].password)
 

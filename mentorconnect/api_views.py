@@ -232,7 +232,6 @@ def student(request):
                 )
 
     except Exception as ex:
-        # print(ex)
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={
