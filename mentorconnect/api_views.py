@@ -13,24 +13,33 @@ from django.core.cache import cache
 
 
 def register(request):
-    form = RegistrationForm()
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
             form.save()
         context = {'form': form}
         return render(request, 'register.html', context)
+    else:
+        form = RegistrationForm()
+        context = {'form': form}
+        return render(request, 'register.html', context)
 
 
 def login(request):
-    form = LoginForm()
     if request.method == "POST":
         form = LoginForm(request.POST)
         if form.is_valid():
             form.save()
         context = {'form': form}
         return render(request, 'login.html', context)
+    else:
+        form = LoginForm()
+        context = {'form': form}
+        return render(request, 'login.html', context)
 
+
+def reset_password_request(request):
+    pass
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])

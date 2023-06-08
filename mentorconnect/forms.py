@@ -11,3 +11,8 @@ class LoginForm(forms.Form):
     email = forms.EmailField(label='Email', required=True)
     password = forms.CharField(label='Password', required=True, widget=forms.PasswordInput)
     remember_me = forms.BooleanField(label='Remember Me', required=False)
+
+
+class PasswordResetForm(forms.Form):
+    # email = forms.EmailField(label='Email', required=True)
+    pass

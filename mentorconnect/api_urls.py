@@ -12,4 +12,5 @@ urlpatterns = [
     path('token/', obtain_auth_token),
     path('register/', api_views.register, name='register'),
     path('login/', api_views.login, name='login'),
+    path('resetpassword/', api_views.reset_password_request, name='reset_password_request'),
 ]
