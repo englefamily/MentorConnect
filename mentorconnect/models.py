@@ -120,7 +120,7 @@ class SubTopic(models.Model):
         return f"ID: {self.pk}, Topic name: {self.topic.topic_name} Sub topic name: {self.sub_topic_name}"
 
 
-class FeedBack(models.Model):
+class Feedback(models.Model):
     fb_content = models.CharField(null=False, max_length=228)
     fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
