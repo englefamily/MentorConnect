@@ -1,11 +1,11 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from django.contrib.auth.password_validation import validate_password
-from django.core.validators import MaxValueValidator, MinValueValidator
 from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, TEACH_OPTIONS
-from django.contrib.auth.base_user import BaseUserManager
 from multiselectfield import MultiSelectField
 
 
@@ -40,7 +40,8 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True)
+    email = models.EmailField(_('email address'), unique=True, db_index=True)
+    date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
 
@@ -57,6 +58,7 @@ class Mentor(models.Model):
     education_start_year = models.CharField(choices=EDUCATION_START, null=False, max_length=4)
     education_completion_year = models.CharField(choices=EDUCATION_COMPLETE, null=False, max_length=4)
     year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
+    # TODO: Chananel - does Limud Naim etc have the full address of Mentors/ students?
     address_city = models.CharField(choices=CITIES_CHOICES, max_length=128)
     study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
     short_description = models.CharField(null=False, max_length=256)
@@ -66,7 +68,7 @@ class Mentor(models.Model):
     teach_in = MultiSelectField(choices=TEACH_OPTIONS, max_length=30)
     experience_with = MultiSelectField(choices=[('adhd', 'adhd'), ('teaching', 'teaching')], max_length=30, null=True, blank=True)
     group_teaching = models.BooleanField(null=False, default=False)
-    user = models.OneToOneField(User, on_delete=models.RESTRICT, related_name='mentor', null=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors', blank=True)
     sub_topics = models.ManyToManyField('SubTopic', related_name='mentors')
 
@@ -78,12 +80,16 @@ class Mentor(models.Model):
 
 
 class Student(models.Model):
+    # TODO: error in students update and create in phone_number and email
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
     phone_num = models.CharField(null=True, blank=True, unique=True, max_length=10)
     year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
+    # TODO: Josh added address_city & study_city to Student model
+    address_city = models.CharField(choices=CITIES_CHOICES, max_length=128)
+    study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
     short_description = models.CharField(null=False, max_length=256)
-    user = models.OneToOneField(User, on_delete=models.RESTRICT, related_name='student', null=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
     sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
 
     class Meta:
@@ -105,7 +111,7 @@ class Topic(models.Model):
 
 class SubTopic(models.Model):
     sub_topic_name = models.CharField(null=False, max_length=50)
-    topic = models.ForeignKey(Topic, on_delete=models.RESTRICT, related_name='courses', null=False)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='courses', null=False)
 
     class Meta:
         db_table = 'sub_topic'
@@ -114,13 +120,15 @@ class SubTopic(models.Model):
         return f"ID: {self.pk}, Topic name: {self.topic.topic_name} Sub topic name: {self.sub_topic_name}"
 
 
-class FeedBack(models.Model):
+class Feedback(models.Model):
     fb_content = models.CharField(null=False, max_length=228)
     fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
+    # TODO: Josh tidied up these relationships - Since each `FeedBack` instance should be related to
+    #  a single `SubTopic`, better to use `ForeignKey` not `ManyToManyField`
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
-    sub_topic = models.ManyToManyField('SubTopic', related_name='feedbacks',  blank=True)
-    #sub_topic = models.ManyToManyField('SubTopic', through='FeedbackSubTopic', related_name='feedbacks',  blank=True)
+    # Changed to ForeignKey
+    sub_topic = models.ForeignKey('SubTopic', on_delete=models.CASCADE, related_name='feedbacks', blank=True, null=True)
 
     class Meta:
         db_table = 'feedback'
@@ -131,4 +139,4 @@ class FeedBack(models.Model):
     def clean(self):
         super().clean()
         if self.student not in self.mentor.students.all():
-            raise ValidationError("Invalid feedback: The student is not associated with the mentor.")
+            raise ValidationError("Invalid feedback: The student is not associated with the mentor 2.")
