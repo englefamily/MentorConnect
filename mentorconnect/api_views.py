@@ -229,31 +229,33 @@ def student(request):
 
             case 'GET':
                 user_token = request.query_params.get("token")
-                sub_topic = request.query_params.get("sub_topic")
-                city = request.query_params.get("city")
-                hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
-                # a field to the mentor model in order to be able to filter by it
-                time = request.query_params.get("time") # this would require us to add such a field to the mentor
-                # model in order to be able to filter - would likely have to be connected to a scheduling/
-                # booking routine. Or for mentors to input times for each sub_topic the teach
-                topic = request.query_params.get("topic")
-                feedback = request.query_params.get("feedback")
+            #  TODO: Going to handle the filtering in ReactJS...
+                # sub_topic = request.query_params.get("sub_topic")
+                # city = request.query_params.get("city")
+                # hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
+                # # a field to the mentor model in order to be able to filter by it
+                # time = request.query_params.get("time") # this would require us to add such a field to the mentor
+                # # model in order to be able to filter - would likely have to be connected to a scheduling/
+                # # booking routine. Or for mentors to input times for each sub_topic the teach
+                # topic = request.query_params.get("topic")
+                # feedback = request.query_params.get("feedback")
 
                 if not user_token:
                     students = Student.objects.all()
 
-                    if sub_topic:
-                        students = students.filter(sub_topic__name=sub_topic)
-                    if city:
-                        students = students.filter(city=city)
-                    if hourly_rate:
-                        students = students.filter(hourly_rate__lte=hourly_rate)
-                    if time:
-                        students = students.filter(available_time=time)
-                    if topic:
-                        students = students.filter(sub_topic__topic__name=topic)
-                    if feedback:
-                        students = students.filter(feedback__rating__gte=feedback)
+                #  TODO: Going to handle the filtering in ReactJS...
+                    # if sub_topic:
+                    #     students = students.filter(sub_topic__name=sub_topic)
+                    # if city:
+                    #     students = students.filter(city=city)
+                    # if hourly_rate:
+                    #     students = students.filter(hourly_rate__lte=hourly_rate)
+                    # if time:
+                    #     students = students.filter(available_time=time)
+                    # if topic:
+                    #     students = students.filter(sub_topic__topic__name=topic)
+                    # if feedback:
+                    #     students = students.filter(feedback__rating__gte=feedback)
 
                     students_json = StudentSerializer(students, many=True)
                     return Response(
