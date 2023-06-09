@@ -160,6 +160,10 @@ def mentor(request):
             }
         )
 
+
+# Let's update below `student` `GET` method to include search by criteria
+# (sub_topic, city, hourly rate, time, topic, feedback) and return list of mentors that meet the criteria
+
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def student(request):
     try:
@@ -188,40 +192,78 @@ def student(request):
                             'error': new_student.errors
                         }
                     )
+            # case 'GET':
+            #     user_token = request.query_params.get("token")
+            #     if not user_token:
+            #         students = Student.objects.all()
+            #         students_json = StudentSerializer(students, many=True)
+            #         return Response(
+            #             status=status.HTTP_200_OK,
+            #             data={
+            #                 'status': 'success',
+            #                 'message': 'retrieved all students',
+            #                 'students': students_json.data  # convert to JSON compatible format
+            #             }
+            #         )
+            #     try:
+            #         student = Token.objects.get(key=user_token).student
+            #     except Exception as error: #todo fix Exception
+            #         if str(error) == 'Token matching query does not exist.':
+            #             return Response(
+            #                 status=status.HTTP_400_BAD_REQUEST,
+            #                 data={
+            #                     'status': 'fail',
+            #                     'message': f'token not exist'
+            #                 }
+            #             )
+            #
+            #     student_json = StudentSerializer(student)
+            #     return Response(
+            #         status=status.HTTP_200_OK,
+            #         data={
+            #             'status': 'success',
+            #             'message': 'student found',
+            #             'student': student_json.data # convert to JSON compatible format
+            #         }
+            #     )
+
             case 'GET':
                 user_token = request.query_params.get("token")
+                sub_topic = request.query_params.get("sub_topic")
+                city = request.query_params.get("city")
+                hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
+                # a field to the mentor model in order to be able to filter by it
+                time = request.query_params.get("time") # this would require us to add such a field to the mentor
+                # model in order to be able to filter - would likely have to be connected to a scheduling/
+                # booking routine. Or for mentors to input times for each sub_topic the teach
+                topic = request.query_params.get("topic")
+                feedback = request.query_params.get("feedback")
+
                 if not user_token:
                     students = Student.objects.all()
+
+                    if sub_topic:
+                        students = students.filter(sub_topic__name=sub_topic)
+                    if city:
+                        students = students.filter(city=city)
+                    if hourly_rate:
+                        students = students.filter(hourly_rate__lte=hourly_rate)
+                    if time:
+                        students = students.filter(available_time=time)
+                    if topic:
+                        students = students.filter(sub_topic__topic__name=topic)
+                    if feedback:
+                        students = students.filter(feedback__rating__gte=feedback)
+
                     students_json = StudentSerializer(students, many=True)
                     return Response(
                         status=status.HTTP_200_OK,
                         data={
                             'status': 'success',
                             'message': 'retrieved all students',
-                            'students': students_json.data  # convert to JSON compatible format
+                            'students': students_json.data
                         }
                     )
-                try:
-                    student = Token.objects.get(key=user_token).student
-                except Exception as error: #todo fix Exception
-                    if str(error) == 'Token matching query does not exist.':
-                        return Response(
-                            status=status.HTTP_400_BAD_REQUEST,
-                            data={
-                                'status': 'fail',
-                                'message': f'token not exist'
-                            }
-                        )
-
-                student_json = StudentSerializer(student)
-                return Response(
-                    status=status.HTTP_200_OK,
-                    data={
-                        'status': 'success',
-                        'message': 'student found',
-                        'student': student_json.data # convert to JSON compatible format
-                    }
-                )
 
             case 'PUT':
                 user_token = request.query_params.get("token")
@@ -531,3 +573,9 @@ def feedback(request):
                 'error': str(ex)
             }
         )
+
+
+
+
+
+
