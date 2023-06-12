@@ -1,7 +1,14 @@
 
+import SiteRoutes from "./SiteRoute";
+import BaseNavbar from "./components/BaseNavbar";
+
+
 
 function App() {
-  <h1>sajjhbajchbsaj</h1>
+  return (<>
+  <BaseNavbar/>
+    <SiteRoutes/>
+    </>);
 }
 
 export default App;

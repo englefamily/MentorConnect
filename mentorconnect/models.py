@@ -40,7 +40,7 @@ class UserManager(BaseUserManager):
 
 class User(AbstractUser):
     username = None
-    email = models.EmailField(_('email address'), unique=True, db_index=True)
+    email = models.EmailField(_('email address'), unique=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
     objects = UserManager()
@@ -84,11 +84,11 @@ class Student(models.Model):
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
     phone_num = models.CharField(null=True, blank=True, unique=True, max_length=10)
-    year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
+    year_of_birth = models.CharField(null=True, blank=True,choices=AGE_CHOICES, max_length=4)
     # TODO: Josh added address_city & study_city to Student model
-    address_city = models.CharField(choices=CITIES_CHOICES, max_length=128)
-    study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
-    short_description = models.CharField(null=False, max_length=256)
+    address_city = models.CharField(null=True, blank=True,choices=CITIES_CHOICES, max_length=128)
+    study_cities = MultiSelectField(null=True, blank=True,choices=CITIES_CHOICES, max_length=128)
+    short_description = models.CharField(null=True, blank=True, max_length=256)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
     sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
 
@@ -96,6 +96,10 @@ class Student(models.Model):
         db_table = 'student'
 
     def __str__(self):
+        # If we use TZ number
+        # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+
+        # Otherwise:
         return f"ID: {self.pk} Student: {self.first_name} {self.last_name}"
 
 
