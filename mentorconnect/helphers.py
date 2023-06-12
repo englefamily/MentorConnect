@@ -92,11 +92,11 @@ EDUCATION_LEVEL = [
     ('high_school', 'תיכון'),
 ]
 
-TEACH_OPTIONS = [
-    ('online', 'online'),
-    ('mentor_place', 'mentor_place'),
-    ('student_place', 'student_place'),
-]
+# TEACH_OPTIONS = [
+#     ('online', 'Teach Online'),
+#     ('mentor_place', "Teach at Mentor's"),
+#     ('student_place', "Teach at Student's"),
+# ]
 
 
 
