@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, TEACH_OPTIONS
+from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START
 from multiselectfield import MultiSelectField
 
 
