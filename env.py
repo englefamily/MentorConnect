@@ -11,3 +11,12 @@ from mentorconnect.models import User, Topic, SubTopic, Mentor, Student, Feedbac
 # u.save()
 # print(User.objects.all()[1].password)
 
+m = Mentor.objects.all()
+for i in m:
+    print(i.sub_topics.all())
+# s = SubTopic.objects.get(sub_topic_name='Python')
+# s.sub_topic_name = 'Python1'
+# s.save()
+# print(s)
+# print(m)
+
