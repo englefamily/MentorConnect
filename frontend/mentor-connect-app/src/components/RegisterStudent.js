@@ -3,6 +3,8 @@ import { Form, Button } from 'react-bootstrap';
 import { years } from '../helpers/avariables.js'
 import { fetch_api } from '../helpers/api_request.js'
 
+
+//check if it work
 function RegisterStudent() {
     const [pw2, setPw2] = useState('')
     const [errors, setErrors] = useState({});

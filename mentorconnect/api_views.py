@@ -58,7 +58,6 @@ def mentor(request):
                             'message': 'Mentor profile created',
                             'token': token.key,
                             'mentor': new_mentor.data
-
                         }
                     )
                 else:
