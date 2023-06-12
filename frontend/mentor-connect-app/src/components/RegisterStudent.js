@@ -6,6 +6,7 @@ import { fetch_api } from '../helpers/api_request.js'
 
 //check if it work
 //check if it work 2
+//check if it work 3
 function RegisterStudent() {
     const [pw2, setPw2] = useState('')
     const [errors, setErrors] = useState({});
