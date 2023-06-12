@@ -46,7 +46,6 @@ class StudentSerializer(serializers.ModelSerializer):
 class MentorSerializer(serializers.ModelSerializer):
     user = UserSerializer(partial=True)  # Embed the UserSerializer inside the StudentSerializer
     study_cities = serializers.MultipleChoiceField(choices=CITIES_CHOICES)
-    teach_in = serializers.MultipleChoiceField(choices=TEACH_OPTIONS)
     class Meta:
         model = Mentor
         fields = '__all__'
