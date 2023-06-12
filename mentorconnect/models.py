@@ -1,13 +1,12 @@
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.base_user import BaseUserManager
+from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from django.contrib.auth.password_validation import validate_password
-from django.core.validators import MaxValueValidator, MinValueValidator
 from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, TEACH_OPTIONS
-from django.contrib.auth.base_user import BaseUserManager
 from multiselectfield import MultiSelectField
-
 
 
 class UserManager(BaseUserManager):
@@ -59,6 +58,7 @@ class Mentor(models.Model):
     education_start_year = models.CharField(choices=EDUCATION_START, null=False, max_length=4)
     education_completion_year = models.CharField(choices=EDUCATION_COMPLETE, null=False, max_length=4)
     year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
+    # TODO: Chananel - does Limud Naim etc have the full address of Mentors/ students?
     address_city = models.CharField(choices=CITIES_CHOICES, max_length=128)
     study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
     short_description = models.CharField(null=False, max_length=256)
@@ -80,12 +80,15 @@ class Mentor(models.Model):
 
 
 class Student(models.Model):
-    #todo error in studends update and create in phone_number and email
+    # TODO: error in students update and create in phone_number and email
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
     phone_num = models.CharField(null=True, blank=True, unique=True, max_length=10)
-    year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
-    short_description = models.CharField(null=False, max_length=256)
+    year_of_birth = models.CharField(null=True, blank=True,choices=AGE_CHOICES, max_length=4)
+    # TODO: Josh added address_city & study_city to Student model
+    address_city = models.CharField(null=True, blank=True,choices=CITIES_CHOICES, max_length=128)
+    study_cities = MultiSelectField(null=True, blank=True,choices=CITIES_CHOICES, max_length=128)
+    short_description = models.CharField(null=True, blank=True, max_length=256)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
     sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
 
@@ -93,6 +96,10 @@ class Student(models.Model):
         db_table = 'student'
 
     def __str__(self):
+        # If we use TZ number
+        # return f"ID: {self.pk} person: {self.first_name} {self.last_name} TZ: {self.identity_number}"
+
+        # Otherwise:
         return f"ID: {self.pk} Student: {self.first_name} {self.last_name}"
 
 
@@ -121,8 +128,11 @@ class Feedback(models.Model):
     fb_content = models.CharField(null=False, max_length=228)
     fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
+    # TODO: Josh tidied up these relationships - Since each `FeedBack` instance should be related to
+    #  a single `SubTopic`, better to use `ForeignKey` not `ManyToManyField`
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
-    sub_topic = models.ManyToManyField('SubTopic', related_name='feedbacks',  blank=True)
+    # Changed to ForeignKey
+    sub_topic = models.ForeignKey('SubTopic', on_delete=models.CASCADE, related_name='feedbacks', blank=True, null=True)
 
     class Meta:
         db_table = 'feedback'

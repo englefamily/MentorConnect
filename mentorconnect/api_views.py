@@ -143,13 +143,13 @@ def student(request):
                         status=status.HTTP_201_CREATED,
                         data={
                             "status": 'success',
-                            'message': 'Mentor profile created',
+                            'message': 'Student profile created',
                             'token': token.key,
                             'student': new_student.data
-
                         }
                     )
                 else:
+                    print(str(new_student.errors))
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
@@ -232,7 +232,6 @@ def student(request):
                 )
 
     except Exception as ex:
-        # print(ex)
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={

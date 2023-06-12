@@ -27,10 +27,11 @@ class StudentSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        sub_topics_data = validated_data.pop('sub_topics')
+        sub_topics_data = validated_data.pop('sub_topics', None)
         user = User.objects.create_user(**user_data)  # Create a new User instance
         student = Student.objects.create(user=user, **validated_data)
-        student.sub_topics.add(*sub_topics_data)
+        if sub_topics_data:
+            student.sub_topics.add(*sub_topics_data)
         return student
 
     def update(self, instance, validated_data):
