@@ -82,9 +82,9 @@ class Student(models.Model):
     #todo error in studends update and create in phone_number and email
     first_name = models.CharField(null=False, max_length=50)
     last_name = models.CharField(null=False, max_length=50)
-    phone_num = models.CharField(null=True, blank=True, unique=True, max_length=10)
-    year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
-    short_description = models.CharField(null=False, max_length=256)
+    phone_number = models.CharField(null=True, blank=True, unique=True, max_length=10)
+    year_of_birth = models.CharField(choices=AGE_CHOICES, null=True, blank=True, max_length=4)
+    short_description = models.CharField(null=True, blank=True, max_length=256)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
     sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
 
