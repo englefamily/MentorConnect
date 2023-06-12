@@ -1,0 +1,9 @@
+Website Color scheme: https://colorhunt.co/palette/0a4d6808839505bfdb00ffca
+#0A4D68 rgb(10, 77, 104)
+#088395 rgb(8, 131, 149)
+#05BFDB rgb(5, 191, 219)
+#00FFCA rgb(0, 255, 202)
+
+
+
+
