@@ -144,3 +144,6 @@ class Feedback(models.Model):
         super().clean()
         if self.student not in self.mentor.students.all():
             raise ValidationError("Invalid feedback: The student is not associated with the mentor 2.")
+
+
+# Check of our idea to update project - then work - then commit-push
