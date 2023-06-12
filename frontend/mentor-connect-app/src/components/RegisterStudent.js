@@ -108,6 +108,7 @@ function RegisterStudent() {
     }
 
     return (
+        
         <Form dir='rtl' onSubmit={handelSubmit}>
             <Form.Group controlId="formName">
                 <Form.Label>שם פרטי</Form.Label>

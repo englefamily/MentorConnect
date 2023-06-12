@@ -1,6 +1,8 @@
 
 import SiteRoutes from "./SiteRoute";
 import BaseNavbar from "./components/BaseNavbar";
+import NewComponent from "./components/LoginModel";
+import LoginModal from "./components/LoginModel";
 
 
 
