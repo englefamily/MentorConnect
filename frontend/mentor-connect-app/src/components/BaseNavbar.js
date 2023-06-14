@@ -10,7 +10,7 @@ function BaseNavbar() {
       <Navbar.Toggle aria-controls="basic-navbar-nav" />
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="ml-auto">
-          <Nav.Link href="/" className="mr-3" style={{color: '#0A4D68'}}>בית</Nav.Link>
+          <Nav.Link href="/" className="mr-3">בית</Nav.Link>
           <Nav.Link href="/registerMentor" className="mr-3">הרשמה למורה</Nav.Link>
           <Nav.Link href="/registerStudent" className="mr-3">הרשמה לתלמיד</Nav.Link>
           <Nav.Link href="/mentors" className="mr-3">מורים</Nav.Link>

@@ -8,9 +8,9 @@ import LoginModal from "./components/LoginModel";
 
 function App() {
   return (<>
-  <BaseNavbar/>
-    <SiteRoutes/>
-    </>);
+    <BaseNavbar />
+    <SiteRoutes />
+  </>);
 }
 
 export default App;

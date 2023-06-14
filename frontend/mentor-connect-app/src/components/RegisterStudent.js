@@ -21,7 +21,7 @@ function RegisterStudent() {
         last_name: '',
         // year_of_birth: '',
         // short_description: '',
-        phone_number: ''
+        phone_num: ''
 
     })
 
@@ -64,8 +64,8 @@ function RegisterStudent() {
         }
 
         // Validate phone number
-        if (!studentData.phone_number) {
-            errors.phone_number = 'שדה חובה';
+        if (!studentData.phone_num) {
+            errors.phone_num = 'שדה חובה';
             isValid = false;
         }
 
@@ -94,8 +94,22 @@ function RegisterStudent() {
     function handelSubmit(event) {
         event.preventDefault()
         if (validateForm()) {
-            const res = fetch_api('student', 'POST', studentData)
-            console.log(res)
+            fetch_api('student', 'POST', studentData)
+                .then((response) => {
+                    console.log(response)
+                })
+                .catch((response) => {
+                    const error = response.response.data.error
+                    console.log(error)
+                    if (error?.user?.email != undefined && error?.user?.email[0] === 'user with this email address already exists.')
+                        console.log('email error')
+                    
+                    if (error?.phone_num != undefined && error?.phone_num[0] === 'student with this phone num already exists.'){
+                        console.log('phone error')
+                    }
+                })
+
+            
         }
 
     }
@@ -108,7 +122,7 @@ function RegisterStudent() {
     }
 
     return (
-        
+
         <Form dir='rtl' onSubmit={handelSubmit}>
             <Form.Group controlId="formName">
                 <Form.Label>שם פרטי</Form.Label>
@@ -122,9 +136,9 @@ function RegisterStudent() {
             {errors.last_name && <p style={errorStyle}>{errors.last_name}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>מספר פאלפון</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='phone_number' value={studentData.phone_number} onChange={handleChange} />
+                <Form.Control type="text" placeholder="הכנס שם" name='phone_num' value={studentData.phone_num} onChange={handleChange} />
             </Form.Group>
-            {errors.phone_number && <p style={errorStyle}>{errors.phone_number}</p>}
+            {errors.phone_num && <p style={errorStyle}>{errors.phone_num}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>אמייל</Form.Label>
                 <Form.Control type="email" placeholder="הכנס אמייל" name='email' value={studentData.user.email} onChange={handleChange} />

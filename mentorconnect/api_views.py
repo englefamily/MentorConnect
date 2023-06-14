@@ -182,7 +182,7 @@ def student(request):
                         }
                     )
                 else:
-                    print(str(new_student.errors))
+                    print(new_student.errors['user']['email'][0])
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
