@@ -29,6 +29,71 @@ function RegisterStudent() {
         console.log(studentData)
     }, [studentData])
 
+    const validator = (event) => {
+        let isValid = true;
+        let error = '';
+
+        // Validate first name
+        if (event.target.name === 'first_name') {
+            console.log(event.target.value)
+            if (!studentData[event.target.name]) {
+                error = 'שדה חובה';
+                isValid = false;
+            }
+
+        }
+
+        // Validate last name
+        if (event.target.name === 'last_name') {
+            if (!event.target.value) {
+                console.log('---------')
+                error = 'שדה חובה';
+                isValid = false;
+            }
+        }
+
+        // Validate phone number
+        if (event.target.name === 'phone_num') {
+            if (!event.target.value) {
+                error = 'שדה חובה';
+                isValid = false;
+            }
+        }
+
+        // Validate email
+        if (event.target.name === 'email') {
+            if (!event.target.value) {
+                error = 'שדה חובה';
+                isValid = false;
+            }
+        }
+
+        // Validate password
+        if (event.target.name === 'password') {
+            if (!event.target.value) {
+                error = 'שדה חובה';
+                isValid = false;
+            }
+        }
+
+        // Validate confirm password
+        if (event.target.name === 'confirm_password') {
+            if (!event.target.value) {
+                error = 'שדה חובה';
+                isValid = false;
+            } else if (studentData.user.password !== pw2) {
+                error = 'הסיסמאות לא תואמות';
+                isValid = false;
+            }
+        }
+
+        setErrors((prevErrors) => ({
+            ...prevErrors,
+            [event.target.name]: error
+        }));
+        return isValid;
+    };
+
     const handleChange = event => {
         const { name, value } = event.target;
         if (name === 'email' || name === 'password') {
@@ -47,53 +112,9 @@ function RegisterStudent() {
         }
     };
 
-    const validateForm = () => {
-        let isValid = true;
-        const errors = {};
-
-        // Validate first name
-        if (!studentData.first_name) {
-            errors.first_name = 'שדה חובה';
-            isValid = false;
-        }
-
-        // Validate last name
-        if (!studentData.last_name) {
-            errors.last_name = 'שדה חובה';
-            isValid = false;
-        }
-
-        // Validate phone number
-        if (!studentData.phone_num) {
-            errors.phone_num = 'שדה חובה';
-            isValid = false;
-        }
-
-        // Validate email
-        if (!studentData.user.email) {
-            errors.email = 'שדה חובה';
-            isValid = false;
-        }
-
-        // Validate password
-        if (!studentData.user.password) {
-            errors.password = 'שדה חובה';
-            isValid = false;
-        }
-
-        // Validate confirm password
-        if (studentData.user.password !== pw2) {
-            errors.confirm_password = 'הסיסמאות לא תואמות';
-            isValid = false;
-        }
-
-        setErrors(errors);
-        return isValid;
-    };
-
     function handelSubmit(event) {
         event.preventDefault()
-        if (validateForm()) {
+        if (0 === 0) {
             fetch_api('student', 'POST', studentData)
                 .then((response) => {
                     console.log(response)
@@ -101,15 +122,23 @@ function RegisterStudent() {
                 .catch((response) => {
                     const error = response.response.data.error
                     console.log(error)
-                    if (error?.user?.email != undefined && error?.user?.email[0] === 'user with this email address already exists.')
+                    if (error?.user?.email != undefined && error?.user?.email[0] === 'user with this email address already exists.') {
+                        setErrors((prevErrors) => ({
+                            ...prevErrors,
+                            ['email']: 'המייל כבר קיים במערכת'
+                        }))
                         console.log('email error')
-                    
-                    if (error?.phone_num != undefined && error?.phone_num[0] === 'student with this phone num already exists.'){
+                    }
+                    if (error?.phone_num != undefined && error?.phone_num[0] === 'student with this phone num already exists.') {
+                        setErrors((prevErrors) => ({
+                            ...prevErrors,
+                            ['phone_num']: 'מספר הפאלפון כבר קיים במערכת'
+                        }))
                         console.log('phone error')
                     }
                 })
 
-            
+
         }
 
     }
@@ -126,28 +155,28 @@ function RegisterStudent() {
         <Form dir='rtl' onSubmit={handelSubmit}>
             <Form.Group controlId="formName">
                 <Form.Label>שם פרטי</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='first_name' value={studentData.first_name} onChange={handleChange} />
+                <Form.Control type="text" placeholder="הכנס שם" name='first_name' value={studentData.first_name} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
             </Form.Group>
             {errors.first_name && <p style={errorStyle}>{errors.first_name}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>שם משפחה</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='last_name' value={studentData.last_name} onChange={handleChange} />
+                <Form.Control type="text" placeholder="הכנס שם" name='last_name' value={studentData.last_name} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
             </Form.Group>
             {errors.last_name && <p style={errorStyle}>{errors.last_name}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>מספר פאלפון</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='phone_num' value={studentData.phone_num} onChange={handleChange} />
+                <Form.Control type="text" placeholder="הכנס שם" name='phone_num' value={studentData.phone_num} onChange={handleChange} onBlur={validator} />
             </Form.Group>
             {errors.phone_num && <p style={errorStyle}>{errors.phone_num}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>אמייל</Form.Label>
-                <Form.Control type="email" placeholder="הכנס אמייל" name='email' value={studentData.user.email} onChange={handleChange} />
+                <Form.Control type="email" placeholder="הכנס אמייל" name='email' value={studentData.user.email} onChange={handleChange} onBlur={validator} />
             </Form.Group>
             {errors.email && <p style={errorStyle}>{errors.email}</p>}
 
             {/* <Form.Group controlId="formName">
                 <Form.Label>שנת לידה</Form.Label>
-                <Form.Select name='year_of_birth' value={studentData.year_of_birth} onChange={handleChange}>
+                <Form.Select name='year_of_birth' value={studentData.year_of_birth} onChange={handleChange} onBlur={validator}>
                     <option value="">Choose an option</option>
                     {years.map((year, index) => (
                         <option key={index} value={year}>{year}</option>
@@ -157,16 +186,16 @@ function RegisterStudent() {
             </Form.Group> */}
             {/* <Form.Group controlId="formMessage">
                 <Form.Label>קצת עליך</Form.Label >
-                <Form.Control as="textarea" rows={3} placeholder="(:" name='short_description' value={studentData.short_description} onChange={handleChange} />
+                <Form.Control as="textarea" rows={3} placeholder="(:" name='short_description' value={studentData.short_description} onChange={handleChange} onBlur={validator} />
             </Form.Group> */}
             <Form.Group controlId="formName">
                 <Form.Label>סיסמא</Form.Label>
-                <Form.Control type="password" placeholder="" name='password' value={studentData.user.password} onChange={handleChange} />
+                <Form.Control type="password" placeholder="" name='password' value={studentData.user.password} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
             </Form.Group>
             {errors.password && <p style={errorStyle}>{errors.password}</p>}
             <Form.Group controlId="formName">
                 <Form.Label>אשר סיסמא</Form.Label>
-                <Form.Control type="password" placeholder="" value={pw2} onChange={(e) => { setPw2(e.target.value) }} />
+                <Form.Control type="password" placeholder="" name='confirm_password' value={pw2} onChange={(e) => { setPw2({e.target.value}, validator(e))}} onBlur={validator} />
             </Form.Group>
             {errors.confirm_password && <p style={errorStyle}>{errors.confirm_password}</p>}
             <Button variant="primary" type="submit">צור פרופיל</Button>
