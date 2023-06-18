@@ -1,17 +1,12 @@
-import React, { useEffect, useState } from 'react'
-import { Form, Button } from 'react-bootstrap';
-import { years } from '../helpers/avariables.js'
-import { fetch_api } from '../helpers/api_request.js'
+import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
+import { years } from '../helpers/avariables.js';
+import { fetch_api } from '../helpers/api_request.js';
 
-
-//check if it work
-//check if it work 2
-//check if it work 3
-//check if it work 4
 function RegisterStudent() {
-    const [pw2, setPw2] = useState('')
+    const [studentCreate, setStudentCreate] = useState(false)
+    const [pw2, setPw2] = useState('');
     const [errors, setErrors] = useState({});
-
     const [studentData, setStudentData] = useState({
         user: {
             email: '',
@@ -19,188 +14,256 @@ function RegisterStudent() {
         },
         first_name: '',
         last_name: '',
-        // year_of_birth: '',
-        // short_description: '',
         phone_num: ''
+    });
+    const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
 
-    })
-
-    useEffect(() => {
-        console.log(studentData)
-    }, [studentData])
-
-    const validator = (event) => {
-        let isValid = true;
+    const validateField = (name, value) => {
         let error = '';
 
-        // Validate first name
-        if (event.target.name === 'first_name') {
-            console.log(event.target.value)
-            if (!studentData[event.target.name]) {
-                error = 'שדה חובה';
-                isValid = false;
-            }
-
+        // Validate required fields
+        if (name === 'phone_num' && value.length !== 10) {
+            error = 'מספר הפאלפון חייב להיות בעל 10 ספרות';
         }
 
-        // Validate last name
-        if (event.target.name === 'last_name') {
-            if (!event.target.value) {
-                console.log('---------')
-                error = 'שדה חובה';
-                isValid = false;
-            }
+        if (name === 'user.password' && !passwordRegex.test(value)) {
+            error = `כללי הסיסמה:
+            - מכילה לפחות 8 תווים
+            - מכילה לפחות אות אחת גדולה או קטנה (a-z או A-Z)
+            - מכילה לפחות מספר אחד (0-9)
+            - מכילה לפחות תו מיוחד אחד (!@#$%^&*()\-_=+{};:,<.>)
+            - אינה מכילה רווחים`;
         }
 
-        // Validate phone number
-        if (event.target.name === 'phone_num') {
-            if (!event.target.value) {
-                error = 'שדה חובה';
-                isValid = false;
-            }
-        }
-
-        // Validate email
-        if (event.target.name === 'email') {
-            if (!event.target.value) {
-                error = 'שדה חובה';
-                isValid = false;
-            }
-        }
-
-        // Validate password
-        if (event.target.name === 'password') {
-            if (!event.target.value) {
-                error = 'שדה חובה';
-                isValid = false;
-            }
+        if (value.trim() === '') {
+            error = 'שדה חובה';
         }
 
         // Validate confirm password
-        if (event.target.name === 'confirm_password') {
-            if (!event.target.value) {
-                error = 'שדה חובה';
-                isValid = false;
-            } else if (studentData.user.password !== pw2) {
-                error = 'הסיסמאות לא תואמות';
-                isValid = false;
-            }
+        if (name === 'confirm_password' && value !== studentData.user.password) {
+            error = 'הסיסמאות לא תואמות';
         }
 
-        setErrors((prevErrors) => ({
-            ...prevErrors,
-            [event.target.name]: error
-        }));
-        return isValid;
+        return error;
     };
 
-    const handleChange = event => {
+    const handleChange = (event) => {
         const { name, value } = event.target;
-        if (name === 'email' || name === 'password') {
-            setStudentData(prev => ({
-                ...prev,
+        let error = validateField(name, value);
+
+        setErrors((prevErrors) => {
+            if (name === 'user.password' && value === pw2) {
+                return {
+                    ...prevErrors,
+                    [name]: error,
+                    confirm_password: ''
+                };
+            } else if (name === 'user.password' && pw2 && value !== pw2) {
+                return {
+                    ...prevErrors,
+                    [name]: error,
+                    confirm_password: 'הסיסמאות לא תואמות'
+                };
+            } else {
+                return {
+                    ...prevErrors,
+                    [name]: error
+                };
+            }
+        });
+
+        if (name === 'confirm_password') {
+            setPw2(value);
+        } else if (name.startsWith('user.')) {
+            setStudentData((prevData) => ({
+                ...prevData,
                 user: {
-                    ...prev.user,
-                    [name]: value
+                    ...prevData.user,
+                    [name.substring(5)]: value
                 }
             }));
         } else {
-            setStudentData(prev => ({
-                ...prev,
+            setStudentData((prevData) => ({
+                ...prevData,
                 [name]: value
             }));
         }
     };
 
-    function handelSubmit(event) {
-        event.preventDefault()
-        if (0 === 0) {
+    const handleSubmit = (event) => {
+        event.preventDefault();
+
+        let updatedErrors = {};
+
+        Object.entries(studentData).forEach(([name, value]) => {
+            if (name === 'user') {
+                Object.entries(value).forEach(([name, value]) => {
+                    const error = validateField('user.' + name, value);
+                    if (error !== '') {
+                        updatedErrors['user.' + name] = error;
+                    }
+                });
+            } else {
+                const error = validateField(name, value);
+                if (error !== '') {
+                    updatedErrors[name] = error;
+                }
+            }
+            const error = validateField('confirm_password', pw2);
+            if (error !== '') {
+                updatedErrors['confirm_password'] = error;
+            }
+        });
+        setErrors(updatedErrors);
+
+        if (Object.keys(updatedErrors).length === 0) {
             fetch_api('student', 'POST', studentData)
                 .then((response) => {
-                    console.log(response)
+                    setStudentCreate(true)
+                    console.log(response);
                 })
                 .catch((response) => {
-                    const error = response.response.data.error
-                    console.log(error)
-                    if (error?.user?.email != undefined && error?.user?.email[0] === 'user with this email address already exists.') {
-                        setErrors((prevErrors) => ({
-                            ...prevErrors,
-                            ['email']: 'המייל כבר קיים במערכת'
-                        }))
-                        console.log('email error')
-                    }
-                    if (error?.phone_num != undefined && error?.phone_num[0] === 'student with this phone num already exists.') {
-                        setErrors((prevErrors) => ({
-                            ...prevErrors,
-                            ['phone_num']: 'מספר הפאלפון כבר קיים במערכת'
-                        }))
-                        console.log('phone error')
-                    }
-                })
+                    let phone_num_error = '';
+                    let email_error = '';
+                    const error = response.response.data.error;
 
+                    if (
+                        error?.user?.email != undefined &&
+                        error?.user?.email[0] === 'user with this email address already exists.'
+                    ) {
+                        email_error = 'המייל כבר קיים במערכת';
+                    }
+                    if (
+                        error?.phone_num != undefined &&
+                        error?.phone_num[0] === 'student with this phone num already exists.'
+                    ) {
+                        phone_num_error = 'מספר הפאלפון כבר קיים במערכת';
+                    }
 
+                    setErrors((prevErrors) => ({
+                        ...prevErrors,
+                        ['user.email']: email_error,
+                        ['phone_num']: phone_num_error
+                    }));
+                });
         }
-
-    }
+    };
 
     const errorStyle = {
         color: 'red',
         fontSize: '70%',
-        // paddingBottom: '0px',
         marginBottom: '0.5%'
+    };
+
+    const formStyle = {
+        // display: 'flex',
+        // flexDirection: 'column',
+        // alignItems: 'flex-end',
+    };
+
+    const labelStyle = {
+        fontWeight: 'bold'
+    };
+
+    const buttonStyle = {
+        backgroundColor: '#05BFDB',
+        borderColor: '#05BFDB'
+    };
+
+    const div_display = {
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundImage: 'url(https://img.freepik.com/premium-photo/group-happy-young-students-university_85574-4531.jpg'
     }
 
     return (
-
-        <Form dir='rtl' onSubmit={handelSubmit}>
-            <Form.Group controlId="formName">
-                <Form.Label>שם פרטי</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='first_name' value={studentData.first_name} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
-            </Form.Group>
-            {errors.first_name && <p style={errorStyle}>{errors.first_name}</p>}
-            <Form.Group controlId="formName">
-                <Form.Label>שם משפחה</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='last_name' value={studentData.last_name} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
-            </Form.Group>
-            {errors.last_name && <p style={errorStyle}>{errors.last_name}</p>}
-            <Form.Group controlId="formName">
-                <Form.Label>מספר פאלפון</Form.Label>
-                <Form.Control type="text" placeholder="הכנס שם" name='phone_num' value={studentData.phone_num} onChange={handleChange} onBlur={validator} />
-            </Form.Group>
-            {errors.phone_num && <p style={errorStyle}>{errors.phone_num}</p>}
-            <Form.Group controlId="formName">
-                <Form.Label>אמייל</Form.Label>
-                <Form.Control type="email" placeholder="הכנס אמייל" name='email' value={studentData.user.email} onChange={handleChange} onBlur={validator} />
-            </Form.Group>
-            {errors.email && <p style={errorStyle}>{errors.email}</p>}
-
-            {/* <Form.Group controlId="formName">
-                <Form.Label>שנת לידה</Form.Label>
-                <Form.Select name='year_of_birth' value={studentData.year_of_birth} onChange={handleChange} onBlur={validator}>
-                    <option value="">Choose an option</option>
-                    {years.map((year, index) => (
-                        <option key={index} value={year}>{year}</option>
-                    ))}
-                    <option value="option1">Option 1</option>
-                </Form.Select>
-            </Form.Group> */}
-            {/* <Form.Group controlId="formMessage">
-                <Form.Label>קצת עליך</Form.Label >
-                <Form.Control as="textarea" rows={3} placeholder="(:" name='short_description' value={studentData.short_description} onChange={handleChange} onBlur={validator} />
-            </Form.Group> */}
-            <Form.Group controlId="formName">
-                <Form.Label>סיסמא</Form.Label>
-                <Form.Control type="password" placeholder="" name='password' value={studentData.user.password} onChange={(e) => { handleChange(e); validator(e) }} onBlur={validator} />
-            </Form.Group>
-            {errors.password && <p style={errorStyle}>{errors.password}</p>}
-            <Form.Group controlId="formName">
-                <Form.Label>אשר סיסמא</Form.Label>
-                <Form.Control type="password" placeholder="" name='confirm_password' value={pw2} onChange={(e) => { setPw2({e.target.value}, validator(e))}} onBlur={validator} />
-            </Form.Group>
-            {errors.confirm_password && <p style={errorStyle}>{errors.confirm_password}</p>}
-            <Button variant="primary" type="submit">צור פרופיל</Button>
-        </Form>
-    )
+        <div style={div_display}>
+            { studentCreate && <Alert key={'success'} variant={'success'} style={{textAlign: 'center'}}>משתמש נוצר</Alert>}
+                
+            
+            <div style={{ width: '50%', marginLeft: '50%' }}>
+                <Form dir="rtl" onSubmit={handleSubmit} style={formStyle}>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>שם פרטי</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="הכנס שם"
+                            name="first_name"
+                            value={studentData.first_name}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors.first_name && <p style={errorStyle}>{errors.first_name}</p>}
+                    </Form.Group>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>שם משפחה</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="הכנס שם"
+                            name="last_name"
+                            value={studentData.last_name}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors.last_name && <p style={errorStyle}>{errors.last_name}</p>}
+                    </Form.Group>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>מספר פאלפון</Form.Label>
+                        <Form.Control
+                            type="text"
+                            placeholder="הכנס שם"
+                            name="phone_num"
+                            value={studentData.phone_num}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors.phone_num && <p style={errorStyle}>{errors.phone_num}</p>}
+                    </Form.Group>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>אמייל</Form.Label>
+                        <Form.Control
+                            type="email"
+                            placeholder="הכנס אמייל"
+                            name="user.email"
+                            value={studentData.user.email}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors['user.email'] && <p style={errorStyle}>{errors['user.email']}</p>}
+                    </Form.Group>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>סיסמא</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder=""
+                            name="user.password"
+                            value={studentData.user.password}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors['user.password'] && <p style={errorStyle}>{errors['user.password']}</p>}
+                    </Form.Group>
+                    <Form.Group controlId="formName">
+                        <Form.Label style={labelStyle}>אשר סיסמא</Form.Label>
+                        <Form.Control
+                            type="password"
+                            placeholder=""
+                            name="confirm_password"
+                            value={pw2}
+                            onChange={handleChange}
+                            onBlur={handleChange}
+                        />
+                        {errors.confirm_password && <p style={errorStyle}>{errors.confirm_password}</p>}
+                    </Form.Group>
+                    <Button variant="primary" type="submit" style={buttonStyle}>
+                        צור פרופיל
+                    </Button>
+                </Form></div>
+            <div>
+                {/* <img src='https://img.freepik.com/premium-photo/group-happy-young-students-university_85574-4531.jpg'/> */}
+            </div>
+        </div>
+    );
 }
-// comment
-export default RegisterStudent
+
+export default RegisterStudent;
