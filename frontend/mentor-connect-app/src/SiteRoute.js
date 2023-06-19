@@ -4,6 +4,7 @@ import Home from './components/Home'
 import RegisterForm from './components/RegisterForm'
 import RegisterMentor from './components/RegisterMentor'
 import RegisterStudent from './components/RegisterStudent'
+import ChatApp from './components/Test'
 
 
 function SiteRoutes() {
@@ -12,6 +13,7 @@ function SiteRoutes() {
         <Route path='/' element={<Home/>}/>
         <Route path='/registerMentor' element={<RegisterMentor/>}/>
         <Route path='/registerStudent' element={<RegisterStudent/>}/>
+        <Route path='/test' element={<ChatApp/>}/>
     </Routes>
     </>)
 }

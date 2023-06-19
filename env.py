@@ -13,7 +13,7 @@ from mentorconnect.models import User, Topic, SubTopic, Mentor, Student, Feedbac
 
 m = Mentor.objects.all()
 for i in m:
-    print(i.sub_topics.all())
+    print(i)
 # s = SubTopic.objects.get(sub_topic_name='Python')
 # s.sub_topic_name = 'Python1'
 # s.save()
