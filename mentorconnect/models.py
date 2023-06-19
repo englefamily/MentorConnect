@@ -63,6 +63,7 @@ class Mentor(models.Model):
     study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
     self_description_title = models.CharField(null=False, max_length=256)
     self_description_content = models.CharField(null=False, max_length=700)
+    # TODO: The following three fields are decimal - so that the Mentor can input a `rate` for that teaching methods
     teach_at_mentor = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     teach_at_student = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     teach_online = models.DecimalField(max_digits=4, decimal_places=2, default=0)
@@ -71,7 +72,7 @@ class Mentor(models.Model):
     group_teaching = models.BooleanField(null=False, default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors', blank=True)
-    sub_topics = models.ManyToManyField('SubTopic', related_name='mentors')
+    topics = models.ManyToManyField('Topic', related_name='mentors')
 
     class Meta:
         db_table = 'mentor'
@@ -91,7 +92,7 @@ class Student(models.Model):
     study_cities = MultiSelectField(null=True, blank=True,choices=CITIES_CHOICES, max_length=128)
     short_description = models.CharField(null=True, blank=True, max_length=256)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=False)
-    sub_topics = models.ManyToManyField('SubTopic', related_name='students', blank=True)
+    topics = models.ManyToManyField('Topic', related_name='students', blank=True)
 
     class Meta:
         db_table = 'student'
@@ -105,24 +106,26 @@ class Student(models.Model):
 
 
 class Topic(models.Model):
-    topic_name = models.CharField(null=False, max_length=50)
+    # TODO: Change to `null=False` for production
+    topic_name = models.CharField(null=True, max_length=50)
+    topic_field = models.CharField(null=True, max_length=50)
 
     class Meta:
         db_table = 'topic'
 
     def __str__(self):
-        return f"ID: {self.pk} topic name: {self.topic_name}"
+        return f"ID: {self.pk}, Topic name: {self.topic_name} Topic field: {self.topic_field}"
 
 
-class SubTopic(models.Model):
-    sub_topic_name = models.CharField(null=False, max_length=50)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='courses', null=False)
-
-    class Meta:
-        db_table = 'sub_topic'
-
-    def __str__(self):
-        return f"ID: {self.pk}, Topic name: {self.topic.topic_name} Sub topic name: {self.sub_topic_name}"
+# class SubTopic(models.Model):
+#     sub_topic_name = models.CharField(null=False, max_length=50)
+#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='courses', null=False)
+#
+#     class Meta:
+#         db_table = 'sub_topic'
+#
+#     def __str__(self):
+#         return f"ID: {self.pk}, Topic name: {self.topic.topic_name} Sub topic name: {self.sub_topic_name}"
 
 
 class Feedback(models.Model):
@@ -133,7 +136,7 @@ class Feedback(models.Model):
     #  a single `SubTopic`, better to use `ForeignKey` not `ManyToManyField`
     mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='feedbacks')
     # Changed to ForeignKey
-    sub_topic = models.ForeignKey('SubTopic', on_delete=models.CASCADE, related_name='feedbacks', blank=True, null=True)
+    topic = models.ForeignKey('Topic', on_delete=models.CASCADE, related_name='feedbacks', blank=True, null=True)
 
     class Meta:
         db_table = 'feedback'

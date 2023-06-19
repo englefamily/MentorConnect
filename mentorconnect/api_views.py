@@ -1,6 +1,6 @@
-from .models import User, Student, Mentor, Topic, SubTopic, Feedback
+from .models import User, Student, Mentor, Topic, Feedback
 from .forms import RegistrationForm, LoginForm
-from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, SubTopicSerializer, FeedbackSerializer
+from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
@@ -400,19 +400,19 @@ def topic(request):
         )
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def sub_topic(request):
+def topic(request):
     try:
         match request.method:
             case 'POST':
-                new_sub_topic = SubTopicSerializer(data=request.data)
-                if new_sub_topic.is_valid():
-                    new_sub_topic.save()
+                new_topic = TopicSerializer(data=request.data)
+                if new_topic.is_valid():
+                    new_topic.save()
                     return Response(
                         status=status.HTTP_201_CREATED,
                         data={
                             "status": 'success',
-                            'message': 'Sub topic has been created',
-                            'sub _topic': new_sub_topic.data
+                            'message': 'Topic has been created',
+                            'topic': new_topic.data
                         }
                     )
                 else:
@@ -421,34 +421,34 @@ def sub_topic(request):
                         data={
                             'status': 'fail',
                             'message': 'the data provided is incorrect',
-                            'error': new_sub_topic.errors
+                            'error': new_topic.errors
                         }
                     )
             case 'GET':
-                sub_topic_id = request.query_params.get("id")
-                if sub_topic_id:
-                    sub_topic = SubTopic.objects.get(pk=sub_topic_id)
-                    sub_topic_json = SubTopicSerializer(sub_topic)
+                topic_id = request.query_params.get("id")
+                if topic_id:
+                    topic = Topic.objects.get(pk=topic_id)
+                    topic_json = TopicSerializer(topic)
                 else:
-                    sub_topics = SubTopic.objects.all()
-                    sub_topic_json = SubTopicSerializer(sub_topics, many=True)
+                    topics = Topic.objects.all()
+                    topic_json = TopicSerializer(topics, many=True)
                 return Response(
                     status=status.HTTP_200_OK,
                     data={
                         'status': 'success',
                         'message': 'retrieved all topics',
-                        'sub_topic': sub_topic_json.data
+                        'topic': topic_json.data
                     }
                 )
 
             case 'PUT':
                 try:
-                    sub_topic_id = request.query_params.get("id")
-                    sub_topic_instance = SubTopic.objects.get(pk=sub_topic_id)
-                    sts = SubTopicSerializer(instance=sub_topic_instance, data=request.data, partial=True)
+                    topic_id = request.query_params.get("id")
+                    topic_instance = Topic.objects.get(pk=topic_id)
+                    sts = TopicSerializer(instance=topic_instance, data=request.data, partial=True)
                     if sts.is_valid():
                         sts.save()
-                        return Response("Sub topic updated")
+                        return Response("Topic updated")
                     else:
                         return Response({"Error": sts.errors}, status=500)
                 except Exception as e:
@@ -456,10 +456,10 @@ def sub_topic(request):
 
             case 'DELETE':
                 try:
-                    sub_topic_id = request.query_params.get("id")
-                    sub_topic_instance = SubTopic.objects.get(pk=sub_topic_id)
-                    sub_topic_instance.delete()
-                    return Response("Sub topic Deleted")
+                    topic_id = request.query_params.get("id")
+                    topic_instance = Topic.objects.get(pk=topic_id)
+                    topic_instance.delete()
+                    return Response("Topic Deleted")
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Mentor, Student, Feedback, Topic, SubTopic
+from .models import User, Mentor, Student, Feedback, Topic
 # Register your models here.
 
 @admin.register(User)
@@ -8,5 +8,4 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(Mentor)
 admin.site.register(Student)
 admin.site.register(Topic)
-admin.site.register(SubTopic)
 admin.site.register(Feedback)
