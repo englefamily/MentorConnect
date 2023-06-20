@@ -17,12 +17,14 @@ function RegisterStudent() {
         phone_num: ''
     });
     const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
+    const phoneNumberRegex = /^05\d{8}$/;
+
 
     const validateField = (name, value) => {
         let error = '';
 
         // Validate required fields
-        if (name === 'phone_num' && value.length !== 10) {
+        if (name === 'phone_num' && !phoneNumberRegex.test(value)) {
             error = 'מספר הפאלפון חייב להיות בעל 10 ספרות';
         }
 

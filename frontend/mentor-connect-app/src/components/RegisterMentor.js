@@ -1,42 +1,112 @@
 import React, { useState } from 'react';
 import { Form, Button } from 'react-bootstrap';
+import { fetch_api } from '../helpers/api_request.js';
 
-const TeacherRegistrationForm = () => {
-  const [formData, setFormData] = useState({
-    gender: '',
-    first_name: '',
-    last_name: '',
-    phone_num: '',
-    education_level: '',
-    education_start: '',
-    education_completion: '',
-    year_of_birth: '',
-    city_residence: '',
-    study_cities: [],
-    self_description_title: '',
-    self_description_content: '',
-    teach_at_mentor: 0,
-    teach_at_student: 0,
-    teach_online: 0,
-    experience_with: [],
-    group_teaching: false
+const RegisterMentor = () => {
+  const [mentorCreated, setMentorCreated] = useState(false)
+  const [pw2, setPw2] = useState('');
+  const [errors, setErrors] = useState({});
+  const [mentorData, setMentorData] = useState({
+    user: {
+      email: "",
+      password: ""
+    },
+    study_cities: [
+    ],
+    gender: "",
+    first_name: "",
+    last_name: "",
+    phone_num: "",
+    education_level: "",
+    education_start: "",
+    education_completion: "",
+    year_of_birth: "",
+    city_residence: "",
+    self_description_title: "",
+    self_description_content: "",
+    teach_at_mentor: "",
+    teach_at_student: "",
+    teach_online: "",
+    experience_with: [
+    ],
+    group_teaching: true,
+    // students: [
+    //     1
+    // ],
+    sub_topics: [
+    ]
   });
+  const passwordRegex = /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
+  const phoneNumberRegex = /^05\d{8}$/;
+
+
+  const validateField = (name, value) => {
+    let error = '';
+
+    // Validate required fields
+    if (name === 'phone_num' && !phoneNumberRegex.test(value)) {
+      error = 'מספר הפאלפון חייב להיות בעל 10 ספרות';
+    }
+
+    if (name === 'user.password' && !passwordRegex.test(value)) {
+      error = `כללי הסיסמה:
+            - מכילה לפחות 8 תווים
+            - מכילה לפחות אות אחת גדולה או קטנה (a-z או A-Z)
+            - מכילה לפחות מספר אחד (0-9)
+            - מכילה לפחות תו מיוחד אחד (!@#$%^&*()\-_=+{};:,<.>)
+            - אינה מכילה רווחים`;
+    }
+
+    if (value.trim() === '') {
+      error = 'שדה חובה';
+    }
+
+    // Validate confirm password
+    if (name === 'confirm_password' && value !== mentorData.user.password) {
+      error = 'הסיסמאות לא תואמות';
+    }
+
+    return error;
+  };
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
+    const { name, value } = event.target;
+    let error = validateField(name, value);
 
-    if (type === 'checkbox') {
-      const updatedValue = checked
-        ? [...formData[name], value]
-        : formData[name].filter((item) => item !== value);
+    setErrors((prevErrors) => {
+      if (name === 'user.password' && value === pw2) {
+        return {
+          ...prevErrors,
+          [name]: error,
+          confirm_password: ''
+        };
+      } else if (name === 'user.password' && pw2 && value !== pw2) {
+        return {
+          ...prevErrors,
+          [name]: error,
+          confirm_password: 'הסיסמאות לא תואמות'
+        };
+      } else {
+        return {
+          ...prevErrors,
+          [name]: error
+        };
+      }
+    });
 
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [name]: updatedValue
+    if (name === 'confirm_password') {
+      setPw2(value);
+    } else if (name.startsWith('user.')) {
+      setMentorData((prevData) => ({
+        ...prevData,
+        user: {
+          ...prevData.user,
+          [name.substring(5)]: value
+        }
       }));
     } else {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
+      setMentorData((prevData) => ({
+        ...prevData,
         [name]: value
       }));
     }
@@ -44,268 +114,343 @@ const TeacherRegistrationForm = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    // TODO: Handle form submission
-    console.log(formData);
-    // Reset form
-    setFormData({
-      gender: '',
-      first_name: '',
-      last_name: '',
-      phone_num: '',
-      education_level: '',
-      education_start: '',
-      education_completion: '',
-      year_of_birth: '',
-      city_residence: '',
-      study_cities: [],
-      self_description_title: '',
-      self_description_content: '',
-      teach_at_mentor: 0,
-      teach_at_student: 0,
-      teach_online: 0,
-      experience_with: [],
-      group_teaching: false
+
+    let updatedErrors = {};
+
+    Object.entries(mentorData).forEach(([name, value]) => {
+      if (name === 'user') {
+        Object.entries(value).forEach(([name, value]) => {
+          const error = validateField('user.' + name, value);
+          if (error !== '') {
+            updatedErrors['user.' + name] = error;
+          }
+        });
+      } else {
+        const error = validateField(name, value);
+        if (error !== '') {
+          updatedErrors[name] = error;
+        }
+      }
+      const error = validateField('confirm_password', pw2);
+      if (error !== '') {
+        updatedErrors['confirm_password'] = error;
+      }
     });
+    setErrors(updatedErrors);
+
+    if (Object.keys(updatedErrors).length === 0) {
+      fetch_api('mentor', 'POST', mentorData)
+        .then((response) => {
+          setMentorCreated(true)
+          console.log(response);
+        })
+        .catch((response) => {
+          let phone_num_error = '';
+          let email_error = '';
+          const error = response.response.data.error;
+
+          if (
+            error?.user?.email != undefined &&
+            error?.user?.email[0] === 'user with this email address already exists.'
+          ) {
+            email_error = 'המייל כבר קיים במערכת';
+          }
+          if (
+            error?.phone_num != undefined &&
+            error?.phone_num[0] === 'student with this phone num already exists.'
+          ) {
+            phone_num_error = 'מספר הפאלפון כבר קיים במערכת';
+          }
+
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            ['user.email']: email_error,
+            ['phone_num']: phone_num_error
+          }));
+        });
+    }
   };
 
   return (
-    <div>
-      <h2 style={{textAlign: 'right'}}>טופס הרשמה למורה</h2>
-      <hr/>
+    <div className="registration-form">
+      <h2 style={{ textAlign: 'right' }}>טופס הרשמה</h2>
       <Form onSubmit={handleSubmit} dir='rtl'>
-        {/* Personal Information */}
-        <h3>פרטים אישיים</h3>
-        <Form.Group controlId="gender">
-          <Form.Label>מין</Form.Label>
-          <Form.Control
-            as="select"
-            name="gender"
-            value={formData.gender}
-            onChange={handleChange}
-            required
-          >
-            <option value="">בחר</option>
-            <option value="male">זכר</option>
-            <option value="female">נקבה</option>
-          </Form.Control>
-        </Form.Group>
-
-        <Form.Group controlId="first_name">
+        <h4>פרופיל</h4>
+        {/* First Name */}
+        <Form.Group controlId="firstName">
           <Form.Label>שם פרטי</Form.Label>
           <Form.Control
             type="text"
             name="first_name"
-            value={formData.first_name}
+            value={mentorData.first_name}
             onChange={handleChange}
-            required
+            onBlur={handleChange}
           />
+          {errors.first_name && <Form.Text className="text-danger">{errors.first_name}</Form.Text>}
         </Form.Group>
 
-        <Form.Group controlId="last_name">
+        {/* Last Name */}
+        <Form.Group controlId="lastName">
           <Form.Label>שם משפחה</Form.Label>
           <Form.Control
             type="text"
             name="last_name"
-            value={formData.last_name}
+            value={mentorData.last_name}
             onChange={handleChange}
-            required
+            onBlur={handleChange}
           />
+          {errors.last_name && <Form.Text className="text-danger">{errors.last_name}</Form.Text>}
         </Form.Group>
 
-        <Form.Group controlId="phone_num">
+        {/* Phone Number */}
+        <Form.Group controlId="phoneNum">
           <Form.Label>מספר טלפון</Form.Label>
           <Form.Control
             type="tel"
             name="phone_num"
-            value={formData.phone_num}
+            value={mentorData.phone_num}
             onChange={handleChange}
-            required
+            onBlur={handleChange}
           />
+          {errors.phone_num && <Form.Text className="text-danger">{errors.phone_num}</Form.Text>}
+        </Form.Group>
+        <Form.Group controlId="email">
+          <Form.Label>כתובת דוא"ל</Form.Label>
+          <Form.Control
+            type="email"
+            name="user.email"
+            value={mentorData.user.email}
+            onChange={handleChange}
+            onBlur={handleChange}
+          />
+          {errors['user.email'] && <Form.Text className="text-danger">{errors['user.email']}</Form.Text>}
         </Form.Group>
 
-        {/* Education */}
-        <h3>השכלה</h3>
-        <Form.Group controlId="education_level">
+        <Form.Group controlId="user.password">
+          <Form.Label>סיסמה</Form.Label>
+          <Form.Control
+            type="password"
+            name="user.password"
+            value={mentorData.user.password}
+            onChange={handleChange}
+            onBlur={handleChange}
+          />
+          {errors['user.password'] && <Form.Text className="text-danger">{errors['user.password']}</Form.Text>}
+        </Form.Group>
+
+        <Form.Group controlId="confirmPassword">
+          <Form.Label>אשר סיסמא</Form.Label>
+          <Form.Control
+            type="password"
+            name="confirm_password"
+            value={pw2}
+            onChange={handleChange}
+            onBlur={handleChange}
+          />
+          {errors.confirm_password && <Form.Text className="text-danger">{errors.confirm_password}</Form.Text>}
+        </Form.Group>
+
+        {/* Study Cities */}
+        {/* <Form.Group controlId="studyCities">
+          <Form.Label>ערים לימוד</Form.Label>
+          <Form.Control
+            as="select"
+            name="studyCities"
+            multiple
+            value={mentorData.studyCities}
+            onChange={handleChange}
+          >
+            <option value="Tel Aviv-Yafo">תל אביב-יפו</option>
+            <option value="Jerusalem">ירושלים</option>
+          </Form.Control>
+          {errors.studyCities && <Form.Text className="text-danger">{errors.studyCities}</Form.Text>}
+        </Form.Group> */}
+
+        {/* Gender */}
+        {/* <Form.Group controlId="gender">
+          <Form.Label>מין</Form.Label>
+          <Form.Control
+            as="select"
+            name="gender"
+            value={mentorData.gender}
+            onChange={handleChange}
+          >
+            <option value="">בחר מין</option>
+            <option value="male">זכר</option>
+            <option value="female">נקבה</option>
+          </Form.Control>
+          {errors.gender && <Form.Text className="text-danger">{errors.gender}</Form.Text>}
+        </Form.Group> */}
+
+        {/* Education Level */}
+        {/* <Form.Group controlId="educationLevel">
           <Form.Label>רמת השכלה</Form.Label>
           <Form.Control
             as="select"
-            name="education_level"
-            value={formData.education_level}
+            name="educationLevel"
+            value={mentorData.educationLevel}
             onChange={handleChange}
-            required
           >
-            <option value="">בחר</option>
-            {/* Add education level options */}
+            <option value="">בחר רמת השכלה</option>
           </Form.Control>
-        </Form.Group>
+          {errors.educationLevel && <Form.Text className="text-danger">{errors.educationLevel}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="education_start">
-          <Form.Label>שנת התחלת הלימודים</Form.Label>
+        {/* Education Start */}
+        {/* <Form.Group controlId="educationStart">
+          <Form.Label>תחילת לימודים</Form.Label>
           <Form.Control
             as="select"
-            name="education_start"
-            value={formData.education_start}
+            name="educationStart"
+            value={mentorData.educationStart}
             onChange={handleChange}
-            required
           >
-            <option value="">בחר</option>
-            {/* Add education start options */}
+            <option value="">בחר שנת התחלת לימודים</option>
           </Form.Control>
-        </Form.Group>
+          {errors.educationStart && <Form.Text className="text-danger">{errors.educationStart}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="education_completion">
-          <Form.Label>שנת השלמת הלימודים</Form.Label>
+        {/* Education Completion */}
+        {/* <Form.Group controlId="educationCompletion">
+          <Form.Label>סיום לימודים</Form.Label>
           <Form.Control
             as="select"
-            name="education_completion"
-            value={formData.education_completion}
+            name="educationCompletion"
+            value={mentorData.educationCompletion}
             onChange={handleChange}
-            required
           >
-            <option value="">בחר</option>
-            {/* Add education completion options */}
+            <option value="">בחר שנת סיום לימודים</option>
           </Form.Control>
-        </Form.Group>
+          {errors.educationCompletion && <Form.Text className="text-danger">{errors.educationCompletion}</Form.Text>}
+        </Form.Group> */}
 
-        {/* Additional Information */}
-        <h3>מידע נוסף</h3>
-        <Form.Group controlId="year_of_birth">
+        {/* Year of Birth */}
+        {/* <Form.Group controlId="yearOfBirth">
           <Form.Label>שנת לידה</Form.Label>
           <Form.Control
             as="select"
-            name="year_of_birth"
-            value={formData.year_of_birth}
+            name="yearOfBirth"
+            value={mentorData.yearOfBirth}
             onChange={handleChange}
-            required
           >
-            <option value="">בחר</option>
-            {/* Add year of birth options */}
+            <option value="">בחר שנת לידה</option>
           </Form.Control>
-        </Form.Group>
+          {errors.yearOfBirth && <Form.Text className="text-danger">{errors.yearOfBirth}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="city_residence">
+        {/* City of Residence */}
+        {/* <Form.Group controlId="cityResidence">
           <Form.Label>עיר מגורים</Form.Label>
           <Form.Control
             as="select"
-            name="city_residence"
-            value={formData.city_residence}
+            name="cityResidence"
+            value={mentorData.cityResidence}
             onChange={handleChange}
-            required
           >
-            <option value="">בחר</option>
-            {/* Add city residence options */}
+            <option value="">בחר עיר מגורים</option>
           </Form.Control>
-        </Form.Group>
+          {errors.cityResidence && <Form.Text className="text-danger">{errors.cityResidence}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="study_cities">
-          <Form.Label>ערים בהן ניתן ללמוד</Form.Label>
-          <Form.Control
-            as="select"
-            name="study_cities"
-            value={formData.study_cities}
-            onChange={handleChange}
-            multiple
-            required
-          >
-            {/* Add study cities options */}
-          </Form.Control>
-        </Form.Group>
-
-        <Form.Group controlId="self_description_title">
-          <Form.Label>כותרת התיאור האישי</Form.Label>
+        {/* Self Description Title */}
+        {/* <Form.Group controlId="selfDescriptionTitle">
+          <Form.Label>כותרת תיאור עצמי</Form.Label>
           <Form.Control
             type="text"
-            name="self_description_title"
-            value={formData.self_description_title}
+            name="selfDescriptionTitle"
+            value={mentorData.selfDescriptionTitle}
             onChange={handleChange}
-            required
           />
-        </Form.Group>
+          {errors.selfDescriptionTitle && <Form.Text className="text-danger">{errors.selfDescriptionTitle}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="self_description_content">
+        {/* Self Description Content */}
+        {/* <Form.Group controlId="selfDescriptionContent">
           <Form.Label>תיאור עצמי</Form.Label>
           <Form.Control
             as="textarea"
-            name="self_description_content"
-            value={formData.self_description_content}
+            rows={4}
+            name="selfDescriptionContent"
+            value={mentorData.selfDescriptionContent}
             onChange={handleChange}
-            required
           />
-        </Form.Group>
+          {errors.selfDescriptionContent && <Form.Text className="text-danger">{errors.selfDescriptionContent}</Form.Text>}
+        </Form.Group> */}
 
-        {/* Teaching Experience */}
-        <h3>פרטי השיעור</h3>
-        <Form.Group controlId="teach_at_mentor">
-          <Form.Label>הוראה בנושאים הקשורים לחניכים</Form.Label>
+        {/* Teach at Mentor */}
+        {/* <Form.Group controlId="teachAtMentor">
+          <Form.Label>לימוד עם מנטור (בש"ח)</Form.Label>
           <Form.Control
             type="number"
-            name="teach_at_mentor"
-            value={formData.teach_at_mentor}
-            onChange={handleChange}
             step="0.01"
-            min="0"
-            max="100"
-            required
+            name="teachAtMentor"
+            value={mentorData.teachAtMentor}
+            onChange={handleChange}
           />
-        </Form.Group>
+          {errors.teachAtMentor && <Form.Text className="text-danger">{errors.teachAtMentor}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="teach_at_student">
-          <Form.Label>הוראה לתלמידים ביחס לחניכים</Form.Label>
+        {/* Teach at Student */}
+        {/* <Form.Group controlId="teachAtStudent">
+          <Form.Label>לימוד עם תלמיד (בש"ח)</Form.Label>
           <Form.Control
             type="number"
-            name="teach_at_student"
-            value={formData.teach_at_student}
-            onChange={handleChange}
             step="0.01"
-            min="0"
-            max="100"
-            required
+            name="teachAtStudent"
+            value={mentorData.teachAtStudent}
+            onChange={handleChange}
           />
-        </Form.Group>
+          {errors.teachAtStudent && <Form.Text className="text-danger">{errors.teachAtStudent}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="teach_online">
-          <Form.Label>הוראה מקוונת</Form.Label>
+        {/* Teach Online */}
+        {/* <Form.Group controlId="teachOnline">
+          <Form.Label>לימוד מקוון (בש"ח)</Form.Label>
           <Form.Control
             type="number"
-            name="teach_online"
-            value={formData.teach_online}
-            onChange={handleChange}
             step="0.01"
-            min="0"
-            max="100"
-            required
+            name="teachOnline"
+            value={mentorData.teachOnline}
+            onChange={handleChange}
           />
-        </Form.Group>
+          {errors.teachOnline && <Form.Text className="text-danger">{errors.teachOnline}</Form.Text>}
+        </Form.Group> */}
 
-        {/* Experience with */}
-        <Form.Group controlId="experience_with">
-          <Form.Label>ניסיון בתחומים הבאים</Form.Label>
+        {/* Experience With */}
+        {/* <Form.Group controlId="experienceWith">
+          <Form.Label>ניסיון ב</Form.Label>
           <Form.Check
-            type="checkbox"
-            name="experience_with"
-            value="adhd"
+            inline
             label="ADHD"
+            type="checkbox"
+            name="experienceWith"
+            value="adhd"
+            checked={mentorData.experienceWith.includes('adhd')}
             onChange={handleChange}
-            style={{alignItems: 'flex-end'}}
           />
           <Form.Check
+            inline
+            label="לימוד"
             type="checkbox"
-            name="experience_with"
+            name="experienceWith"
             value="teaching"
-            label="הוראה"
+            checked={mentorData.experienceWith.includes('teaching')}
             onChange={handleChange}
           />
-        </Form.Group>
+          {errors.experienceWith && <Form.Text className="text-danger">{errors.experienceWith}</Form.Text>}
+        </Form.Group> */}
 
-        <Form.Group controlId="group_teaching">
+        {/* Group Teaching */}
+        {/* <Form.Group controlId="groupTeaching">
           <Form.Check
             type="checkbox"
-            name="group_teaching"
-            label="הוראת קבוצה"
-            checked={formData.group_teaching}
+            label="לימוד קבוצתי"
+            name="groupTeaching"
+            checked={mentorData.groupTeaching}
             onChange={handleChange}
           />
-        </Form.Group>
+          {errors.groupTeaching && <Form.Text className="text-danger">{errors.groupTeaching}</Form.Text>}
+        </Form.Group> */}
 
         <Button variant="primary" type="submit">
           שלח
@@ -315,4 +460,4 @@ const TeacherRegistrationForm = () => {
   );
 };
 
-export default TeacherRegistrationForm;
+export default RegisterMentor;
