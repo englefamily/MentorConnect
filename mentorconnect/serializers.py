@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Student, Mentor, Feedback, Topic, SubTopic
+from .models import User, Student, Mentor, Feedback, Topic
 from .helphers import CITIES_CHOICES
 from django.contrib.auth.hashers import make_password
 
@@ -74,10 +74,10 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SubTopicSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SubTopic
-        fields = '__all__'
+# class SubTopicSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = SubTopic
+#         fields = '__all__'
 
 
 class FeedbackSerializer(serializers.ModelSerializer):
