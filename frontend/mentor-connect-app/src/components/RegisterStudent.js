@@ -50,8 +50,11 @@ function RegisterStudent() {
     };
 
     const handleChange = (event) => {
+        // console.log(event)
         const { name, value } = event.target;
+        
         let error = validateField(name, value);
+        
 
         setErrors((prevErrors) => {
             if (name === 'user.password' && value === pw2) {
