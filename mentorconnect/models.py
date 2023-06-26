@@ -72,7 +72,7 @@ class Mentor(models.Model):
     group_teaching = models.BooleanField(null=False, default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors', blank=True)
-    topics = models.ManyToManyField('Topic', related_name='mentors')
+    topics = models.ManyToManyField('Topic', related_name='mentors', blank=True)
 
     class Meta:
         db_table = 'mentor'
