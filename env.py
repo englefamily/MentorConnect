@@ -62,3 +62,65 @@ from mentorconnect.models import User, Topic, Mentor, Student, Feedback
 
 
 
+# You have a list with n members.
+# Each element in the list is a color, either white, red or black.
+# Arrange the elements in the list so that all the first elements are white, then red, then lastly  black.
+
+# def sort_colors(colors):
+#     white_count = 0
+#     black_count = 0
+#     red_count = 0
+#     for color in colors:
+#         if color == 'white':
+#             white_count += 1
+#         elif color == 'black':
+#             black_count += 1
+#         elif color == 'red':
+#             red_count += 1
+#     print(white_count, black_count, red_count)
+#     for i in range(white_count):
+#         colors[i] = 'white'
+#     for i in range(red_count):
+#         colors[i] = 'red'
+#     for i in range(black_count):
+#         colors[i] = 'black'
+#
+#     return colors
+#
+#
+# colors = ['black', 'red', 'black', 'white', 'red', 'red', 'black', 'white', 'white', 'red', 'black']
+#
+# print(sort_colors(colors))
+
+# Ori solution
+# def sort_colors(lst):
+#     r = 0
+#     b = 0
+#     w = 0
+#
+#     for item in lst:
+#         if item == 'r':
+#             r += 1
+#         elif item == 'w':
+#             w += 1
+#         else:
+#             b += 1
+#
+#     for i in range(len(lst)):
+#         if w > 0:
+#             lst[i] = 'w'
+#             w -= 1
+#             continue
+#         if r > 0:
+#             lst[i] = 'r'
+#             r -= 1
+#             continue
+#
+#         lst[i] = 'b'
+#
+#     return lst
+#
+# lst = ['r', 'r', 'w', 'b', 'b', 'w']
+# print(sort_colors(lst))
+
+
