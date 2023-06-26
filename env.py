@@ -3,7 +3,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mcproject.settings")
 import django
 django.setup()
 
-from mentorconnect.models import User, Topic, SubTopic, Mentor, Student, Feedback
+from mentorconnect.models import User, Topic, Mentor, Student, Feedback
 
 # u = User.objects.all()[1]
 # u.set_password('123')
@@ -60,29 +60,5 @@ from mentorconnect.models import User, Topic, SubTopic, Mentor, Student, Feedbac
 #         print('     ',i.feedbacks.all())
 
 
-# create a function that rcv's two lists and checks if one list is identical in reversed order to the second list
-
-# list0 = ['a','b','c','d','e','f']
-# list1 = ['f','e','d','c','b','a']
-# def check_if_reversed(list0, list1):
-#     for i in range(len(list0)):
-#         if list0[i] != list1[len(list1)-1-i]:
-#             print('list do not match')
-#         else:
-#             print('list match')
-
-# def check_if_reversed(list0, list1):
-#     print(list0, list1)
-#     print('list0')
-#     for i in list0:
-#         print(i)
-#         for x in list1:
-#             print(x)
-#             if list0[i] == list1[-1-x]:
-#                 continue
-#             else:
-#                 print('lists do not match')
-#                 break
 
 
-# print(type((1,)))
