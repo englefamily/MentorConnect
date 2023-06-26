@@ -10,6 +10,11 @@ import Select from "react-select";
 
 const RegisterMentor = () => {
   const [mentorCreated, setMentorCreated] = useState(false);
+  const [teachField, setTeachField] = useState({
+    teach_at_mentor: true,
+    teach_at_student: true,
+    teach_online: true,
+  });
   const [pw2, setPw2] = useState("");
   const [errors, setErrors] = useState({});
   const [mentorData, setMentorData] = useState({
@@ -32,30 +37,44 @@ const RegisterMentor = () => {
     teach_at_mentor: "",
     teach_at_student: "",
     teach_online: "",
-    // experience_with: [],
-    // group_teaching: true,
-    // students: [
-    //     1
-    // ],
+    study_cities: [],
+    experience_with: [],
+    group_teaching: false,
+
     topics: [],
   });
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
+  const priceRegex = /^([4-9][0-9]|[1-3][0-9]{2}|400)$/;
 
   useEffect(() => {
-    console.log(mentorData.topics)
-  }, [mentorData.topics]);
+    console.log(mentorData.study_cities);
+  }, [mentorData.study_cities]);
 
   const validateField = (name, value) => {
-    console.log('From Validator _name_:', name)
-    console.log('From Validator _value_:', value)
+    console.log("From Validator _name_:", name);
+    console.log("From Validator _value_:", value);
     let error = "";
 
     // Validate required fields
     if (name === "phone_num" && !phoneNumberRegex.test(value)) {
       error = "מספר הפאלפון חייב להיות בעל 10 ספרות";
+    }
+
+    if (
+      name === "teach_online" ||
+      name === "teach_at_mentor" ||
+      name === "teach_at_student"
+    ) {
+      if (!priceRegex.test(value) && teachField[name] !== true) {
+        error = "טווח המחירים חייב להיות בין 40 ל 400";
+      }
+      if (value === "" && teachField[name] !== true) {
+        error = "שדה חובה";
+      }
+      return error;
     }
 
     if (name === "user.password" && !passwordRegex.test(value)) {
@@ -66,12 +85,17 @@ const RegisterMentor = () => {
             - מכילה לפחות תו מיוחד אחד (!@#$%^&*()\-_=+{};:,<.>)
             - אינה מכילה רווחים`;
     }
-    // 
-
-    if (typeof(value) === 'object' && value.length !== 0 || value === undefined || value.trim() === "") {
-      error = "שדה חובה";
+    //
+    if (typeof value === "object") {
+      if (value.length === 0) {
+        error = "שדה חובה";
+      }
+      return error;
     }
 
+    if (value === undefined || value.trim() === "") {
+      error = "שדה חובה";
+    }
     // Validate confirm password
     if (name === "confirm_password" && value !== mentorData.user.password) {
       error = "הסיסמאות לא תואמות";
@@ -81,14 +105,40 @@ const RegisterMentor = () => {
   };
 
   const handleChange = (event) => {
-    
     const { name, value } = event.target;
+
     if (value === null) {
       value = "";
     }
-    
+
+    if (name === "group_teaching") {
+      setMentorData((prevState) => ({
+        ...prevState,
+        [name]: !prevState[name],
+      }));
+      return null;
+    }
+
+    if (value === "on") {
+      if (teachField[name] === false) {
+        setMentorData((prevState) => ({
+          ...prevState,
+          [name]: "",
+        }));
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          [name]: "",
+        }));
+      }
+      setTeachField((prevState) => ({
+        ...prevState,
+        [name]: !prevState[name],
+      }));
+      return null;
+    }
+
     let error = validateField(name, value);
-    
+
     setErrors((prevErrors) => {
       if (name === "user.password" && value === pw2) {
         // todo to match if user.password
@@ -159,7 +209,6 @@ const RegisterMentor = () => {
       fetch_api("mentor", "POST", mentorData)
         .then((response) => {
           setMentorCreated(true);
-          
         })
         .catch((response) => {
           let phone_num_error = "";
@@ -335,16 +384,19 @@ const RegisterMentor = () => {
             isSearchable={true}
             name="city_residence"
             options={CITIES_CHOICES}
-            onChange={(res) =>{
-                const res_ = res ? res : {value: ''}
-                handleChange({
-                  target: { value: res_.value, name: "city_residence" },
-                })
+            onChange={(res) => {
+              const res_ = res ? res : { value: "" };
+              handleChange({
+                target: { value: res_.value, name: "city_residence" },
+              });
             }}
             onBlur={() => {
-                handleChange({
-                  target: { value: mentorData.city_residence, name: "city_residence" },
-                })
+              handleChange({
+                target: {
+                  value: mentorData.city_residence,
+                  name: "city_residence",
+                },
+              });
             }}
           />
 
@@ -431,33 +483,141 @@ const RegisterMentor = () => {
             name="topics"
             value={mentorData.topics}
             options={CITIES_CHOICES}
-            className="basic-multi-select"
-            classNamePrefix="select"
-            onChange={(res)=>{handleChange({target: {value: res, name: 'topics'}})}}
-            onBlur={(res)=>{handleChange({target: {value: res.value, name: 'topics'}})}}
-            
+            onChange={(res) => {
+              handleChange({ target: { value: res, name: "topics" } });
+            }}
+            onBlur={(res) => {
+              handleChange({
+                target: { value: mentorData.topics, name: "topics" },
+              });
+            }}
           />
           {errors.topics && (
             <Form.Text className="text-danger">{errors.topics}</Form.Text>
           )}
         </Form.Group>
         {/* Study Cities */}
-        {/* <Form.Group controlId="studyCities">
-          <Form.Label>ערים לימוד</Form.Label>
-          <Form.Control
-            as="select"
-            name="studyCities"
-            multiple
-            value={mentorData.studyCities}
-            onChange={handleChange}
-          >
-            <option value="Tel Aviv-Yafo">תל אביב-יפו</option>
-            <option value="Jerusalem">ירושלים</option>
-          </Form.Control>
-          {errors.studyCities && (
-            <Form.Text className="text-danger">{errors.studyCities}</Form.Text>
+        <Form.Group controlId="studyCities">
+          <Form.Label>ערי לימוד</Form.Label>
+          <Select
+            isMulti
+            name="study_cities"
+            value={mentorData.study_cities}
+            options={CITIES_CHOICES}
+            onChange={(res) => {
+              console.log(res);
+              handleChange({ target: { value: res, name: "study_cities" } });
+            }}
+            onBlur={(res) => {
+              handleChange({
+                target: {
+                  value: mentorData.study_cities,
+                  name: "study_cities",
+                },
+              });
+            }}
+          />
+          {errors.study_cities && (
+            <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
           )}
-        </Form.Group> */}
+        </Form.Group>
+
+        <Form.Group>
+          <Form.Label>שיעורי אונליין</Form.Label>
+          <br />
+          <input type="checkbox" name="teach_online" onChange={handleChange} />
+          <Form.Control
+            type="number"
+            placeholder="מחיר"
+            disabled={teachField.teach_online}
+            name="teach_online"
+            onChange={handleChange}
+            value={mentorData.teach_online}
+          />
+        </Form.Group>
+        {errors.teach_online && (
+          <Form.Text className="text-danger">{errors.teach_online}</Form.Text>
+        )}
+        <Form.Group>
+          <Form.Label>שיעורים אצל מורה</Form.Label>
+          <br />
+          <input
+            type="checkbox"
+            name="teach_at_mentor"
+            onChange={handleChange}
+          />
+          <Form.Control
+            type="number"
+            placeholder="מחיר"
+            disabled={teachField.teach_at_mentor}
+            name="teach_at_mentor"
+            onChange={handleChange}
+            value={mentorData.teach_at_mentor}
+          />
+        </Form.Group>
+        {errors.teach_at_mentor && (
+          <Form.Text className="text-danger">
+            {errors.teach_at_mentor}
+          </Form.Text>
+        )}
+        <Form.Group>
+          <Form.Label>שיעורים אצל תלמיד</Form.Label>
+          <br />
+          <input
+            type="checkbox"
+            name="teach_at_student"
+            onChange={handleChange}
+          />
+          <Form.Control
+            type="number"
+            placeholder="מחיר"
+            disabled={teachField.teach_at_student}
+            name="teach_at_student"
+            onChange={handleChange}
+            value={mentorData.teach_at_student}
+          />
+        </Form.Group>
+        {errors.teach_at_student && (
+          <Form.Text className="text-danger">
+            {errors.teach_at_student}
+          </Form.Text>
+        )}
+        <br/>
+        <Form.Group>
+          <input
+            type="checkbox"
+            name="group_teaching"
+            onChange={handleChange}
+            style={{marginLeft: '2px'}}
+          />  
+          <Form.Label>מלמד בקבוצות</Form.Label>
+        </Form.Group>
+
+        <Form.Group controlId="studyCities">
+          <Form.Label>ניסיון עם</Form.Label>
+          <Select
+            isMulti
+            name="study_cities"
+            value={mentorData.experience_with}
+            options={CITIES_CHOICES}
+            onChange={(res) => {
+              console.log(res);
+              handleChange({ target: { value: res, name: "study_cities" } });
+            }}
+            onBlur={(res) => {
+              handleChange({
+                target: {
+                  value: mentorData.study_cities,
+                  name: "study_cities",
+                },
+              });
+            }}
+          />
+          {errors.study_cities && (
+            <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
+          )}
+        </Form.Group>
+
         {/* Self Description Title
         {/* <Form.Group controlId="selfDescriptionTitle">
           <Form.Label>כותרת תיאור עצמי</Form.Label>
@@ -551,6 +711,7 @@ const RegisterMentor = () => {
           />
           {errors.groupTeaching && <Form.Text className="text-danger">{errors.groupTeaching}</Form.Text>}
         </Form.Group> */}
+        <br />
         <Button variant="primary" type="submit">
           שלח
         </Button>

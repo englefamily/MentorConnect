@@ -12,7 +12,6 @@ export const EDUCATION_LEVEL = [
 ];
 
 export const CITIES_CHOICES = [
-    { "value": "", "label": "בחר עיר" },
     { "value": "Jerusalem", "label": "ירושלים" },
     { "value": "Tel Aviv-Yafo", "label": "תל אביב-יפו" },
     { "value": "Haifa", "label": "חיפה" },
