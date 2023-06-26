@@ -5,6 +5,7 @@ import {
   years,
   EDUCATION_LEVEL,
   CITIES_CHOICES,
+  EXPERIENCE_WITH,
 } from "../helpers/avariables.js";
 import Select from "react-select";
 
@@ -593,28 +594,28 @@ const RegisterMentor = () => {
           <Form.Label>מלמד בקבוצות</Form.Label>
         </Form.Group>
 
-        <Form.Group controlId="studyCities">
+        <Form.Group controlId="experienceWith">
           <Form.Label>ניסיון עם</Form.Label>
           <Select
             isMulti
-            name="study_cities"
+            name="experience_with"
             value={mentorData.experience_with}
-            options={CITIES_CHOICES}
+            options={EXPERIENCE_WITH}
             onChange={(res) => {
               console.log(res);
-              handleChange({ target: { value: res, name: "study_cities" } });
+              handleChange({ target: { value: res, name: "experience_with" } });
             }}
             onBlur={(res) => {
               handleChange({
                 target: {
-                  value: mentorData.study_cities,
-                  name: "study_cities",
+                  value: mentorData.experience_with,
+                  name: "experience_with",
                 },
               });
             }}
           />
-          {errors.study_cities && (
-            <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
+          {errors.experience_with && (
+            <Form.Text className="text-danger">{errors.experience_with}</Form.Text>
           )}
         </Form.Group>
 

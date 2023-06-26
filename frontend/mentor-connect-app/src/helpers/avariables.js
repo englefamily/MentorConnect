@@ -11,6 +11,11 @@ export const EDUCATION_LEVEL = [
     ['high_school', 'תיכון'],
 ];
 
+export const EXPERIENCE_WITH = [
+    { "value": "adhd", "label": "קשב וריכוז" },
+    { "value": "teaching", "label": "הוראה" },
+];
+
 export const CITIES_CHOICES = [
     { "value": "Jerusalem", "label": "ירושלים" },
     { "value": "Tel Aviv-Yafo", "label": "תל אביב-יפו" },
