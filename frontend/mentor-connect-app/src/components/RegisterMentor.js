@@ -41,7 +41,6 @@ const RegisterMentor = () => {
     study_cities: [],
     experience_with: [],
     group_teaching: false,
-
     topics: [],
   });
 
@@ -59,6 +58,10 @@ const RegisterMentor = () => {
     console.log("From Validator _value_:", value);
     let error = "";
 
+    if (name === "experience_with" || name === "group_teaching") {
+      return error;
+    }
+    console.log(error);
     // Validate required fields
     if (name === "phone_num" && !phoneNumberRegex.test(value)) {
       error = "מספר הפאלפון חייב להיות בעל 10 ספרות";
@@ -97,11 +100,12 @@ const RegisterMentor = () => {
     if (value === undefined || value.trim() === "") {
       error = "שדה חובה";
     }
+
     // Validate confirm password
     if (name === "confirm_password" && value !== mentorData.user.password) {
       error = "הסיסמאות לא תואמות";
     }
-
+    console.log(error);
     return error;
   };
 
@@ -110,14 +114,6 @@ const RegisterMentor = () => {
 
     if (value === null) {
       value = "";
-    }
-
-    if (name === "group_teaching") {
-      setMentorData((prevState) => ({
-        ...prevState,
-        [name]: !prevState[name],
-      }));
-      return null;
     }
 
     if (value === "on") {
@@ -139,7 +135,7 @@ const RegisterMentor = () => {
     }
 
     let error = validateField(name, value);
-
+    console.log("From Validator _error_:", error);
     setErrors((prevErrors) => {
       if (name === "user.password" && value === pw2) {
         // todo to match if user.password
@@ -161,7 +157,12 @@ const RegisterMentor = () => {
         };
       }
     });
-
+    if (name === "group_teaching") {
+      setMentorData((prevState) => ({
+        ...prevState,
+        [name]: !prevState[name],
+      }));
+    }
     if (name === "confirm_password") {
       setPw2(value);
     } else if (name.startsWith("user.")) {
@@ -203,10 +204,18 @@ const RegisterMentor = () => {
       if (error !== "") {
         updatedErrors["confirm_password"] = error;
       }
+      if (
+        teachField.teach_at_mentor &&
+        teachField.teach_at_student &&
+        teachField.teach_online
+      ) {
+        updatedErrors["teach_at"] = "חובה לבחור את אחד מדרכי הלימוד";
+      }
     });
     setErrors(updatedErrors);
 
     if (Object.keys(updatedErrors).length === 0) {
+      console.log(mentorData);
       fetch_api("mentor", "POST", mentorData)
         .then((response) => {
           setMentorCreated(true);
@@ -215,7 +224,6 @@ const RegisterMentor = () => {
           let phone_num_error = "";
           let email_error = "";
           const error = response.response.data.error;
-
           if (
             error?.user?.email != undefined &&
             error?.user?.email[0] ===
@@ -522,7 +530,6 @@ const RegisterMentor = () => {
             <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
           )}
         </Form.Group>
-
         <Form.Group>
           <Form.Label>שיעורי אונליין</Form.Label>
           <br />
@@ -583,17 +590,19 @@ const RegisterMentor = () => {
             {errors.teach_at_student}
           </Form.Text>
         )}
-        <br/>
+        {errors.teach_at && (
+          <Form.Text className="text-danger">{errors.teach_at}</Form.Text>
+        )}
+        <br />
         <Form.Group>
           <input
             type="checkbox"
             name="group_teaching"
             onChange={handleChange}
-            style={{marginLeft: '2px'}}
-          />  
+            style={{ marginLeft: "2px" }}
+          />
           <Form.Label>מלמד בקבוצות</Form.Label>
         </Form.Group>
-
         <Form.Group controlId="experienceWith">
           <Form.Label>ניסיון עם</Form.Label>
           <Select
@@ -615,104 +624,43 @@ const RegisterMentor = () => {
             }}
           />
           {errors.experience_with && (
-            <Form.Text className="text-danger">{errors.experience_with}</Form.Text>
+            <Form.Text className="text-danger">
+              {errors.experience_with}
+            </Form.Text>
           )}
         </Form.Group>
-
-        {/* Self Description Title
-        {/* <Form.Group controlId="selfDescriptionTitle">
-          <Form.Label>כותרת תיאור עצמי</Form.Label>
-          <Form.Control
-            type="text"
-            name="selfDescriptionTitle"
-            value={mentorData.selfDescriptionTitle}
-            onChange={handleChange}
-          />
-          {errors.selfDescriptionTitle && <Form.Text className="text-danger">{errors.selfDescriptionTitle}</Form.Text>}
-        </Form.Group> */}
-        {/* Self Description Content */}
-        {/* <Form.Group controlId="selfDescriptionContent">
-          <Form.Label>תיאור עצמי</Form.Label>
+        {/* Self Description Title */}
+        <Form.Group controlId="selfDescriptionTitle">
+          <Form.Label>ספר על עצמך בקצרה</Form.Label>
           <Form.Control
             as="textarea"
-            rows={4}
-            name="selfDescriptionContent"
-            value={mentorData.selfDescriptionContent}
+            rows={3}
+            name="self_description_title"
+            value={mentorData.self_description_title}
             onChange={handleChange}
           />
-          {errors.selfDescriptionContent && <Form.Text className="text-danger">{errors.selfDescriptionContent}</Form.Text>}
-        </Form.Group> */}
-        {/* Teach at Mentor */}
-        {/* <Form.Group controlId="teachAtMentor">
-          <Form.Label>לימוד עם מנטור (בש"ח)</Form.Label>
+          {errors.self_description_title && (
+            <Form.Text className="text-danger">
+              {errors.self_description_title}
+            </Form.Text>
+          )}
+        </Form.Group>
+        {/* Self Description Content */}
+        <Form.Group controlId="selfDescriptionContent">
+          <Form.Label>ספר על עצמך ועל התנהלות השיעור האריכות</Form.Label>
           <Form.Control
-            type="number"
-            step="0.01"
-            name="teachAtMentor"
-            value={mentorData.teachAtMentor}
+            as="textarea"
+            rows={7}
+            name="self_description_content"
+            value={mentorData.self_description_content}
             onChange={handleChange}
           />
-          {errors.teachAtMentor && <Form.Text className="text-danger">{errors.teachAtMentor}</Form.Text>}
-        </Form.Group> */}
-        {/* Teach at Student */}
-        {/* <Form.Group controlId="teachAtStudent">
-          <Form.Label>לימוד עם תלמיד (בש"ח)</Form.Label>
-          <Form.Control
-            type="number"
-            step="0.01"
-            name="teachAtStudent"
-            value={mentorData.teachAtStudent}
-            onChange={handleChange}
-          />
-          {errors.teachAtStudent && <Form.Text className="text-danger">{errors.teachAtStudent}</Form.Text>}
-        </Form.Group> */}
-        {/* Teach Online */}
-        {/* <Form.Group controlId="teachOnline">
-          <Form.Label>לימוד מקוון (בש"ח)</Form.Label>
-          <Form.Control
-            type="number"
-            step="0.01"
-            name="teachOnline"
-            value={mentorData.teachOnline}
-            onChange={handleChange}
-          />
-          {errors.teachOnline && <Form.Text className="text-danger">{errors.teachOnline}</Form.Text>}
-        </Form.Group> */}
-        {/* Experience With */}
-        {/* <Form.Group controlId="experienceWith">
-          <Form.Label>ניסיון ב</Form.Label>
-          <Form.Check
-            inline
-            label="ADHD"
-            type="checkbox"
-            name="experienceWith"
-            value="adhd"
-            checked={mentorData.experienceWith.includes('adhd')}
-            onChange={handleChange}
-          />
-          <Form.Check
-            inline
-            label="לימוד"
-            type="checkbox"
-            name="experienceWith"
-            value="teaching"
-            checked={mentorData.experienceWith.includes('teaching')}
-            onChange={handleChange}
-          />
-          {errors.experienceWith && <Form.Text className="text-danger">{errors.experienceWith}</Form.Text>}
-        </Form.Group> */}
-        {/* Group Teaching */}
-        {/* <Form.Group controlId="groupTeaching">
-          <Form.Check
-            type="checkbox"
-            label="לימוד קבוצתי"
-            name="groupTeaching"
-            checked={mentorData.groupTeaching}
-            onChange={handleChange}
-          />
-          {errors.groupTeaching && <Form.Text className="text-danger">{errors.groupTeaching}</Form.Text>}
-        </Form.Group> */}
-        <br />
+          {errors.selfd_escription_content && (
+            <Form.Text className="text-danger">
+              {errors.self_description_content}
+            </Form.Text>
+          )}
+        </Form.Group>
         <Button variant="primary" type="submit">
           שלח
         </Button>
