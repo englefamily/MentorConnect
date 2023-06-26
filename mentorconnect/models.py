@@ -67,7 +67,7 @@ class Mentor(models.Model):
     teach_at_mentor = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     teach_at_student = models.DecimalField(max_digits=4, decimal_places=2, default=0)
     teach_online = models.DecimalField(max_digits=4, decimal_places=2, default=0)
-    experience_with = MultiSelectField(choices=[('adhd', 'ADHD'), ('teaching', 'Teaching')],
+    experience_with = MultiSelectField(choices=[('adhd', 'קשב וריכוז'), ('teaching', 'הוראה')],
                                        max_length=30, null=True, blank=True)
     group_teaching = models.BooleanField(null=False, default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
