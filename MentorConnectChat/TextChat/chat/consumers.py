@@ -36,3 +36,6 @@ class ChatConsumer(WebsocketConsumer):
             'type':'chat',
             'message':message
         }))
+
+    def disconnect(self, close_code):
+        pass
