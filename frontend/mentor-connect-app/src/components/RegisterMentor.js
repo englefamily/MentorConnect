@@ -46,18 +46,6 @@ const RegisterMentor = () => {
     topics: [],
   });
 
-  const objects = {
-    Math: [
-      { name: "Algebra", id: 1 },
-      { name: "Calculus", id: 2 },
-      { name: "Geometry", id: 3 },
-    ],
-    English: [
-      { name: "Poetry", id: 4 },
-      { name: "Grammar", id: 5 },
-      { name: "Literature", id: 6 },
-    ],
-  };
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;

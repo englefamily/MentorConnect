@@ -348,6 +348,7 @@ def topic(request):
                 else:
                     topics = Topic.objects.all()
                     topic_json = TopicSerializer(topics, many=True)
+                print(topic_json.data)
                 return Response(
                     status=status.HTTP_200_OK,
                     data={
