@@ -61,6 +61,7 @@ def mentor(request):
                         }
                     )
                 else:
+                    print(new_mentor.errors)
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={

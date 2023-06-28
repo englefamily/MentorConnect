@@ -46,7 +46,6 @@ const RegisterMentor = () => {
     topics: [],
   });
 
-
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
@@ -423,7 +422,7 @@ const RegisterMentor = () => {
           <Select
             isClearable={true}
             isRtl={true}
-            defaultValue={CITIES_CHOICES[0]}
+            // defaultValue={CITIES_CHOICES[0]}
             isSearchable={true}
             name="city_residence"
             options={CITIES_CHOICES}
