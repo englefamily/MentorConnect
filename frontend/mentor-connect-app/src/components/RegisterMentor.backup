@@ -1,216 +1,75 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import { fetch_api, transformData } from "../helpers/functions.js";
-import {
-  years,
-  EDUCATION_LEVEL,
-  CITIES_CHOICES,
-  EXPERIENCE_WITH,
-} from "../helpers/avariables.js";
 import Select from "react-select";
 import DropDown from "./Test.js";
+import { fetch_api, transformData } from "../helpers/functions.js";
+import { years, EDUCATION_LEVEL, CITIES_CHOICES, EXPERIENCE_WITH } from "../helpers/avariables.js";
+
+const VALIDATORS = {
+  "phone_num": (value) => /^05\d{8}$/.test(value) ? "" : "מספר הפאלפון חייב להיות בעל 10 ספרות",
+  "user.password": (value) => /^(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/i.test(value) ? "" : `כללי הסיסמה....`,
+  "confirm_password": (value, mentorData, pw2) => value === mentorData.user.password ? "" : "הסיסמאות לא תואמות",
+  "default": (value) => value.trim() === "" ? "שדה חובה" : "",
+};
+
+const defaultMentorData = {
+  user: { email: "", password: "" },
+  gender: "", first_name: "", last_name: "", phone_num: "", education_level: "",
+  education_start: "", education_completion: "", year_of_birth: "", city_residence: "",
+  self_description_title: "", self_description_content: "", teach_at_mentor: "0",
+  teach_at_student: "0", teach_online: "0", study_cities: [], experience_with: [],
+  group_teaching: false, topics: [],
+};
+
+const defaultTeachField = { teach_at_mentor: true, teach_at_student: true, teach_online: true };
 
 const RegisterMentor = () => {
   const [mentorCreated, setMentorCreated] = useState(false);
-  const [teachField, setTeachField] = useState({
-    teach_at_mentor: true,
-    teach_at_student: true,
-    teach_online: true,
-  });
+  const [teachField, setTeachField] = useState(defaultTeachField);
   const [pw2, setPw2] = useState("");
   const [topics, setTopics] = useState([]);
   const [errors, setErrors] = useState({});
-  const [mentorData, setMentorData] = useState({
-    user: {
-      email: "",
-      password: "",
-    },
-    // study_cities: [],
-    gender: "",
-    first_name: "",
-    last_name: "",
-    phone_num: "",
-    education_level: "",
-    education_start: "",
-    education_completion: "",
-    year_of_birth: "",
-    city_residence: "",
-    self_description_title: "",
-    self_description_content: "",
-    teach_at_mentor: "0",
-    teach_at_student: "0",
-    teach_online: "0",
-    study_cities: [],
-    experience_with: [],
-    group_teaching: false,
-    topics: [],
-  });
+  const [mentorData, setMentorData] = useState(defaultMentorData);
 
-  const passwordRegex =
-    /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
-  const phoneNumberRegex = /^05\d{8}$/;
-  const priceRegex = /^([4-9][0-9]|[1-3][0-9]{2}|400)$/;
-
-  useEffect(() => {
-    console.log(mentorData);
-  }, [mentorData]);
+  useEffect(() => { console.log(mentorData); }, [mentorData]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch_api("topic", "GET");
-        const topics = response.data.topic;
-        console.log(topics);
-        setTopics(transformData(topics));
-      } catch (error) {
-        console.error(error);
-      }
+        const { data: { topic } } = await fetch_api("topic", "GET");
+        console.log(topic);
+        setTopics(transformData(topic));
+      } catch (error) { console.error(error); }
     };
-
     fetchData();
   }, []);
 
-  const validateField = (name, value) => {
-    console.log("From Validator _name_:", name);
-    console.log("From Validator _value_:", value);
-    let error = "";
-
-    if (
-      name === "experience_with" ||
-      name === "group_teaching"
-    ) {
-      return error;
-    }
-    // Validate required fields
-    if (name === "phone_num" && !phoneNumberRegex.test(value)) {
-      error = "מספר הפאלפון חייב להיות בעל 10 ספרות";
-    }
-
-    if (
-      name === "teach_online" ||
-      name === "teach_at_mentor" ||
-      name === "teach_at_student"
-    ) {
-      if (!priceRegex.test(value) && teachField[name] !== true) {
-        error = "טווח המחירים חייב להיות בין 40 ל 400";
-      }
-      if (value === "" && teachField[name] !== true) {
-        error = "שדה חובה";
-      }
-      return error;
-    }
-
-    if (name === "user.password" && !passwordRegex.test(value)) {
-      error = `כללי הסיסמה:
-            - מכילה לפחות 8 תווים
-            - מכילה לפחות אות אחת גדולה או קטנה (a-z או A-Z)
-            - מכילה לפחות מספר אחד (0-9)
-            - מכילה לפחות תו מיוחד אחד (!@#$%^&*()\-_=+{};:,<.>)
-            - אינה מכילה רווחים`;
-    }
-    //
-    if (typeof value === "object") {
-      if (value.length === 0) {
-        error = "שדה חובה";
-      }
-      return error;
-    }
-
-    if (value === undefined || value.trim() === "") {
-      error = "שדה חובה";
-    }
-
-    // Validate confirm password
-    if (name === "confirm_password" && value !== mentorData.user.password) {
-      error = "הסיסמאות לא תואמות";
-    }
-    return error;
-  };
+  const validateField = (name, value) => VALIDATORS[name]?.(value, mentorData, pw2) ?? VALIDATORS.default(value);
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-
-    if (value === null) {
-      value = "";
-    }
-
-    if (value === "on") {
-      if (teachField[name] === false) {
-        setMentorData((prevState) => ({
-          ...prevState,
-          [name]: "",
-        }));
-        setErrors((prevErrors) => ({
-          ...prevErrors,
-          [name]: "",
-        }));
-      }
-      setTeachField((prevState) => ({
-        ...prevState,
-        [name]: !prevState[name],
-      }));
-      return null;
-    }
+    const { name, value: untrimmedValue } = event.target;
+    const value = untrimmedValue?.trim();
 
     let error = validateField(name, value);
     console.log("From Validator _error_:", error);
-    setErrors((prevErrors) => {
-      if (name === "user.password" && value === pw2) {
-        // todo to match if user.password
-        return {
-          ...prevErrors,
-          [name]: error,
-          confirm_password: "",
-        };
-      } else if (name === "user.password" && pw2 && value !== pw2) {
-        return {
-          ...prevErrors,
-          [name]: error,
-          confirm_password: "הסיסמאות לא תואמות",
-        };
-      } else {
-        return {
-          ...prevErrors,
-          [name]: error,
-        };
-      }
-    });
-    if (name === "group_teaching") {
-      setMentorData((prevState) => ({
-        ...prevState,
-        [name]: !prevState[name],
-      }));
-    }
+
+    if (name === "user.password" && pw2)
+      error = value === pw2 ? "" : "הסיסמאות לא תואמות";
+
+    setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
+
     if (name === "confirm_password") {
       setPw2(value);
     } else if (name.startsWith("user.")) {
-      setMentorData((prevData) => ({
-        ...prevData,
-        user: {
-          ...prevData.user,
-          [name.substring(5)]: value,
-        },
-      }));
-    } else if (name === "topics") {
-      const id = parseInt(event.target.id);
-      setMentorData((prev) => {
-        if (prev.topics.includes(id)) {
-          return {
-            ...prev,
-            [name]: prev.topics.filter((item) => item !== id),
-          };
-        } else {
-          return {
-            ...prev,
-            [name]: [...prev.topics, id],
-          };
-        }
-      });
+      setMentorData(prevData => ({ ...prevData, user: {...prevData.user, [name.slice(5)]: value} }));
     } else {
-      setMentorData((prevData) => ({
-        ...prevData,
-        [name]: value,
-      }));
+      const newValue = name === 'topics' ? [...mentorData.topics, parseInt(event.target.id)] : value;
+      setMentorData(prevData => ({ ...prevData, [name]: newValue }));
+    }
+
+    if (teachField.hasOwnProperty(name)) {
+      setTeachField(prevTeachField => ({ ...prevTeachField, [name]: !prevTeachField[name] }));
+      if (!teachField[name]) setMentorData(prevData => ({ ...prevData, [name]: "" }));
     }
   };
 
