@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START
+from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, EXPERIENCE_CHOICES
 from multiselectfield import MultiSelectField
 
 
@@ -64,11 +64,10 @@ class Mentor(models.Model):
     self_description_title = models.CharField(null=False, max_length=256)
     self_description_content = models.CharField(null=False, max_length=700)
     # TODO: The following three fields are decimal - so that the Mentor can input a `rate` for that teaching methods
-    teach_at_mentor = models.DecimalField(max_digits=4, decimal_places=2, default=0)
-    teach_at_student = models.DecimalField(max_digits=4, decimal_places=2, default=0)
-    teach_online = models.DecimalField(max_digits=4, decimal_places=2, default=0)
-    experience_with = MultiSelectField(choices=[('adhd', 'קשב וריכוז'), ('teaching', 'הוראה')],
-                                       max_length=30, null=True, blank=True)
+    teach_at_mentor = models.IntegerField(default=0)
+    teach_at_student = models.IntegerField(default=0)
+    teach_online = models.IntegerField(default=0)
+    experience_with = MultiSelectField(choices=EXPERIENCE_CHOICES, max_length=30, null=True, blank=True)
     group_teaching = models.BooleanField(null=False, default=False)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='mentor', null=False)
     students = models.ManyToManyField('Student', related_name='mentors', blank=True)

@@ -3,6 +3,11 @@ AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
 EDUCATION_START = [(str(year), str(year)) for year in range(1983, 2024)]
 EDUCATION_COMPLETE = [(str(year), str(year)) for year in range(1984, 2031)]
 
+EXPERIENCE_CHOICES = [
+    ('adhd', 'קשב וריכוז'),
+    ('teaching', 'הוראה')
+]
+
 CITIES_CHOICES = [("Jerusalem", "ירושלים"),
           ("Tel Aviv-Yafo", "תל אביב-יפו"),
           ("Haifa", "חיפה"),

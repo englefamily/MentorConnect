@@ -9,15 +9,16 @@ export async function fetch_api(to, method, data) {
     }
   } else if (to === "mentor") {
     console.log(data)
+    const mentor_data = {...data}
     if (method === "POST") {
-      data.experience_with = data.experience_with.map((item) => {
+      mentor_data.experience_with = mentor_data.experience_with.map((item) => {
         return item.value;
       });
-      data.study_cities = data.study_cities.map((item) => {
+      mentor_data.study_cities = mentor_data.study_cities.map((item) => {
         return item.value;
       });
-      console.log(data)
-      const response = await axios.post(HOST_URL + "api/mentor/", data);
+      console.log(mentor_data)
+      const response = await axios.post(HOST_URL + "api/mentor/", mentor_data);
       return response;
     }
   } else if (to === "topic") {

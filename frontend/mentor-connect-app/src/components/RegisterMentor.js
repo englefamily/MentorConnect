@@ -37,9 +37,9 @@ const RegisterMentor = () => {
     city_residence: "",
     self_description_title: "",
     self_description_content: "",
-    teach_at_mentor: "",
-    teach_at_student: "",
-    teach_online: "",
+    teach_at_mentor: "0",
+    teach_at_student: "0",
+    teach_online: "0",
     study_cities: [],
     experience_with: [],
     group_teaching: false,
@@ -77,8 +77,7 @@ const RegisterMentor = () => {
 
     if (
       name === "experience_with" ||
-      name === "group_teaching" ||
-      name === "topics"
+      name === "group_teaching"
     ) {
       return error;
     }
@@ -267,7 +266,7 @@ const RegisterMentor = () => {
           if (
             error?.phone_num != undefined &&
             error?.phone_num[0] ===
-              "student with this phone num already exists."
+              "mentor with this phone num already exists."
           ) {
             phone_num_error = "מספר הפאלפון כבר קיים במערכת";
           }

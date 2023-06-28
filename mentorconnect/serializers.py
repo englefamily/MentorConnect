@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User, Student, Mentor, Feedback, Topic
-from .helphers import CITIES_CHOICES
+from .helphers import CITIES_CHOICES, EXPERIENCE_CHOICES
 from django.contrib.auth.hashers import make_password
 
 
@@ -46,6 +46,7 @@ class StudentSerializer(serializers.ModelSerializer):
 class MentorSerializer(serializers.ModelSerializer):
     user = UserSerializer(partial=True)  # Embed the UserSerializer inside the StudentSerializer
     study_cities = serializers.MultipleChoiceField(choices=CITIES_CHOICES)
+    experience_with = serializers.MultipleChoiceField(choices=EXPERIENCE_CHOICES)
     class Meta:
         model = Mentor
         fields = '__all__'
