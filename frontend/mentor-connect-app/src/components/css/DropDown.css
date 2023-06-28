@@ -1,0 +1,39 @@
+.drop-down {
+    background-color: white;
+    border-radius: 5px;
+    border: none;
+    text-align: right;
+    direction: rtl;
+    
+}
+
+.search-input {
+    min-width: 30vw;
+}
+
+.search-res {
+    list-style: none;
+    border: 2px black solid;
+    background-color: whitesmoke;
+    max-height: 50vh;
+    width: 190px;
+    overflow-y: auto;
+    direction: rtl;
+    min-width: 30vw;
+    position: absolute;
+    z-index: 1;
+}
+
+.main-list {
+    padding-right: 3px;
+}
+
+.sub-list {
+    list-style: none;
+    margin-left: 1rem;
+    margin-bottom: 0;
+}
+
+.search-res li {
+    cursor: pointer;
+}
