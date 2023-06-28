@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
-import { fetch_api } from "../helpers/api_request.js";
+import { fetch_api, transformData } from "../helpers/functions.js";
 import {
   years,
   EDUCATION_LEVEL,
@@ -8,6 +8,7 @@ import {
   EXPERIENCE_WITH,
 } from "../helpers/avariables.js";
 import Select from "react-select";
+import DropDown from "./Test.js";
 
 const RegisterMentor = () => {
   const [mentorCreated, setMentorCreated] = useState(false);
@@ -17,6 +18,7 @@ const RegisterMentor = () => {
     teach_online: true,
   });
   const [pw2, setPw2] = useState("");
+  const [topics, setTopics] = useState([]);
   const [errors, setErrors] = useState({});
   const [mentorData, setMentorData] = useState({
     user: {
@@ -44,24 +46,55 @@ const RegisterMentor = () => {
     topics: [],
   });
 
+  const objects = {
+    Math: [
+      { name: "Algebra", id: 1 },
+      { name: "Calculus", id: 2 },
+      { name: "Geometry", id: 3 },
+    ],
+    English: [
+      { name: "Poetry", id: 4 },
+      { name: "Grammar", id: 5 },
+      { name: "Literature", id: 6 },
+    ],
+  };
+
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
   const priceRegex = /^([4-9][0-9]|[1-3][0-9]{2}|400)$/;
 
   useEffect(() => {
-    console.log(mentorData.study_cities);
-  }, [mentorData.study_cities]);
+    console.log(mentorData);
+  }, [mentorData]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch_api("topic", "GET");
+        const topics = response.data.topic;
+        console.log(topics);
+        setTopics(transformData(topics));
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const validateField = (name, value) => {
     console.log("From Validator _name_:", name);
     console.log("From Validator _value_:", value);
     let error = "";
 
-    if (name === "experience_with" || name === "group_teaching") {
+    if (
+      name === "experience_with" ||
+      name === "group_teaching" ||
+      name === "topics"
+    ) {
       return error;
     }
-    console.log(error);
     // Validate required fields
     if (name === "phone_num" && !phoneNumberRegex.test(value)) {
       error = "מספר הפאלפון חייב להיות בעל 10 ספרות";
@@ -105,7 +138,6 @@ const RegisterMentor = () => {
     if (name === "confirm_password" && value !== mentorData.user.password) {
       error = "הסיסמאות לא תואמות";
     }
-    console.log(error);
     return error;
   };
 
@@ -173,6 +205,21 @@ const RegisterMentor = () => {
           [name.substring(5)]: value,
         },
       }));
+    } else if (name === "topics") {
+      const id = parseInt(event.target.id);
+      setMentorData((prev) => {
+        if (prev.topics.includes(id)) {
+          return {
+            ...prev,
+            [name]: prev.topics.filter((item) => item !== id),
+          };
+        } else {
+          return {
+            ...prev,
+            [name]: [...prev.topics, id],
+          };
+        }
+      });
     } else {
       setMentorData((prevData) => ({
         ...prevData,
@@ -215,7 +262,6 @@ const RegisterMentor = () => {
     setErrors(updatedErrors);
 
     if (Object.keys(updatedErrors).length === 0) {
-      console.log(mentorData);
       fetch_api("mentor", "POST", mentorData)
         .then((response) => {
           setMentorCreated(true);
@@ -486,20 +532,10 @@ const RegisterMentor = () => {
         <h4>פרטי השיעור</h4>
         <Form.Group controlId="educationCompletion">
           <Form.Label>נושאי לימוד</Form.Label>
-          <Select
-            // defaultValue={[colourOptions[2], colourOptions[3]]}
-            isMulti
-            name="topics"
+          <DropDown
+            objects={topics}
             value={mentorData.topics}
-            options={CITIES_CHOICES}
-            onChange={(res) => {
-              handleChange({ target: { value: res, name: "topics" } });
-            }}
-            onBlur={(res) => {
-              handleChange({
-                target: { value: mentorData.topics, name: "topics" },
-              });
-            }}
+            onChange={handleChange}
           />
           {errors.topics && (
             <Form.Text className="text-danger">{errors.topics}</Form.Text>
@@ -514,7 +550,6 @@ const RegisterMentor = () => {
             value={mentorData.study_cities}
             options={CITIES_CHOICES}
             onChange={(res) => {
-              console.log(res);
               handleChange({ target: { value: res, name: "study_cities" } });
             }}
             onBlur={(res) => {
@@ -611,7 +646,6 @@ const RegisterMentor = () => {
             value={mentorData.experience_with}
             options={EXPERIENCE_WITH}
             onChange={(res) => {
-              console.log(res);
               handleChange({ target: { value: res, name: "experience_with" } });
             }}
             onBlur={(res) => {
@@ -638,6 +672,7 @@ const RegisterMentor = () => {
             name="self_description_title"
             value={mentorData.self_description_title}
             onChange={handleChange}
+            onBlur={handleChange}
           />
           {errors.self_description_title && (
             <Form.Text className="text-danger">
@@ -654,8 +689,9 @@ const RegisterMentor = () => {
             name="self_description_content"
             value={mentorData.self_description_content}
             onChange={handleChange}
+            onBlur={handleChange}
           />
-          {errors.selfd_escription_content && (
+          {errors.self_description_content && (
             <Form.Text className="text-danger">
               {errors.self_description_content}
             </Form.Text>

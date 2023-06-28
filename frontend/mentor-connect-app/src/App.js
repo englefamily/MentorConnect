@@ -11,7 +11,6 @@ function App() {
   return (<>
     <BaseNavbar />
     <SiteRoutes />
-    <CategorySubcategoryDropdown/>
 
   </>);
 }
