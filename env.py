@@ -5,6 +5,8 @@ django.setup()
 
 from mentorconnect.models import User, Topic, Mentor, Student, Feedback
 
+print(User.objects.all()[1].mentor)
+
 # u = User.objects.all()[1]
 # u.set_password('123')
 # u.email = 'test2@gmail.com'
