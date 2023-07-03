@@ -60,7 +60,7 @@ class Mentor(models.Model):
     year_of_birth = models.CharField(choices=AGE_CHOICES, null=False, max_length=4)
     # TODO: Chananel - does Limud Naim etc have the full address of Mentors/ students?
     city_residence = models.CharField(choices=CITIES_CHOICES, max_length=128)
-    study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128)
+    study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128, null=True, blank=True)
     self_description_title = models.CharField(null=False, max_length=256)
     self_description_content = models.CharField(null=False, max_length=700)
     # TODO: The following three fields are decimal - so that the Mentor can input a `rate` for that teaching methods

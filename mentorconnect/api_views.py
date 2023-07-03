@@ -10,36 +10,43 @@ from rest_framework import status
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+# from django.core.exceptions import
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
-def register(request):
-    if request.method == "POST":
-        form = RegistrationForm(request.POST)
-        if form.is_valid():
-            form.save()
-        context = {'form': form}
-        return render(request, 'register.html', context)
-    else:
-        form = RegistrationForm()
-        context = {'form': form}
-        return render(request, 'register.html', context)
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        userType = []
+        try:
+            user.mentor
+            userType += ['mentor']
+        except Exception as error:
+            print(error)
+
+        try:
+            user.student
+            userType += ['student']
+        except Exception as error:
+            print(error)
+
+        print(userType)
+        token['email'] = user.email
+        if 'mentor' in userType:
+            token['first_name'] = user.mentor.first_name
+            token['last_name'] = user.mentor.last_name
+        elif 'student' in userType:
+            token['first_name'] = user.student.first_name
+            token['last_name'] = user.student.last_name
+        token['type'] = userType
 
 
-def login(request):
-    if request.method == "POST":
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            form.save()
-        context = {'form': form}
-        return render(request, 'login.html', context)
-    else:
-        form = LoginForm()
-        context = {'form': form}
-        return render(request, 'login.html', context)
+        return token
 
-
-def reset_password_request(request):
-    pass
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -83,13 +90,6 @@ def mentor(request):
                             'mentors': mentors_json.data  # convert to JSON compatible format
                         }
                     )
-                    # return Response(
-                    #     status=status.HTTP_400_BAD_REQUEST,
-                    #     data={
-                    #         'status': 'fail',
-                    #         'message': f'token not found'
-                    #     }
-                    # )
                 try:
                     mentor = Token.objects.get(key=user_token).mentor
                 except Exception as error:
@@ -150,7 +150,6 @@ def mentor(request):
                 )
 
     except Exception as ex:
-        # print(ex)
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={
@@ -192,80 +191,80 @@ def student(request):
                             'error': new_student.errors
                         }
                     )
-            # case 'GET':
-            #     user_token = request.query_params.get("token")
-            #     if not user_token:
-            #         students = Student.objects.all()
-            #         students_json = StudentSerializer(students, many=True)
-            #         return Response(
-            #             status=status.HTTP_200_OK,
-            #             data={
-            #                 'status': 'success',
-            #                 'message': 'retrieved all students',
-            #                 'students': students_json.data  # convert to JSON compatible format
-            #             }
-            #         )
-            #     try:
-            #         student = Token.objects.get(key=user_token).student
-            #     except Exception as error: #todo fix Exception
-            #         if str(error) == 'Token matching query does not exist.':
-            #             return Response(
-            #                 status=status.HTTP_400_BAD_REQUEST,
-            #                 data={
-            #                     'status': 'fail',
-            #                     'message': f'token not exist'
-            #                 }
-            #             )
-            #
-            #     student_json = StudentSerializer(student)
-            #     return Response(
-            #         status=status.HTTP_200_OK,
-            #         data={
-            #             'status': 'success',
-            #             'message': 'student found',
-            #             'student': student_json.data # convert to JSON compatible format
-            #         }
-            #     )
-
             case 'GET':
                 user_token = request.query_params.get("token")
-            #  TODO: Going to handle the filtering in ReactJS...
-                # sub_topic = request.query_params.get("sub_topic")
-                # city = request.query_params.get("city")
-                # hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
-                # # a field to the mentor model in order to be able to filter by it
-                # time = request.query_params.get("time") # this would require us to add such a field to the mentor
-                # # model in order to be able to filter - would likely have to be connected to a scheduling/
-                # # booking routine. Or for mentors to input times for each sub_topic the teach
-                # topic = request.query_params.get("topic")
-                # feedback = request.query_params.get("feedback")
-
                 if not user_token:
                     students = Student.objects.all()
-
-                #  TODO: Going to handle the filtering in ReactJS...
-                    # if sub_topic:
-                    #     students = students.filter(sub_topic__name=sub_topic)
-                    # if city:
-                    #     students = students.filter(city=city)
-                    # if hourly_rate:
-                    #     students = students.filter(hourly_rate__lte=hourly_rate)
-                    # if time:
-                    #     students = students.filter(available_time=time)
-                    # if topic:
-                    #     students = students.filter(sub_topic__topic__name=topic)
-                    # if feedback:
-                    #     students = students.filter(feedback__rating__gte=feedback)
-
                     students_json = StudentSerializer(students, many=True)
                     return Response(
                         status=status.HTTP_200_OK,
                         data={
                             'status': 'success',
                             'message': 'retrieved all students',
-                            'students': students_json.data
+                            'students': students_json.data  # convert to JSON compatible format
                         }
                     )
+                try:
+                    student = Token.objects.get(key=user_token).student
+                except Exception as error: #todo fix Exception
+                    if str(error) == 'Token matching query does not exist.':
+                        return Response(
+                            status=status.HTTP_400_BAD_REQUEST,
+                            data={
+                                'status': 'fail',
+                                'message': f'token not exist'
+                            }
+                        )
+
+                student_json = StudentSerializer(student)
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'student found',
+                        'student': student_json.data # convert to JSON compatible format
+                    }
+                )
+
+            # case 'GET':
+            #     user_token = request.query_params.get("token")
+            # #  TODO: Going to handle the filtering in ReactJS...
+            #     # sub_topic = request.query_params.get("sub_topic")
+            #     # city = request.query_params.get("city")
+            #     # hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
+            #     # # a field to the mentor model in order to be able to filter by it
+            #     # time = request.query_params.get("time") # this would require us to add such a field to the mentor
+            #     # # model in order to be able to filter - would likely have to be connected to a scheduling/
+            #     # # booking routine. Or for mentors to input times for each sub_topic the teach
+            #     # topic = request.query_params.get("topic")
+            #     # feedback = request.query_params.get("feedback")
+            #
+            #     if not user_token:
+            #         students = Student.objects.all()
+            #
+            #     #  TODO: Going to handle the filtering in ReactJS...
+            #         # if sub_topic:
+            #         #     students = students.filter(sub_topic__name=sub_topic)
+            #         # if city:
+            #         #     students = students.filter(city=city)
+            #         # if hourly_rate:
+            #         #     students = students.filter(hourly_rate__lte=hourly_rate)
+            #         # if time:
+            #         #     students = students.filter(available_time=time)
+            #         # if topic:
+            #         #     students = students.filter(sub_topic__topic__name=topic)
+            #         # if feedback:
+            #         #     students = students.filter(feedback__rating__gte=feedback)
+            #
+            #         students_json = StudentSerializer(students, many=True)
+            #         return Response(
+            #             status=status.HTTP_200_OK,
+            #             data={
+            #                 'status': 'success',
+            #                 'message': 'retrieved all students',
+            #                 'students': students_json.data
+            #             }
+            #         )
 
             case 'PUT':
                 user_token = request.query_params.get("token")
@@ -349,7 +348,6 @@ def topic(request):
                 else:
                     topics = Topic.objects.all()
                     topic_json = TopicSerializer(topics, many=True)
-                print(topic_json.data)
                 return Response(
                     status=status.HTTP_200_OK,
                     data={
@@ -369,90 +367,6 @@ def topic(request):
                         return Response("Topic updated")
                     else:
                         return Response({"Error": ts.errors}, status=500)
-                except Exception as e:
-                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            case 'DELETE':
-                try:
-                    topic_id = request.query_params.get("id")
-                    topic_instance = Topic.objects.get(pk=topic_id)
-                    topic_instance.delete()
-                    return Response("Topic Deleted")
-                except Exception as e:
-                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-            case _:
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data={
-                        'status': 'fail',
-                        'message': f'the method {request.method} is not allowed for this url'
-                    }
-                )
-
-    except Exception as ex:
-        print(ex)
-        return Response(
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            data={
-                'status': 'fail',
-                'message': 'a server error was thrown',
-                'error': str(ex)
-            }
-        )
-
-@api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def topic(request):
-    try:
-        match request.method:
-            case 'POST':
-                new_topic = TopicSerializer(data=request.data)
-                if new_topic.is_valid():
-                    new_topic.save()
-                    return Response(
-                        status=status.HTTP_201_CREATED,
-                        data={
-                            "status": 'success',
-                            'message': 'Topic has been created',
-                            'topic': new_topic.data
-                        }
-                    )
-                else:
-                    return Response(
-                        status=status.HTTP_400_BAD_REQUEST,
-                        data={
-                            'status': 'fail',
-                            'message': 'the data provided is incorrect',
-                            'error': new_topic.errors
-                        }
-                    )
-            case 'GET':
-                topic_id = request.query_params.get("id")
-                if topic_id:
-                    topic = Topic.objects.get(pk=topic_id)
-                    topic_json = TopicSerializer(topic)
-                else:
-                    topics = Topic.objects.all()
-                    topic_json = TopicSerializer(topics, many=True)
-                return Response(
-                    status=status.HTTP_200_OK,
-                    data={
-                        'status': 'success',
-                        'message': 'retrieved all topics',
-                        'topic': topic_json.data
-                    }
-                )
-
-            case 'PUT':
-                try:
-                    topic_id = request.query_params.get("id")
-                    topic_instance = Topic.objects.get(pk=topic_id)
-                    sts = TopicSerializer(instance=topic_instance, data=request.data, partial=True)
-                    if sts.is_valid():
-                        sts.save()
-                        return Response("Topic updated")
-                    else:
-                        return Response({"Error": sts.errors}, status=500)
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -576,9 +490,4 @@ def feedback(request):
                 'error': str(ex)
             }
         )
-
-
-
-
-
 

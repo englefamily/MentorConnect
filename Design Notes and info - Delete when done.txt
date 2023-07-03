@@ -9,3 +9,6 @@ You're welcome! If you're working with it, I think it's good to break up the col
 like this for example: #F0EEC8 Good luck!
 
 
+**** add option to add mentor and student on the same email and phone number ****
+
+**** add in cities list the area of the city ****
