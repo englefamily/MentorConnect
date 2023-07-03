@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { years } from "../helpers/avariables.js";
 import { fetch_api } from "../helpers/functions.js";
+import context from "../Context.js";
 
 function RegisterStudent() {
+  const {loginUser} = useContext(context)
   const [studentCreate, setStudentCreate] = useState(false);
   const [pw2, setPw2] = useState("");
   const [errors, setErrors] = useState({});
@@ -19,6 +21,7 @@ function RegisterStudent() {
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
+  const textRegex = /^[\u0591-\u05F4a-zA-Z]+$/u;
 
   const validateField = (name, value) => {
     let error = "";
@@ -37,9 +40,14 @@ function RegisterStudent() {
             - אינה מכילה רווחים`;
     }
 
+    if (name.endsWith('name') && !textRegex.test(value)) {
+      error = 'שדה זה יכול להכיל רק אותיות'
+    }
+
     if (value.trim() === "") {
       error = "שדה חובה";
     }
+
 
     // Validate confirm password
     if (name === "confirm_password" && value !== studentData.user.password) {
@@ -122,11 +130,17 @@ function RegisterStudent() {
 
     if (Object.keys(updatedErrors).length === 0) {
       fetch_api("student", "POST", studentData)
-        .then((response) => {
-          setStudentCreate(true);
-          console.log(response);
+        .then( (response) => {
+            console.log('=============')
+            setStudentCreate(true);
+            console.log(studentData.user.email, studentData.user.password)
+            loginUser(studentData.user.email, studentData.user.password)
+            // .then((q)=>{})          
+            // .catch((q)=>{})          
         })
+        
         .catch((response) => {
+          console.log('-----------')
           let phone_num_error = "";
           let email_error = "";
           const error = response.response.data.error;
@@ -179,8 +193,6 @@ function RegisterStudent() {
   const div_display = {
     display: "flex",
     flexDirection: "column",
-    backgroundImage:
-      "url(https://img.freepik.com/premium-photo/group-happy-young-students-university_85574-4531.jpg",
   };
 
   return (

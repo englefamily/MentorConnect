@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, Button } from "react-bootstrap";
 import { fetch_api, transformData } from "../helpers/functions.js";
 import {
@@ -8,9 +8,12 @@ import {
   EXPERIENCE_WITH,
 } from "../helpers/avariables.js";
 import Select from "react-select";
-import DropDown from "./Test.js";
+import DropDown from "./DropDown.js";
+import { useNavigate } from "react-router-dom";
+import context from "../Context.js";
 
 const RegisterMentor = () => {
+  const {loginUser} = useContext(context)
   const [mentorCreated, setMentorCreated] = useState(false);
   const [teachField, setTeachField] = useState({
     teach_at_mentor: true,
@@ -50,16 +53,20 @@ const RegisterMentor = () => {
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
   const priceRegex = /^([4-9][0-9]|[1-3][0-9]{2}|400)$/;
+  const textRegex = /^[\u0591-\u05F4a-zA-Z]+$/u;
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     console.log(mentorData);
-  }, [mentorData]);
+    console.log(topics);
+  }, [mentorData, topics]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await fetch_api("topic", "GET");
-        const topics = response.data.topic;
+        const topics = response.data.topics;
         console.log(topics);
         setTopics(transformData(topics));
       } catch (error) {
@@ -75,10 +82,7 @@ const RegisterMentor = () => {
     console.log("From Validator _value_:", value);
     let error = "";
 
-    if (
-      name === "experience_with" ||
-      name === "group_teaching"
-    ) {
+    if (name === "experience_with" || name === "group_teaching") {
       return error;
     }
     // Validate required fields
@@ -94,6 +98,7 @@ const RegisterMentor = () => {
       if (!priceRegex.test(value) && teachField[name] !== true) {
         error = "טווח המחירים חייב להיות בין 40 ל 400";
       }
+
       if (value === "" && teachField[name] !== true) {
         error = "שדה חובה";
       }
@@ -114,6 +119,10 @@ const RegisterMentor = () => {
         error = "שדה חובה";
       }
       return error;
+    }
+
+    if (name.endsWith("name") && !textRegex.test(value)) {
+      error = "שדה זה יכול להכיל רק אותיות";
     }
 
     if (value === undefined || value.trim() === "") {
@@ -251,6 +260,8 @@ const RegisterMentor = () => {
       fetch_api("mentor", "POST", mentorData)
         .then((response) => {
           setMentorCreated(true);
+          loginUser(mentorData.user.email, mentorData.user.password)
+          navigate("/");
         })
         .catch((response) => {
           let phone_num_error = "";
@@ -265,8 +276,7 @@ const RegisterMentor = () => {
           }
           if (
             error?.phone_num != undefined &&
-            error?.phone_num[0] ===
-              "mentor with this phone num already exists."
+            error?.phone_num[0] === "mentor with this phone num already exists."
           ) {
             phone_num_error = "מספר הפאלפון כבר קיים במערכת";
           }
@@ -527,30 +537,6 @@ const RegisterMentor = () => {
             <Form.Text className="text-danger">{errors.topics}</Form.Text>
           )}
         </Form.Group>
-        {/* Study Cities */}
-        <Form.Group controlId="studyCities">
-          <Form.Label>ערי לימוד</Form.Label>
-          <Select
-            isMulti
-            name="study_cities"
-            value={mentorData.study_cities}
-            options={CITIES_CHOICES}
-            onChange={(res) => {
-              handleChange({ target: { value: res, name: "study_cities" } });
-            }}
-            onBlur={(res) => {
-              handleChange({
-                target: {
-                  value: mentorData.study_cities,
-                  name: "study_cities",
-                },
-              });
-            }}
-          />
-          {errors.study_cities && (
-            <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
-          )}
-        </Form.Group>
         <Form.Group>
           <Form.Label>שיעורי אונליין</Form.Label>
           <br />
@@ -605,15 +591,40 @@ const RegisterMentor = () => {
             onChange={handleChange}
             value={mentorData.teach_at_student}
           />
+          {errors.teach_at_student && (
+            <Form.Text className="text-danger">
+              {errors.teach_at_student}
+            </Form.Text>
+          )}
         </Form.Group>
-        {errors.teach_at_student && (
-          <Form.Text className="text-danger">
-            {errors.teach_at_student}
-          </Form.Text>
-        )}
         {errors.teach_at && (
           <Form.Text className="text-danger">{errors.teach_at}</Form.Text>
         )}
+        {/* Study Cities */}
+        {/* todo add is Disable */}
+        <Form.Group controlId="studyCities">
+          <Form.Label>ערי לימוד</Form.Label>
+          <Select
+            isMulti
+            name="study_cities"
+            value={mentorData.study_cities}
+            options={CITIES_CHOICES}
+            onChange={(res) => {
+              handleChange({ target: { value: res, name: "study_cities" } });
+            }}
+            onBlur={(res) => {
+              handleChange({
+                target: {
+                  value: mentorData.study_cities,
+                  name: "study_cities",
+                },
+              });
+            }}
+          />
+          {errors.study_cities && (
+            <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
+          )}
+        </Form.Group>
         <br />
         <Form.Group>
           <input

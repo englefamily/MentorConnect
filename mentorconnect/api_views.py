@@ -10,17 +10,38 @@ from rest_framework import status
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
+# from django.core.exceptions import
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
+        userType = []
+        try:
+            user.mentor
+            userType += ['mentor']
+        except Exception as error:
+            print(error)
 
-        # Add custom claims
-        token['username'] = user.username
-        # ...
+        try:
+            user.student
+            userType += ['student']
+        except Exception as error:
+            print(error)
+
+        print(userType)
+        token['email'] = user.email
+        if 'mentor' in userType:
+            token['first_name'] = user.mentor.first_name
+            token['last_name'] = user.mentor.last_name
+        elif 'student' in userType:
+            token['first_name'] = user.student.first_name
+            token['last_name'] = user.student.last_name
+        token['type'] = userType
+
 
         return token
 
@@ -327,7 +348,6 @@ def topic(request):
                 else:
                     topics = Topic.objects.all()
                     topic_json = TopicSerializer(topics, many=True)
-                print(topic_json.data)
                 return Response(
                     status=status.HTTP_200_OK,
                     data={
@@ -470,9 +490,4 @@ def feedback(request):
                 'error': str(ex)
             }
         )
-
-
-
-
-
 
