@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/mentor-connect-app.iml" filepath="$PROJECT_DIR$/.idea/mentor-connect-app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/mentorconnect.iml" filepath="$PROJECT_DIR$/.idea/mentorconnect.iml" />
     </modules>
   </component>
 </project>

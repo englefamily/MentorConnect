@@ -18,11 +18,11 @@ function BaseNavbar() {
               <img src={logo} alt="Logo" className="nav-logo" />
             </a>
           </li>
-          <li className="nav-item" style={{ cursor: "pointer" }}>
+          {/* <li className="nav-item" style={{ cursor: "pointer" }}>
             <a onClick={() => setShowLoginModal(true)} className="nav-link">
               התחברות
             </a>
-          </li>
+          </li> */}
           <li className="nav-item">
             <a href="/registerMentor" className="nav-link">
               הרשמה למורה
@@ -39,7 +39,7 @@ function BaseNavbar() {
             </a>
           </li>
           <li className="nav-dropdown">
-            <button class="dropbtn">{userData?.first_name ? userData.first_name : 'השם שלי'}</button>
+            <button class="dropbtn" onClick={() => setShowLoginModal(true)}>{userData?.first_name ? userData.first_name : 'התחברות'}</button>
             <div class="dropdown-content">
               <a href="#">החשבון שלי</a>
               <a onClick={logoutUser}>התנתק</a>
