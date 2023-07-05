@@ -201,17 +201,18 @@ const RegisterMentor = () => {
         },
       }));
     } else if (name === "topics") {
-      const id = parseInt(event.target.id);
+      const topic_id = parseInt(value);
+      console.log(topic_id)
       setMentorData((prev) => {
-        if (prev.topics.includes(id)) {
+        if (prev.topics.includes(topic_id)) {
           return {
             ...prev,
-            [name]: prev.topics.filter((item) => item !== id),
+            [name]: prev.topics.filter((item) => item !== topic_id),
           };
         } else {
           return {
             ...prev,
-            [name]: [...prev.topics, id],
+            [name]: [...prev.topics, topic_id],
           };
         }
       });
@@ -529,8 +530,11 @@ const RegisterMentor = () => {
         <Form.Group controlId="educationCompletion">
           <Form.Label>נושאי לימוד</Form.Label>
           <DropDown
+          subSubjects={true}
+          name={'topics'}
             objects={topics}
             value={mentorData.topics}
+            placeholder={'חפש נושא'}
             onChange={handleChange}
           />
           {errors.topics && (

@@ -13,6 +13,7 @@ from django.core.cache import cache
 # from django.core.exceptions import
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.db.models import Count, Q
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -79,38 +80,62 @@ def mentor(request):
                     )
             case 'GET':
                 user_token = request.query_params.get("token")
-                if not user_token:
-                    mentors = Mentor.objects.all()
-                    mentors_json = MentorSerializer(mentors, many=True)
-                    return Response(
-                        status=status.HTTP_200_OK,
-                        data={
-                            'status': 'success',
-                            'message': 'retrieved all mentors',
-                            'mentors': mentors_json.data  # convert to JSON compatible format
-                        }
-                    )
-                try:
-                    mentor = Token.objects.get(key=user_token).mentor
-                except Exception as error:
-                    if str(error) == 'Token matching query does not exist.':
+                topics_param = request.query_params.get("topics")
+                cities_param = request.query_params.get("cities")
+
+                mentors = Mentor.objects
+
+                if request.query_params:
+
+                    if cities_param:
+                        cities_lst = cities_param.split(',')
+                        conditions = Q()
+                        for city in cities_lst:
+                            conditions |= Q(study_cities__contains=city)
+                        mentors = mentors.filter(conditions) \
+                            .annotate(num_matches=Count('study_cities')) \
+                            .order_by('-num_matches')
+
+                    if topics_param:
+                        topics_set = set(topics_param.split(','))
+                        mentors = mentors.filter(topics__id__in=topics_set) \
+                            .annotate(match_count=Count('topics')) \
+                            .order_by('-match_count')
+
+                    if user_token:
+                        try:
+                            mentor = Token.objects.get(key=user_token).mentor
+                        except Exception as error:
+                            if str(error) == 'Token matching query does not exist.':
+                                return Response(
+                                    status=status.HTTP_400_BAD_REQUEST,
+                                    data={
+                                        'status': 'fail',
+                                        'message': f'token not exist'
+                                    }
+                                )
+                        mentor_json = MentorSerializer(mentor)
                         return Response(
-                            status=status.HTTP_400_BAD_REQUEST,
+                            status=status.HTTP_200_OK,
                             data={
-                                'status': 'fail',
-                                'message': f'token not exist'
+                                'status': 'success',
+                                'message': 'user found',
+                                'mentor': mentor_json.data  # convert to JSON compatible format
                             }
                         )
+                else:
+                    mentors = mentors.all()
 
-                mentor_json = MentorSerializer(mentor)
+                mentors_json = MentorSerializer(mentors, many=True)
                 return Response(
                     status=status.HTTP_200_OK,
                     data={
                         'status': 'success',
-                        'message': 'user found',
-                        'mentor': mentor_json.data # convert to JSON compatible format
+                        'message': 'retrieved all mentors',
+                        'mentors': mentors_json.data  # convert to JSON compatible format
                     }
                 )
+
 
             case 'PUT':
                     user_token = request.query_params.get("token")

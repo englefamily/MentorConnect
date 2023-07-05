@@ -49,8 +49,9 @@ export async function fetch_api(to, method, data) {
     }
   } else if (to === "mentor") {
     console.log(data);
-    const mentor_data = { ...data };
+    
     if (method === "POST") {
+      const mentor_data = { ...data };
       mentor_data.experience_with = mentor_data.experience_with.map((item) => {
         return item.value;
       });
@@ -59,6 +60,9 @@ export async function fetch_api(to, method, data) {
       });
       console.log(mentor_data);
       const response = await api.post(HOST_URL + "api/mentor/", mentor_data);
+      return response;
+    } else if (method === 'GET') {
+      const response = await api.get(HOST_URL + `api/mentor/?${data}`);
       return response;
     }
   } else if (to === "topic") {
@@ -93,7 +97,7 @@ export const transformData = (data) => {
       transformedData[topic_name] = [];
     }
 
-    transformedData[topic_name].push({ name: topic_field, id: id });
+    transformedData[topic_name].push({ name: topic_field, value: id });
   });
 
   return transformedData;

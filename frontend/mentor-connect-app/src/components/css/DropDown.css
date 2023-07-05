@@ -37,3 +37,7 @@
 .search-res li {
     cursor: pointer;
 }
+
+.labelCheckbox {
+    margin-right: 2px;
+}
