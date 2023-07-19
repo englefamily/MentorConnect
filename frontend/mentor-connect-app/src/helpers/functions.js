@@ -3,7 +3,6 @@ import { HOST_URL } from "./avariables";
 import { useContext } from "react";
 import context from "../Context";
 
-
 const api = axios.create();
 
 // // Add a request interceptor
@@ -38,66 +37,72 @@ const api = axios.create();
 //   }
 // );
 
-
-
 export async function fetch_api(to, method, data) {
+  try {
+    if (to === "student") {
+      if (method === "POST") {
+        const response = await api.post(HOST_URL + "api/student/", data);
+        return response;
+      } else if (method === "GET") {
+        const response = await api.get(HOST_URL + `api/student/?${data}`);
+        return response;
+      } else if (method === "PUT") {
+        const response = await api.put(HOST_URL + `api/student/`, data);
+        return response;
+      }
+    } else if (to === "mentor") {
+      if (method === "POST") {
+        const mentor_data = { ...data };
+        const response = await api.post(HOST_URL + "api/mentor/", mentor_data);
+        return response;
+      } else if (method === "GET") {
+        const response = await api.get(HOST_URL + `api/mentor/?${data}`);
+        return response;
+      } else if (method === "PUT") {
+        const response = await api.put(HOST_URL + `api/mentor/`, data);
+        return response;
+      }
+    } else if (to === "topic") {
+      if (method === "GET") {
+        const response = await api.get(HOST_URL + "api/topic/");
+        return response;
+      }
+    } else if (to === "chat") {
+      if (method === 'GET') {
+        const response = await api.get(HOST_URL + `text-chat/api/chat/${data}`);
+        return response;
+      }
+    } else if (to === "token") {
+      if (method === "POST") {
+        const response = await api.post(HOST_URL + "api/token/", data);
+        return response;
+      }
+    } else if (to === "refresh-token") {
+      if (method === "POST") {
+        const response = await api.post(HOST_URL + "api/token/refresh/", data);
+        return response;
+      }
+    }
 
-  if (to === "student") {
-    if (method === "POST") {
-      const response = await api.post(HOST_URL + "api/student/", data);
-      return response;
-    }
-  } else if (to === "mentor") {
-    console.log(data);
-    
-    if (method === "POST") {
-      const mentor_data = { ...data };
-      mentor_data.experience_with = mentor_data.experience_with.map((item) => {
-        return item.value;
-      });
-      mentor_data.study_cities = mentor_data.study_cities.map((item) => {
-        return item.value;
-      });
-      console.log(mentor_data);
-      const response = await api.post(HOST_URL + "api/mentor/", mentor_data);
-      return response;
-    } else if (method === 'GET') {
-      const response = await api.get(HOST_URL + `api/mentor/?${data}`);
-      return response;
-    }
-  } else if (to === "topic") {
-    if (method === "GET") {
-      const response = await api.get(HOST_URL + "api/topic/");
-      console.log(response.data.topics);
-      return response;
-    }
-  } else if (to === "token") {
-    if (method === 'POST') {
-      const response = await api.post(HOST_URL + "api/token/", data)
-      return response
-    }
-  } else if (to === 'refresh-token') {
-    if (method === 'POST') {
-      const response = await api.post(HOST_URL + 'api/token/refresh/', data)
-      return response
-    }
+    // Handle the case when "to" or "method" doesn't match the expected values
+    throw new Error("Invalid parameters");
+  } catch (error) {
+    console.log("🚀 ~ file: functions.js:91 ~ fetch_api ~ error:", error);
+    return error;
   }
-
-  // Handle the case when "to" or "method" doesn't match the expected values
-  throw new Error("Invalid parameters");
 }
 
 export const transformData = (data) => {
   const transformedData = {};
 
   data.forEach((item) => {
-    const { topic_field, topic_name, id } = item;
+    const { field, name, id } = item;
 
-    if (!transformedData[topic_name]) {
-      transformedData[topic_name] = [];
+    if (!transformedData[name]) {
+      transformedData[name] = [];
     }
 
-    transformedData[topic_name].push({ name: topic_field, value: id });
+    transformedData[name].push({ name: field, value: id });
   });
 
   return transformedData;

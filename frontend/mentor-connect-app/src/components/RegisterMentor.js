@@ -12,42 +12,55 @@ import DropDown from "./DropDown.js";
 import { useNavigate } from "react-router-dom";
 import context from "../Context.js";
 
-const RegisterMentor = () => {
-  const {loginUser} = useContext(context)
+const RegisterMentor = (props) => {
+  console.log("🚀 ~ file: RegisterMentor.js:16 ~ RegisterMentor ~ props:", props)
+  const { loginUser, authTokens } = useContext(context);
   const [mentorCreated, setMentorCreated] = useState(false);
-  const [teachField, setTeachField] = useState({
-    teach_at_mentor: true,
-    teach_at_student: true,
-    teach_online: true,
-  });
+  const [teachField, setTeachField] = useState(
+    props.edit
+      ? {
+          teach_at_mentor: props.data.teach_at_mentor ? false : true,
+          teach_at_student: props.data.teach_at_student ? false : true,
+          teach_online: props.data.teach_online ? false : true,
+        }
+      : {
+          teach_at_mentor: true,
+          teach_at_student: true,
+          teach_online: true,
+        }
+  );
   const [pw2, setPw2] = useState("");
   const [topics, setTopics] = useState([]);
   const [errors, setErrors] = useState({});
-  const [mentorData, setMentorData] = useState({
-    user: {
-      email: "",
-      password: "",
-    },
-    // study_cities: [],
-    gender: "",
-    first_name: "",
-    last_name: "",
-    phone_num: "",
-    education_level: "",
-    education_start: "",
-    education_completion: "",
-    year_of_birth: "",
-    city_residence: "",
-    self_description_title: "",
-    self_description_content: "",
-    teach_at_mentor: "0",
-    teach_at_student: "0",
-    teach_online: "0",
-    study_cities: [],
-    experience_with: [],
-    group_teaching: false,
-    topics: [],
-  });
+  const [mentorData, setMentorData] = useState(
+    props.edit
+      ? props.data
+      : {
+          user: {
+            email: "",
+            password: "",
+          },
+          // study_cities: [],
+          gender: "",
+          first_name: "",
+          last_name: "",
+          phone_num: "",
+          education_level: "",
+          education_start: "",
+          education_completion: "",
+          year_of_birth: "",
+          city_residence: "",
+          self_description_title: "",
+          self_description_content: "",
+          teach_at_mentor: 0,
+          teach_at_student: 0,
+          teach_online: 0,
+          study_cities: [],
+          experience_with: [],
+          group_teaching: false,
+          topics: [],
+        }
+  );
 
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
@@ -58,8 +71,6 @@ const RegisterMentor = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    console.log(mentorData);
-    console.log(topics);
   }, [mentorData, topics]);
 
   useEffect(() => {
@@ -67,7 +78,6 @@ const RegisterMentor = () => {
       try {
         const response = await fetch_api("topic", "GET");
         const topics = response.data.topics;
-        console.log(topics);
         setTopics(transformData(topics));
       } catch (error) {
         console.error(error);
@@ -78,8 +88,6 @@ const RegisterMentor = () => {
   }, []);
 
   const validateField = (name, value) => {
-    console.log("From Validator _name_:", name);
-    console.log("From Validator _value_:", value);
     let error = "";
 
     if (name === "experience_with" || name === "group_teaching") {
@@ -125,7 +133,10 @@ const RegisterMentor = () => {
       error = "שדה זה יכול להכיל רק אותיות";
     }
 
-    if (value === undefined || value.trim() === "") {
+    if (
+      typeof value === "string" &&
+      (value === undefined || value.trim() === "")
+    ) {
       error = "שדה חובה";
     }
 
@@ -143,11 +154,11 @@ const RegisterMentor = () => {
       value = "";
     }
 
-    if (value === "on") {
+    if (name.startsWith("teach_") && value === "on") {
       if (teachField[name] === false) {
         setMentorData((prevState) => ({
           ...prevState,
-          [name]: "",
+          [name]: 0,
         }));
         setErrors((prevErrors) => ({
           ...prevErrors,
@@ -162,7 +173,6 @@ const RegisterMentor = () => {
     }
 
     let error = validateField(name, value);
-    console.log("From Validator _error_:", error);
     setErrors((prevErrors) => {
       if (name === "user.password" && value === pw2) {
         // todo to match if user.password
@@ -189,8 +199,7 @@ const RegisterMentor = () => {
         ...prevState,
         [name]: !prevState[name],
       }));
-    }
-    if (name === "confirm_password") {
+    } else if (name === "confirm_password") {
       setPw2(value);
     } else if (name.startsWith("user.")) {
       setMentorData((prevData) => ({
@@ -200,21 +209,42 @@ const RegisterMentor = () => {
           [name.substring(5)]: value,
         },
       }));
-    } else if (name === "topics") {
-      const topic_id = parseInt(value);
-      console.log(topic_id)
+    } else if (
+      name === "topics" ||
+      name === "study_cities" ||
+      name === "experience_with"
+    ) {
       setMentorData((prev) => {
-        if (prev.topics.includes(topic_id)) {
+        if (name === "topics") {
+          const topicId = parseInt(value);
+          const updatedTopics = prev.topics.includes(topicId)
+            ? prev.topics.filter((item) => item !== topicId)
+            : [...prev.topics, topicId];
+
           return {
             ...prev,
-            [name]: prev.topics.filter((item) => item !== topic_id),
+            [name]: updatedTopics,
           };
-        } else {
+        } else if (name === "study_cities") {
+          const updatedStudyCities = prev.study_cities.includes(value)
+            ? prev.study_cities.filter((city) => city !== value)
+            : [...prev.study_cities, value];
+
           return {
             ...prev,
-            [name]: [...prev.topics, topic_id],
+            [name]: updatedStudyCities,
+          };
+        } else if (name === "experience_with") {
+          const updatedExperienceWith = prev.experience_with.includes(value)
+            ? prev.experience_with.filter((experience) => experience !== value)
+            : [...prev.experience_with, value];
+
+          return {
+            ...prev,
+            [name]: updatedExperienceWith,
           };
         }
+        return prev;
       });
     } else {
       setMentorData((prevData) => ({
@@ -232,9 +262,11 @@ const RegisterMentor = () => {
     Object.entries(mentorData).forEach(([name, value]) => {
       if (name === "user") {
         Object.entries(value).forEach(([name, value]) => {
-          const error = validateField("user." + name, value);
-          if (error !== "") {
-            updatedErrors["user." + name] = error;
+          if (!props.edit || (props.edit && name !== "password")) {
+            const error = validateField("user." + name, value);
+            if (error !== "") {
+              updatedErrors["user." + name] = error;
+            }
           }
         });
       } else {
@@ -243,9 +275,11 @@ const RegisterMentor = () => {
           updatedErrors[name] = error;
         }
       }
-      const error = validateField("confirm_password", pw2);
-      if (error !== "") {
-        updatedErrors["confirm_password"] = error;
+      if (!props.edit) {
+        const error = validateField("confirm_password", pw2);
+        if (error !== "") {
+          updatedErrors["confirm_password"] = error;
+        }
       }
       if (
         teachField.teach_at_mentor &&
@@ -256,25 +290,20 @@ const RegisterMentor = () => {
       }
     });
     setErrors(updatedErrors);
-
     if (Object.keys(updatedErrors).length === 0) {
-      fetch_api("mentor", "POST", mentorData)
-        .then((response) => {
-          setMentorCreated(true);
-          loginUser(mentorData.user.email, mentorData.user.password)
-          navigate("/");
-        })
-        .catch((response) => {
+      handleFetch().then((response) => {
+        const error = response?.response?.data?.errors;
+        if (error) {
           let phone_num_error = "";
           let email_error = "";
-          const error = response.response.data.error;
           if (
-            error?.user?.email != undefined &&
+            error?.user?.email !== undefined &&
             error?.user?.email[0] ===
               "user with this email address already exists."
           ) {
             email_error = "המייל כבר קיים במערכת";
           }
+
           if (
             error?.phone_num != undefined &&
             error?.phone_num[0] === "mentor with this phone num already exists."
@@ -287,12 +316,34 @@ const RegisterMentor = () => {
             ["user.email"]: email_error,
             ["phone_num"]: phone_num_error,
           }));
-        });
+        } else {
+          setMentorCreated(true);
+          if (!props.edit) {
+            loginUser(mentorData.user.email, mentorData.user.password);
+            navigate("/");
+          }
+          window.location.reload()
+        }
+      });
     }
   };
 
+  const handleFetch = async () => {
+    let res = null;
+    if (props.edit) {
+      mentorData["token"] = authTokens?.access;
+      res = await fetch_api("mentor", "PUT", mentorData);
+    } else {
+      res = await fetch_api("mentor", "POST", mentorData);
+    }
+    return res;
+  };
+
   return (
-    <div className="registration-form">
+    <div
+      className="registration-form"
+      style={{ overflowY: "scroll", height: "93.5vh" }}
+    >
       <h2 style={{ textAlign: "right" }}>טופס הרשמה</h2>
       <Form onSubmit={handleSubmit} dir="rtl">
         <h4>פרופיל</h4>
@@ -353,36 +404,40 @@ const RegisterMentor = () => {
             </Form.Text>
           )}
         </Form.Group>
-        <Form.Group controlId="user.password">
-          <Form.Label>סיסמה</Form.Label>
-          <Form.Control
-            type="password"
-            name="user.password"
-            value={mentorData.user.password}
-            onChange={handleChange}
-            onBlur={handleChange}
-          />
-          {errors["user.password"] && (
-            <Form.Text className="text-danger">
-              {errors["user.password"]}
-            </Form.Text>
-          )}
-        </Form.Group>
-        <Form.Group controlId="confirmPassword">
-          <Form.Label>אשר סיסמא</Form.Label>
-          <Form.Control
-            type="password"
-            name="confirm_password"
-            value={pw2}
-            onChange={handleChange}
-            onBlur={handleChange}
-          />
-          {errors.confirm_password && (
-            <Form.Text className="text-danger">
-              {errors.confirm_password}
-            </Form.Text>
-          )}
-        </Form.Group>
+        {!props.edit && (
+          <>
+            <Form.Group controlId="user.password">
+              <Form.Label>סיסמה</Form.Label>
+              <Form.Control
+                type="password"
+                name="user.password"
+                value={mentorData.user.password}
+                onChange={handleChange}
+                onBlur={handleChange}
+              />
+              {errors["user.password"] && (
+                <Form.Text className="text-danger">
+                  {errors["user.password"]}
+                </Form.Text>
+              )}
+            </Form.Group>
+            <Form.Group controlId="confirmPassword">
+              <Form.Label>אשר סיסמא</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirm_password"
+                value={pw2}
+                onChange={handleChange}
+                onBlur={handleChange}
+              />
+              {errors.confirm_password && (
+                <Form.Text className="text-danger">
+                  {errors.confirm_password}
+                </Form.Text>
+              )}
+            </Form.Group>
+          </>
+        )}
         <br />
         <h4>פרטים אישיים</h4>
         {/* Gender */}
@@ -429,27 +484,13 @@ const RegisterMentor = () => {
         {/* City of Residence */}
         <Form.Group controlId="cityResidence">
           <Form.Label>עיר מגורים</Form.Label>
-          <Select
-            isClearable={true}
-            isRtl={true}
-            // defaultValue={CITIES_CHOICES[0]}
-            isSearchable={true}
+          <DropDown
+            subjects={true}
+            placeholder="עיר\אזור"
+            objects={CITIES_CHOICES}
             name="city_residence"
-            options={CITIES_CHOICES}
-            onChange={(res) => {
-              const res_ = res ? res : { value: "" };
-              handleChange({
-                target: { value: res_.value, name: "city_residence" },
-              });
-            }}
-            onBlur={() => {
-              handleChange({
-                target: {
-                  value: mentorData.city_residence,
-                  name: "city_residence",
-                },
-              });
-            }}
+            value={mentorData.city_residence}
+            onChange={handleChange}
           />
 
           {errors.city_residence && (
@@ -530,11 +571,11 @@ const RegisterMentor = () => {
         <Form.Group controlId="educationCompletion">
           <Form.Label>נושאי לימוד</Form.Label>
           <DropDown
-          subSubjects={true}
-          name={'topics'}
+            subSubjects={true}
+            name={"topics"}
             objects={topics}
             value={mentorData.topics}
-            placeholder={'חפש נושא'}
+            placeholder={"חפש נושא"}
             onChange={handleChange}
           />
           {errors.topics && (
@@ -544,7 +585,12 @@ const RegisterMentor = () => {
         <Form.Group>
           <Form.Label>שיעורי אונליין</Form.Label>
           <br />
-          <input type="checkbox" name="teach_online" onChange={handleChange} />
+          <input
+            type="checkbox"
+            name="teach_online"
+            onChange={handleChange}
+            checked={!teachField.teach_online}
+          />
           <Form.Control
             type="number"
             placeholder="מחיר"
@@ -564,6 +610,7 @@ const RegisterMentor = () => {
             type="checkbox"
             name="teach_at_mentor"
             onChange={handleChange}
+            checked={!teachField.teach_at_mentor}
           />
           <Form.Control
             type="number"
@@ -586,6 +633,7 @@ const RegisterMentor = () => {
             type="checkbox"
             name="teach_at_student"
             onChange={handleChange}
+            checked={!teachField.teach_at_student}
           />
           <Form.Control
             type="number"
@@ -608,7 +656,17 @@ const RegisterMentor = () => {
         {/* todo add is Disable */}
         <Form.Group controlId="studyCities">
           <Form.Label>ערי לימוד</Form.Label>
-          <Select
+
+          <DropDown
+            subjects={true}
+            placeholder="עיר\אזור"
+            objects={CITIES_CHOICES}
+            name="study_cities"
+            value={mentorData.study_cities}
+            onChange={handleChange}
+          />
+
+          {/* <Select
             isMulti
             name="study_cities"
             value={mentorData.study_cities}
@@ -624,7 +682,7 @@ const RegisterMentor = () => {
                 },
               });
             }}
-          />
+          /> */}
           {errors.study_cities && (
             <Form.Text className="text-danger">{errors.study_cities}</Form.Text>
           )}
@@ -634,6 +692,7 @@ const RegisterMentor = () => {
           <input
             type="checkbox"
             name="group_teaching"
+            checked={mentorData.group_teaching}
             onChange={handleChange}
             style={{ marginLeft: "2px" }}
           />
@@ -641,7 +700,15 @@ const RegisterMentor = () => {
         </Form.Group>
         <Form.Group controlId="experienceWith">
           <Form.Label>ניסיון עם</Form.Label>
-          <Select
+          <DropDown
+            subjects={true}
+            placeholder="ניסיון עם"
+            objects={EXPERIENCE_WITH}
+            name="experience_with"
+            value={mentorData.experience_with}
+            onChange={handleChange}
+          />
+          {/* <Select
             isMulti
             name="experience_with"
             value={mentorData.experience_with}
@@ -657,7 +724,7 @@ const RegisterMentor = () => {
                 },
               });
             }}
-          />
+          /> */}
           {errors.experience_with && (
             <Form.Text className="text-danger">
               {errors.experience_with}

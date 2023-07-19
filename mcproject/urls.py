@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include("mentorconnect.urls")),
     path('api/', include("mentorconnect.api_urls")),
+    path('text-chat/api/', include("TextChat.api_urls")),
 ]

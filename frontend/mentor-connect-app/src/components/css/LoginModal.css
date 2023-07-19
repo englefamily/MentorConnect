@@ -4,7 +4,7 @@ body.active-modal {
 
 .bg-modal {
     width: 100vw;
-    height: 100vh;
+    height: 120vh;
     position: fixed;
     z-index: 1;
     background-color: rgba(0, 0, 0, 0.5);

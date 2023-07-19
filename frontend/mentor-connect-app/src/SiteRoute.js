@@ -7,6 +7,8 @@ import RegisterStudent from "./components/RegisterStudent";
 import ChatApp from "./components/DropDown";
 import Login from "./components/modals/LoginModal";
 import ShowMentors from "./components/ShowMentors";
+import Dashboard from "./components/Dashboard";
+import Test from "./components/Test";
 
 function SiteRoutes() {
   return (
@@ -17,7 +19,8 @@ function SiteRoutes() {
         <Route path="/registerStudent" element={<RegisterStudent />} />
         <Route path="/mentors" element={<ShowMentors />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/test" element={<ChatApp />} />
+        <Route path="/dashboard/:page" element={<Dashboard />} />
+        <Route path="/test" element={<Test />} />
       </Routes>
     </>
   );

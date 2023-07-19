@@ -1,0 +1,52 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  
+  .main-dash {
+    display: flex;
+    flex-direction: row;
+    direction: rtl;
+    height: 100%;
+  }
+  
+  .main-dash-nav {
+    display: flex;
+    flex-direction: column;
+    padding-top: 10vh;
+    width: 20vw;
+    background-color: blanchedalmond;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+.user-types {
+    margin-bottom: 2rem;
+    font-size: 13px;
+    display: flex;
+    
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.user-types span {
+    cursor: pointer;
+}
+  
+  .main-dash-nav p {
+    padding-right: 1rem;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    cursor: pointer;
+  }
+  
+  .data-container {
+    width: 80vw;
+    height: 100%;
+    overflow-y: auto;
+  }
+  

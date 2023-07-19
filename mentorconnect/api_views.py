@@ -14,6 +14,9 @@ from django.core.cache import cache
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.db.models import Count, Q
+import jwt
+from django.conf import settings
+from rest_framework.exceptions import ValidationError
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -79,6 +82,7 @@ def mentor(request):
                         }
                     )
             case 'GET':
+                # todo add order by lisense and stars
                 user_token = request.query_params.get("token")
                 topics_param = request.query_params.get("topics")
                 cities_param = request.query_params.get("cities")
@@ -104,16 +108,17 @@ def mentor(request):
 
                     if user_token:
                         try:
-                            mentor = Token.objects.get(key=user_token).mentor
+                            decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                            mentor = User.objects.get(id=decoded_token['user_id']).mentor
                         except Exception as error:
-                            if str(error) == 'Token matching query does not exist.':
-                                return Response(
-                                    status=status.HTTP_400_BAD_REQUEST,
-                                    data={
-                                        'status': 'fail',
-                                        'message': f'token not exist'
-                                    }
-                                )
+                            print(error)
+                            return Response(
+                                status=status.HTTP_400_BAD_REQUEST,
+                                data={
+                                    'status': 'fail',
+                                    'message': f'token not valid'
+                                }
+                            )
                         mentor_json = MentorSerializer(mentor)
                         return Response(
                             status=status.HTTP_200_OK,
@@ -138,32 +143,69 @@ def mentor(request):
 
 
             case 'PUT':
-                    user_token = request.query_params.get("token")
-                    mentor_instance = Token.objects.get(key=user_token).user.mentor
-                    mentor_data = request.data
-                    user = mentor_data.pop('user', None)
-                    ms = MentorSerializer(instance=mentor_instance, data=mentor_data, context={'user': user}, partial=True)
-                    if ms.is_valid():
-                        try:
-                            ms.save()
-                        except ValueError as error:
-                            return Response({"Error": error}, status=500)
-                        return Response(
-                            status=status.HTTP_200_OK,
-                            data={
-                                'status': 'success',
-                                'message': 'Mentor updated',
-                                'mentor': ms.data  # convert to JSON compatible format
-                            }
-                        )
-                    else:
-                        return Response({"Error": ms.errors}, status=500)
+                user_token = request.data.get('token')
+                if not user_token:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'Token not provided'
+                        }
+                    )
+
+                try:
+                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    mentor_instance = User.objects.get(id=decoded_token['user_id']).mentor
+                except (jwt.DecodeError, User.DoesNotExist) as error:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'Invalid token'
+                        }
+                    )
+
+                mentor_data = request.data
+                mentor_data.pop('token')
+                if mentor_data.get('user', {}).get('email') == mentor_instance.user.email:
+                    mentor_data['user'].pop('email')
+
+                ms = MentorSerializer(instance=mentor_instance, data=mentor_data, partial=True)
+                try:
+                    ms.is_valid(raise_exception=True)
+                    ms.save()
+                except ValidationError as error:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'Invalid data',
+                            'errors': error.detail
+                        }
+                    )
+                except ValueError as error:
+                    return Response(
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        data={
+                            'status': 'error',
+                            'message': str(error)
+                        }
+                    )
+
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'Mentor updated',
+                        'mentor': ms.data
+                    }
+                )
 
             case 'DELETE':
-                    user_token = request.query_params.get("token")
-                    user_instance = User.objects.get(pk=user_token)
-                    user_instance.delete()
-                    return Response("Mentor Deleted")
+                user_token = request.query_params.get("token")
+                user_instance = User.objects.get(pk=user_token)
+                user_instance.delete()
+                return Response("Mentor Deleted")
 
             case _:
                 return Response(
@@ -190,7 +232,8 @@ def mentor(request):
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def student(request):
-    try:
+    # try:
+    if True:
         match request.method:
             case 'POST':
                 new_student = StudentSerializer(data=request.data)
@@ -218,100 +261,149 @@ def student(request):
                     )
             case 'GET':
                 user_token = request.query_params.get("token")
-                if not user_token:
-                    students = Student.objects.all()
-                    students_json = StudentSerializer(students, many=True)
-                    return Response(
-                        status=status.HTTP_200_OK,
-                        data={
-                            'status': 'success',
-                            'message': 'retrieved all students',
-                            'students': students_json.data  # convert to JSON compatible format
-                        }
-                    )
-                try:
-                    student = Token.objects.get(key=user_token).student
-                except Exception as error: #todo fix Exception
-                    if str(error) == 'Token matching query does not exist.':
+
+                students = Student.objects
+
+                if user_token:
+                    try:
+                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        student = Student.objects.get(
+                            user__id=decoded_token['user_id'])  # Retrieve the Student instance
+                        print(student.user)
+                    except Exception as error:
+                        print(error)
                         return Response(
                             status=status.HTTP_400_BAD_REQUEST,
                             data={
                                 'status': 'fail',
-                                'message': f'token not exist'
+                                'message': f'token not valid'
                             }
                         )
-
-                student_json = StudentSerializer(student)
-                return Response(
-                    status=status.HTTP_200_OK,
-                    data={
-                        'status': 'success',
-                        'message': 'student found',
-                        'student': student_json.data # convert to JSON compatible format
-                    }
-                )
-
-            # case 'GET':
-            #     user_token = request.query_params.get("token")
-            # #  TODO: Going to handle the filtering in ReactJS...
-            #     # sub_topic = request.query_params.get("sub_topic")
-            #     # city = request.query_params.get("city")
-            #     # hourly_rate = request.query_params.get("hourly_rate") # this requires us adding such
-            #     # # a field to the mentor model in order to be able to filter by it
-            #     # time = request.query_params.get("time") # this would require us to add such a field to the mentor
-            #     # # model in order to be able to filter - would likely have to be connected to a scheduling/
-            #     # # booking routine. Or for mentors to input times for each sub_topic the teach
-            #     # topic = request.query_params.get("topic")
-            #     # feedback = request.query_params.get("feedback")
-            #
-            #     if not user_token:
-            #         students = Student.objects.all()
-            #
-            #     #  TODO: Going to handle the filtering in ReactJS...
-            #         # if sub_topic:
-            #         #     students = students.filter(sub_topic__name=sub_topic)
-            #         # if city:
-            #         #     students = students.filter(city=city)
-            #         # if hourly_rate:
-            #         #     students = students.filter(hourly_rate__lte=hourly_rate)
-            #         # if time:
-            #         #     students = students.filter(available_time=time)
-            #         # if topic:
-            #         #     students = students.filter(sub_topic__topic__name=topic)
-            #         # if feedback:
-            #         #     students = students.filter(feedback__rating__gte=feedback)
-            #
-            #         students_json = StudentSerializer(students, many=True)
-            #         return Response(
-            #             status=status.HTTP_200_OK,
-            #             data={
-            #                 'status': 'success',
-            #                 'message': 'retrieved all students',
-            #                 'students': students_json.data
-            #             }
-            #         )
-
-            case 'PUT':
-                user_token = request.query_params.get("token")
-                student_instance = Token.objects.get(key=user_token).user.student
-                student_data = request.data
-                user = student_data.pop('user', None)
-                ss = StudentSerializer(instance=student_instance, data=student_data, context={'user': user},partial=True)
-                if ss.is_valid():
-                    try:
-                        ss.save()
-                    except ValueError as error:
-                        return Response({"Error": error}, status=500)
+                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
+                    print(student_serializer.data)
                     return Response(
                         status=status.HTTP_200_OK,
                         data={
                             'status': 'success',
-                            'message': 'Student updated',
-                            'student': ss.data
+                            'message': 'user found',
+                            'student': student_serializer.data  # Convert to JSON compatible format
                         }
                     )
                 else:
-                    return Response({"Error": ss.errors}, status=500)
+                    students = students.all()
+
+                students_serializer = StudentSerializer(students, many=True)
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'retrieved all students',
+                        'students': students_serializer.data  # Convert to JSON compatible format
+                    }
+                )
+            case 'GET':
+                user_token = request.query_params.get("token")
+
+                students = Student.objects
+
+                if user_token:
+                    try:
+                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        student = Student.objects.get(
+                            user__id=decoded_token['user_id'])  # Retrieve the Student instance
+                        print(student.user)
+                    except Exception as error:
+                        print(error)
+                        return Response(
+                            status=status.HTTP_400_BAD_REQUEST,
+                            data={
+                                'status': 'fail',
+                                'message': f'token not valid'
+                            }
+                        )
+                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
+                    print(student_serializer.data)
+                    return Response(
+                        status=status.HTTP_200_OK,
+                        data={
+                            'status': 'success',
+                            'message': 'user found',
+                            'student': student_serializer.data  # Convert to JSON compatible format
+                        }
+                    )
+                else:
+                    students = students.all()
+
+                students_serializer = StudentSerializer(students, many=True)
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'retrieved all students',
+                        'students': students_serializer.data  # Convert to JSON compatible format
+                    }
+                )
+
+            case 'PUT':
+                user_token = request.data.get('token')
+                if not user_token:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'Token not provided'
+                        }
+                    )
+
+                try:
+                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    student_instance = Student.objects.get(
+                        user__id=decoded_token['user_id'])  # Retrieve the Student instance
+                except Exception as error:
+                    print(error)
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': f'token not valid'
+                        }
+                    )
+
+                student_data = request.data
+                student_data.pop('token')
+                if student_data.get('user', {}).get('email') == student_instance.user.email:
+                    student_data['user'].pop('email')
+
+                student_serializer = StudentSerializer(instance=student_instance, data=student_data, partial=True)
+                try:
+                    student_serializer.is_valid(raise_exception=True)
+                    student_serializer.save()
+                except ValidationError as error:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'Invalid data',
+                            'errors': error.detail
+                        }
+                    )
+                except ValueError as error:
+                    return Response(
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        data={
+                            'status': 'error',
+                            'message': str(error)
+                        }
+                    )
+
+                return Response(
+                    status=status.HTTP_200_OK,
+                    data={
+                        'status': 'success',
+                        'message': 'Student updated',
+                        'student': student_serializer.data
+                    }
+                )
 
 
             case 'DELETE':
@@ -329,15 +421,15 @@ def student(request):
                     }
                 )
 
-    except Exception as ex:
-        return Response(
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            data={
-                'status': 'fail',
-                'message': 'a server error was thrown',
-                'error': str(ex)
-            }
-        )
+    # except Exception as ex:
+    #     return Response(
+    #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         data={
+    #             'status': 'fail',
+    #             'message': 'a server error was thrown',
+    #             'error': str(ex)
+    #         }
+    #     )
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])

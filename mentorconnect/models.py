@@ -48,6 +48,9 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    def __str__(self):
+        return f'{self.id}, email: {self.email}'
+
 
 class Mentor(models.Model):
     gender = models.CharField(null=False, choices=[('male', 'male'), ('female', 'female')], max_length=128)
@@ -106,14 +109,14 @@ class Student(models.Model):
 
 class Topic(models.Model):
     # TODO: Change to `null=False` for production
-    topic_name = models.CharField(null=True, max_length=50)
-    topic_field = models.CharField(null=True, max_length=50)
+    name = models.CharField(null=True, max_length=50)
+    field = models.CharField(null=True, max_length=50)
 
     class Meta:
         db_table = 'topic'
 
     def __str__(self):
-        return f"ID: {self.pk}, Topic name: {self.topic_name} Topic field: {self.topic_field}"
+        return f"ID: {self.pk}, Topic name: {self.name} Topic field: {self.field}"
 
 
 # class SubTopic(models.Model):
@@ -128,8 +131,8 @@ class Topic(models.Model):
 
 
 class Feedback(models.Model):
-    fb_content = models.CharField(null=False, max_length=228)
-    fb_stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    content = models.CharField(null=False, max_length=228)
+    stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='feedbacks')
     # TODO: Josh tidied up these relationships - Since each `FeedBack` instance should be related to
     #  a single `SubTopic`, better to use `ForeignKey` not `ManyToManyField`
@@ -141,7 +144,7 @@ class Feedback(models.Model):
         db_table = 'feedback'
 
     def __str__(self):
-        return f"ID: {self.pk} Feedback: {self.fb_content} stars: {self.fb_stars}"
+        return f"ID: {self.pk} Feedback: {self.content} stars: {self.stars}"
 
     def clean(self):
         super().clean()

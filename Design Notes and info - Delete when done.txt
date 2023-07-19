@@ -8,8 +8,15 @@ Naama says:
 You're welcome! If you're working with it, I think it's good to break up the colors a bit with white or beige,
 like this for example: #F0EEC8 Good luck!
 
+
+*** add rise error if the mentor do not have one of 'teach_at'
+*** login modal, handle error in password ***
 ** add cronjobe for prodaction **
 
 **** add option to add mentor and student on the same email and phone number ****
 
 **** add in cities list the area of the city ****
+
+*** fix the ובה לבחור את חד המוריפ plaess ***
+
+*** add pagination ***
