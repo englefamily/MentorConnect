@@ -12,8 +12,11 @@ def get_messages(request):
     if True:
         chat_id = request.query_params.get("id")
         chats = Chat.objects.filter(
-            Q(id__contains=f'{chat_id},') | Q(id__contains=f',{chat_id}')
+            Q(id__contains=f'{chat_id}-') | Q(id__contains=f'-{chat_id}')
         )
+        # get users ids
+
+
 
     # except Exception as ex:
     # print(ex)
@@ -58,7 +61,7 @@ def chat(request):
                 chat_id = request.query_params.get("id")
                 if chat_id:
                     chats = Chat.objects.filter(
-                        Q(id__contains=f'{chat_id},') | Q(id__contains=f',{chat_id}')
+                        Q(id__contains=f'{chat_id}-') | Q(id__contains=f'-{chat_id}')
                     )
                     chat_serializer = ChatSerializer(chats, many=True)
                 else:
