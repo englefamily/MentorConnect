@@ -20,8 +20,9 @@
     overflow-y: auto;
     direction: rtl;
     min-width: 30vw;
-    position: absolute;
-    z-index: 1;
+    position: relative;
+    /* top: 0; */
+    z-index: 2;
 }
 
 .main-list {

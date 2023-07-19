@@ -20,10 +20,10 @@ export default function LoginModal() {
   const handleAuth = async (event) => {
     const loginResponse = await loginUser(email, password);
     console.log(loginResponse);
-    if (loginResponse?.error) {
-      setError("אמייל או סיסמא אינם נכונים");
-    } else {
+    if (loginResponse) {
       toggleModal();
+    } else {
+      setError("אמייל או סיסמא אינם נכונים")
     }
   };
 

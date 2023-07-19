@@ -14,8 +14,8 @@ export const EDUCATION_LEVEL = [
 ];
 
 export const EXPERIENCE_WITH = [
-  { value: "adhd", label: "קשב וריכוז" },
-  { value: "teaching", label: "הוראה" },
+  { value: "adhd", name: "קשב וריכוז" },
+  { value: "teaching", name: "הוראה" },
 ];
 
 export const CITIES_CHOICES = [

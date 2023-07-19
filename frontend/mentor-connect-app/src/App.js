@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import SiteRoutes from "./SiteRoute";
 import BaseNavbar from "./components/BaseNavbar";
 import CategorySubcategoryDropdown from "./components/CategorySubcategoryDropdown";
@@ -8,6 +8,13 @@ import context from "./Context";
 
 function App() {
   const { showLoginModal, setShowLoginModal } = useContext(context);
+  const [height, setHeight] = useState(0);
+  const elementRef = useRef(null);
+
+  useEffect(() => {
+    // console.log(elementRef.current.clientHeight);
+    // setHeight(elementRef.current.clientHeight);
+  }, []);
 
   return (
     <>

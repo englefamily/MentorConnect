@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+    user = UserSerializer(partial=True)
 
     class Meta:
         model = Student
@@ -35,11 +35,10 @@ class StudentSerializer(serializers.ModelSerializer):
         return student
 
     def update(self, instance, validated_data):
-        user_data = self.context['user']
-        if user_data:
-            us = UserSerializer(instance=instance.user, data=user_data, partial=True)
-            assert us.is_valid(), ValueError(us.errors)
-            us.save()
+        user_data = validated_data.pop('user', {})
+        if user_data.get('email'):
+            instance.user.email = user_data.get('email')
+            instance.user.save()
         return super().update(instance, validated_data)
 
 
@@ -47,9 +46,28 @@ class MentorSerializer(serializers.ModelSerializer):
     user = UserSerializer(partial=True)  # Embed the UserSerializer inside the StudentSerializer
     study_cities = serializers.MultipleChoiceField(choices=CITIES_CHOICES)
     experience_with = serializers.MultipleChoiceField(choices=EXPERIENCE_CHOICES)
+    rating = serializers.SerializerMethodField()
+
     class Meta:
         model = Mentor
         fields = '__all__'
+
+
+    def get_rating(self, obj):
+        feedbacks = obj.feedbacks.all()
+        total_stars = sum(feedback.stars for feedback in feedbacks)
+        if feedbacks.exists():
+            average_rating = total_stars / feedbacks.count()
+            return average_rating
+        return 0
+
+
+
+    def to_representation(self, instance):
+        # Modify the serialized response here
+        representation = super().to_representation(instance)
+        representation['topics'] = [TopicSerializer(Topic.objects.get(id=id)).data for id in representation['topics']]
+        return representation
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -60,12 +78,10 @@ class MentorSerializer(serializers.ModelSerializer):
         return mentor
 
     def update(self, instance, validated_data):
-        user_data = self.context['user']
-
-        if user_data:
-            us = UserSerializer(instance=instance.user, data=user_data, partial=True)
-            assert us.is_valid(), ValueError(us.errors)
-            us.save()
+        user_data = validated_data.pop('user', {})
+        if user_data.get('email'):
+            instance.user.email = user_data.get('email')
+            instance.user.save()
         return super().update(instance, validated_data)
 
 

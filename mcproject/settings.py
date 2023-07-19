@@ -41,8 +41,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'mentorconnect',
     'rest_framework_simplejwt.token_blacklist',
+    'channels',
+    'mentorconnect',
+    'TextChat',
 ]
 
 
@@ -115,7 +117,15 @@ TEMPLATES = [
     },
 ]
 
+ASGI_APPLICATION = 'mcproject.asgi.application'
 WSGI_APPLICATION = 'mcproject.wsgi.application'
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 AUTH_USER_MODEL = 'mentorconnect.User'
 

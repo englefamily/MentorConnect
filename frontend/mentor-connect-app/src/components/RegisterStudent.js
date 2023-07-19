@@ -1,27 +1,36 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Form, Button, Alert } from "react-bootstrap";
 import { years } from "../helpers/avariables.js";
 import { fetch_api } from "../helpers/functions.js";
 import context from "../Context.js";
 
-function RegisterStudent() {
-  const {loginUser} = useContext(context)
+function RegisterStudent(props) {
+  const { loginUser, authTokens } = useContext(context);
   const [studentCreate, setStudentCreate] = useState(false);
   const [pw2, setPw2] = useState("");
   const [errors, setErrors] = useState({});
-  const [studentData, setStudentData] = useState({
-    user: {
-      email: "",
-      password: "",
-    },
-    first_name: "",
-    last_name: "",
-    phone_num: "",
-  });
+  const [studentData, setStudentData] = useState(
+    props.edit
+      ? props.data
+      : {
+          user: {
+            email: "",
+            password: "",
+          },
+          first_name: "",
+          last_name: "",
+          phone_num: "",
+        }
+  );
   const passwordRegex =
     /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()\-_=+{};:,<.>])(?!.*\s).{8,}$/;
   const phoneNumberRegex = /^05\d{8}$/;
   const textRegex = /^[\u0591-\u05F4a-zA-Z]+$/u;
+
+  useEffect(()=>{
+    console.log("🚀 ~ file: RegisterStudent.js:34 ~ RegisterStudent ~ props.data:", props.data)
+  }, props.data)
+  
 
   const validateField = (name, value) => {
     let error = "";
@@ -40,14 +49,16 @@ function RegisterStudent() {
             - אינה מכילה רווחים`;
     }
 
-    if (name.endsWith('name') && !textRegex.test(value)) {
-      error = 'שדה זה יכול להכיל רק אותיות'
+    if (name.endsWith("name") && !textRegex.test(value)) {
+      error = "שדה זה יכול להכיל רק אותיות";
     }
 
-    if (value.trim() === "") {
+    if (
+      typeof value === "string" &&
+      (value === undefined || value.trim() === "")
+    ) {
       error = "שדה חובה";
     }
-
 
     // Validate confirm password
     if (name === "confirm_password" && value !== studentData.user.password) {
@@ -58,7 +69,6 @@ function RegisterStudent() {
   };
 
   const handleChange = (event) => {
-    // console.log(event)
     const { name, value } = event.target;
 
     let error = validateField(name, value);
@@ -110,9 +120,11 @@ function RegisterStudent() {
     Object.entries(studentData).forEach(([name, value]) => {
       if (name === "user") {
         Object.entries(value).forEach(([name, value]) => {
-          const error = validateField("user." + name, value);
-          if (error !== "") {
-            updatedErrors["user." + name] = error;
+          if (!props.edit || (props.edit && name !== "password")) {
+            const error = validateField("user." + name, value);
+            if (error !== "") {
+              updatedErrors["user." + name] = error;
+            }
           }
         });
       } else {
@@ -121,30 +133,21 @@ function RegisterStudent() {
           updatedErrors[name] = error;
         }
       }
-      const error = validateField("confirm_password", pw2);
-      if (error !== "") {
-        updatedErrors["confirm_password"] = error;
+      if (!props.edit) {
+        const error = validateField("confirm_password", pw2);
+        if (error !== "") {
+          updatedErrors["confirm_password"] = error;
+        }
       }
     });
     setErrors(updatedErrors);
 
     if (Object.keys(updatedErrors).length === 0) {
-      fetch_api("student", "POST", studentData)
-        .then( (response) => {
-            console.log('=============')
-            setStudentCreate(true);
-            console.log(studentData.user.email, studentData.user.password)
-            loginUser(studentData.user.email, studentData.user.password)
-            // .then((q)=>{})          
-            // .catch((q)=>{})          
-        })
-        
-        .catch((response) => {
-          console.log('-----------')
+      handleFetch().then((response) => {
+        const error = response?.response?.data?.errors;
+        if (error) {
           let phone_num_error = "";
           let email_error = "";
-          const error = response.response.data.error;
-
           if (
             error?.user?.email != undefined &&
             error?.user?.email[0] ===
@@ -165,8 +168,28 @@ function RegisterStudent() {
             ["user.email"]: email_error,
             ["phone_num"]: phone_num_error,
           }));
-        });
+        } else {
+          setStudentCreate(true);
+          window.location.reload()
+          if (!props.edit) {
+            loginUser(studentData.user.email, studentData.user.password);
+          }
+        }
+      });
     }
+  };
+
+  const handleFetch = async () => {
+    let res = null;
+    if (props.edit) {
+      studentData["token"] = authTokens?.access;
+      console.log("🚀 ~ file: RegisterStudent.js:180 ~ handleFetch ~ studentData:", studentData)
+      
+      res = await fetch_api("student", "PUT", studentData);
+    } else {
+      res = await fetch_api("student", "POST", studentData);
+    }
+    return res;
   };
 
   const errorStyle = {
@@ -259,34 +282,39 @@ function RegisterStudent() {
               <p style={errorStyle}>{errors["user.email"]}</p>
             )}
           </Form.Group>
-          <Form.Group controlId="formName">
-            <Form.Label style={labelStyle}>סיסמא</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder=""
-              name="user.password"
-              value={studentData.user.password}
-              onChange={handleChange}
-              onBlur={handleChange}
-            />
-            {errors["user.password"] && (
-              <p style={errorStyle}>{errors["user.password"]}</p>
-            )}
-          </Form.Group>
-          <Form.Group controlId="formName">
-            <Form.Label style={labelStyle}>אשר סיסמא</Form.Label>
-            <Form.Control
-              type="password"
-              placeholder=""
-              name="confirm_password"
-              value={pw2}
-              onChange={handleChange}
-              onBlur={handleChange}
-            />
-            {errors.confirm_password && (
-              <p style={errorStyle}>{errors.confirm_password}</p>
-            )}
-          </Form.Group>
+
+          {!props.edit && (
+            <div>
+              <Form.Group controlId="formName">
+                <Form.Label style={labelStyle}>סיסמא</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder=""
+                  name="user.password"
+                  value={studentData.user.password}
+                  onChange={handleChange}
+                  onBlur={handleChange}
+                />
+                {errors["user.password"] && (
+                  <p style={errorStyle}>{errors["user.password"]}</p>
+                )}
+              </Form.Group>
+              <Form.Group controlId="formName">
+                <Form.Label style={labelStyle}>אשר סיסמא</Form.Label>
+                <Form.Control
+                  type="password"
+                  placeholder=""
+                  name="confirm_password"
+                  value={pw2}
+                  onChange={handleChange}
+                  onBlur={handleChange}
+                />
+                {errors.confirm_password && (
+                  <p style={errorStyle}>{errors.confirm_password}</p>
+                )}
+              </Form.Group>
+            </div>
+          )}
           <Button variant="primary" type="submit" style={buttonStyle}>
             צור פרופיל
           </Button>

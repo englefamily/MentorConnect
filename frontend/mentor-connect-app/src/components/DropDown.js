@@ -153,7 +153,7 @@ const DropDown = (props) => {
                   <input
                     id={index}
                     value={value}
-                    name={name}
+                    name={props.name}
                     checked={props.value.includes(value)}
                     onChange={handleSelected}
                     type="checkbox"

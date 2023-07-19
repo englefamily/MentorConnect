@@ -1,0 +1,143 @@
+/* @import url("https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"); */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+
+html, body {
+    /* height: 100vh;
+    margin: 0; */
+    /* font-family: "Roboto", sans-serif; */
+  }
+  
+.main-div {
+    width: auto;
+    direction: rtl;
+    display: flex;
+    flex-direction: column;
+    /* height: 100vh; */
+}
+
+.main-search {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    justify-content: center;
+    height: 30vh;
+    width: 100vw;
+    align-items: center;
+    background-image: url('https://www.shutterstock.com/image-vector/web-site-development-maintenance-tools-600w-2087806093.jpg');
+    background-size: cover;
+    background-position: center center;
+    margin-bottom: 1rem;
+}
+
+.search-input {
+    width: auto;
+    height: 2rem;
+}
+
+.search-bth {
+    width: auto;
+    height: 2rem;
+}
+
+
+.cards-container {
+ 
+ /* flex-grow: 1; */
+ /* min-height: 70vh; */
+}
+
+.card-container {
+    /* border: rgb(150, 204, 211) solid 2px; */
+    background-color: rgb(8, 131, 149, 0.2);
+    display: flex;
+    flex-direction: row;
+    margin-top: 1rem;
+
+}
+
+.right-card {
+    width: auto;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 130px;
+}
+
+
+.img-container {
+    display: flex;
+  justify-content: center;
+  align-items: center;
+    flex: 1;
+}
+
+.img-container img {
+    border: black solid 2px;
+    max-width: 100px;
+    border-radius: 50%;
+}
+
+.teachs-container {
+    /* display: flex;
+    justify-content: center; */
+    /* align-items: center; */
+    text-align: center;
+    width: 200px;
+    flex: 1;
+}
+
+.teachs-container p{
+    margin-bottom: 5px;
+}
+
+.center-card {
+    flex: 2;
+    text-align: right;
+    /* background-color: rgb(222, 248, 216); */
+    padding-right: 1rem;
+    padding-top: 0.5rem;
+    padding-left: 10px;
+}
+
+.center-card h6{
+    display: inline;
+}
+
+.center-card p {
+    margin-top: 1rem;
+    font-size: 16px;
+  line-height: 1.5; 
+  min-height: calc(3 * 1.5 * 16px);
+  overflow: hidden;
+}
+
+.left-card {
+    flex: 1;
+    text-align: center;
+    /* background-color: rgb(176, 179, 177); */
+    max-width: 130px;
+    display: flex;
+    flex-direction: column;
+    padding: 5px;
+    
+}
+
+.rating-container {
+    margin-top: 5px;
+    flex: 1;
+}
+
+.price-container {
+    margin-top: 0;
+    flex: 1;
+}
+
+.bth-container {
+    flex: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+}

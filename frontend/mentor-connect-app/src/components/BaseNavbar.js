@@ -39,11 +39,11 @@ function BaseNavbar() {
             </a>
           </li>
           <li className="nav-dropdown">
-            <button class="dropbtn" onClick={() => setShowLoginModal(true)}>{userData?.first_name ? userData.first_name : 'התחברות'}</button>
-            <div class="dropdown-content">
-              <a href="#">החשבון שלי</a>
+            <button class="dropbtn" onClick={() => {!userData && setShowLoginModal(true)}}>{userData?.first_name ? userData.first_name : 'התחברות'}</button>
+            {userData && <div class="dropdown-content">
+              <a href="/dashboard/edit_profile">החשבון שלי</a>
               <a onClick={logoutUser}>התנתק</a>
-            </div>
+            </div>}
           </li>
         </ul>
       </nav>
