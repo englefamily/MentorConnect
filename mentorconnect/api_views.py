@@ -635,11 +635,17 @@ class StudySessionSlotView(APIView):
     def get(self, request, pk=None):
         if pk is not None:
             instance = StudySessionSlot.objects.get(pk=pk)
-            serializer = self.serializer_class(instance)
-            return Response(serializer.data)
+            mentor_hourly_rate = instance.mentor.teach_online
+            response = self.serializer_class(instance).data
+            response["hourly_rate"] = mentor_hourly_rate
+            return Response(response)
         instances = StudySessionSlot.objects.all()
-        serializer = self.serializer_class(instances, many=True)
-        return Response(serializer.data)
+        response = []
+        for instance in instances:
+            slot_data = self.serializer_class(instance).data
+            slot_data["hourly_rate"] = instance.mentor.teach_online
+            response.append(slot_data)
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class StudySessionView(APIView):

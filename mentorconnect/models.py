@@ -148,14 +148,13 @@ class StudySessionSlot(models.Model):
     start_time = models.TimeField(choices=HOUR_CHOICES)
     end_time = models.TimeField(choices=HOUR_CHOICES)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots')
-    # Uses `teach_online` to get 'hourly_rate' for session
-    hourly_rate = Mentor.teach_online
 
     class Meta:
         db_table = 'study_session_slot'
 
     def __str__(self):
-        return f"ID: {self.pk} Mentor: {self.mentor.first_name} {self.mentor.last_name} Time: {self.start_time}-{self.end_time} Time"
+        return f"ID: {self.pk} Mentor: {self.mentor.first_name} {self.mentor.last_name} From: {self.start_time}, " \
+               f"until: {self.end_time}"
 
 
 class StudySession(models.Model):
