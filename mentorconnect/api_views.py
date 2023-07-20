@@ -1,11 +1,13 @@
-from .models import User, Student, Mentor, Topic, Feedback
+from .models import User, Student, Mentor, Topic, Feedback, StudySessionSlot, StudySession
 from .forms import RegistrationForm, LoginForm
-from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer
+from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer, \
+    StudySessionSlotSerializer, StudySessionSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
@@ -48,6 +50,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
 
         return token
+
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -405,7 +408,6 @@ def student(request):
                     }
                 )
 
-
             case 'DELETE':
                     user_token = request.query_params.get("token")
                     user_instance = User.objects.get(pk=user_token)
@@ -607,4 +609,66 @@ def feedback(request):
                 'error': str(ex)
             }
         )
+
+
+class StudySessionSlotView(APIView):
+    serializer_class = StudySessionSlotSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        instance = StudySessionSlot.objects.get(pk=pk)
+        serializer = self.serializer_class(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        instance = StudySessionSlot.objects.get(pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, pk=None):
+        if pk is not None:
+            instance = StudySessionSlot.objects.get(pk=pk)
+            serializer = self.serializer_class(instance)
+            return Response(serializer.data)
+        instances = StudySessionSlot.objects.all()
+        serializer = self.serializer_class(instances, many=True)
+        return Response(serializer.data)
+
+
+class StudySessionView(APIView):
+    serializer_class = StudySessionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        instance = StudySession.objects.get(pk=pk)
+        serializer = self.serializer_class(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        instance = StudySession.objects.get(pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, pk=None):
+        if pk is not None:
+            instance = StudySession.objects.get(pk=pk)
+            serializer = self.serializer_class(instance)
+            return Response(serializer.data)
+        instances = StudySession.objects.all()
+        serializer = self.serializer_class(instances, many=True)
+        return Response(serializer.data)
 

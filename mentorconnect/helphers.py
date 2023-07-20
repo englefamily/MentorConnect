@@ -1,3 +1,8 @@
+import datetime as dt
+
+
+HOUR_CHOICES = [(dt.time(hour=x),f'{x}:00') for x in range(0,24)]
+
 AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
 
 EDUCATION_START = [(str(year), str(year)) for year in range(1983, 2024)]
@@ -97,15 +102,12 @@ EDUCATION_LEVEL = [
     ('high_school', 'תיכון'),
 ]
 
+
 # TEACH_OPTIONS = [
 #     ('online', 'Teach Online'),
 #     ('mentor_place', "Teach at Mentor's"),
 #     ('student_place', "Teach at Student's"),
 # ]
-
-
-
-
 
 
 # api for mentor

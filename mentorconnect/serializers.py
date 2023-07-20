@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Student, Mentor, Feedback, Topic
+from .models import User, Student, Mentor, Feedback, Topic, StudySession, StudySessionSlot
 from .helphers import CITIES_CHOICES, EXPERIENCE_CHOICES
 from django.contrib.auth.hashers import make_password
 
@@ -62,7 +62,6 @@ class MentorSerializer(serializers.ModelSerializer):
         return 0
 
 
-
     def to_representation(self, instance):
         # Modify the serialized response here
         representation = super().to_representation(instance)
@@ -91,13 +90,19 @@ class TopicSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-# class SubTopicSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = SubTopic
-#         fields = '__all__'
-
-
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
+        fields = '__all__'
+
+
+class StudySessionSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudySessionSlot
+        fields = '__all__'
+
+
+class StudySessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudySession
         fields = '__all__'

@@ -5,7 +5,8 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, EXPERIENCE_CHOICES
+from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, \
+    EXPERIENCE_CHOICES, HOUR_CHOICES
 from multiselectfield import MultiSelectField
 
 
@@ -119,17 +120,6 @@ class Topic(models.Model):
         return f"ID: {self.pk}, Topic name: {self.name} Topic field: {self.field}"
 
 
-# class SubTopic(models.Model):
-#     sub_topic_name = models.CharField(null=False, max_length=50)
-#     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='courses', null=False)
-#
-#     class Meta:
-#         db_table = 'sub_topic'
-#
-#     def __str__(self):
-#         return f"ID: {self.pk}, Topic name: {self.topic.topic_name} Sub topic name: {self.sub_topic_name}"
-
-
 class Feedback(models.Model):
     content = models.CharField(null=False, max_length=228)
     stars = models.PositiveIntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
@@ -150,3 +140,33 @@ class Feedback(models.Model):
         super().clean()
         if self.student not in self.mentor.students.all():
             raise ValidationError("Invalid feedback: The student is not associated with the mentor.")
+
+
+class StudySessionSlot(models.Model):
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='study_session_slots')
+    date = models.DateField()
+    start_time = models.TimeField(choices=HOUR_CHOICES)
+    end_time = models.TimeField(choices=HOUR_CHOICES)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots')
+    # Uses `teach_online` to get 'hourly_rate' for session
+    hourly_rate = Mentor.teach_online
+
+    class Meta:
+        db_table = 'study_session_slot'
+
+    def __str__(self):
+        return f"ID: {self.pk} Mentor: {self.mentor.first_name} {self.mentor.last_name} Time: {self.start_time}-{self.end_time} Time"
+
+
+class StudySession(models.Model):
+    slot = models.OneToOneField(StudySessionSlot, on_delete=models.CASCADE, related_name='study_session')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='study_sessions')
+    session_happened = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'study_session'
+
+    def __str__(self):
+        return f"ID: {self.pk} Student: {self.student.first_name} {self.student.last_name} Session: {self.created_at}"
+
