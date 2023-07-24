@@ -1,5 +1,7 @@
 export const HOST_URL = "http://127.0.0.1:8000/";
 
+export const WS_HOST_URL = "ws://127.0.0.1:8000/";
+
 export const years = (s, e) => {
   return [Array.from({ length: e - s + 1 }, (_, index) => s + index)][0];
 };

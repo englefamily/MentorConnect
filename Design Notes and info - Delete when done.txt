@@ -13,10 +13,10 @@ like this for example: #F0EEC8 Good luck!
 *** login modal, handle error in password ***
 ** add cronjobe for prodaction **
 
-**** add option to add mentor and student on the same email and phone number ****
-
 **** add in cities list the area of the city ****
 
 *** fix the ובה לבחור את חד המוריפ plaess ***
 
 *** add pagination ***
+
+בצאטים לקבל את הצאטים לפי סדר

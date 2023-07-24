@@ -22,7 +22,7 @@ function Rating({ value }) {
     return stars.reverse();
   };
 
-  return <div>{renderStars()}</div>;
+  return <div style={{display: 'inline-block'}}>{renderStars()}</div>;
 }
 
 export default Rating;

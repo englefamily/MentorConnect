@@ -33,6 +33,7 @@ export const Provider = ({ children }) => {
         updateTokens();
       }, TimeToUpdateToken);
     }
+    
     return () => {
       timeout && clearTimeout(timeout);
     };

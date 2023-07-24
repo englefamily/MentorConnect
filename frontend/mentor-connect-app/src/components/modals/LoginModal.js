@@ -33,6 +33,7 @@ export default function LoginModal() {
         <div className="modal-content">
           <i onClick={toggleModal}>X</i>
           <h2>כניסה</h2>
+          <a href="registerStudent" className="register-link">להרשמה</a>
           <label htmlFor="email">הכנס אמייל</label>
           <input
             id="email"
@@ -51,6 +52,7 @@ export default function LoginModal() {
           <button className="submit-modal" onClick={handleAuth}>
             התחבר
           </button>
+          
         </div>
       </div>
     </div>

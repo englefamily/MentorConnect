@@ -19,7 +19,7 @@ function SiteRoutes() {
         <Route path="/registerStudent" element={<RegisterStudent />} />
         <Route path="/mentors" element={<ShowMentors />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard/:page" element={<Dashboard />} />
+        <Route path="/dashboard/:page/:id_?" element={<Dashboard />} />
         <Route path="/test" element={<Test />} />
       </Routes>
     </>

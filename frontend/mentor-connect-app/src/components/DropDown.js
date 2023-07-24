@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./css/DropDown.css";
 
 const DropDown = (props) => {
@@ -19,10 +19,26 @@ const DropDown = (props) => {
   const [isSubjectOpen, setIsSubjectOpen] = useState({});
   const [searchInput, setSearchInput] = useState("");
   const searchResRef = useRef(null);
+  const dropdownRef = useRef(null);
 
   const handleSelected = (event) => {
     props.onChange(event);
   };
+
+  useEffect(() => {
+    const handleDocumentClick = (event) => {
+      // Check if the clicked element is inside the dropdown container or not
+      if (!dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("click", handleDocumentClick);
+
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, []);
 
   const openSelected = async () => {
     Object.keys(props.objects).map((subject) => {
@@ -97,7 +113,7 @@ const DropDown = (props) => {
   };
 
   return (
-    <div className="drop-down">
+    <div className="drop-down" ref={dropdownRef}>
       <input
         className="search-input"
         onClick={() => {
@@ -108,7 +124,7 @@ const DropDown = (props) => {
         placeholder={props.placeholder}
         name="search_bar"
       />
-      {isOpen && (
+      {(isOpen) && (
         <div
           className="search-res"
           // onBlur={() => {

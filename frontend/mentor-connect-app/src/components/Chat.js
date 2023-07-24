@@ -1,87 +1,199 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import "./css/Chat.css";
 import { fetch_api } from "../helpers/functions";
 import context from "../Context";
-const URL = "ws://127.0.0.1:8000/ws/2-5/";
+import { WS_HOST_URL } from "../helpers/avariables";
+import { useStateManager } from "react-select";
 
-const Chat = () => {
-  const { userData } = useContext(context)
-  console.log("🚀 ~ file: Chat.js:9 ~ Chat ~ UserData:", userData)
-  const [newMessage, setNewMessage] = useState();
+const Chat = (props) => {
+  const { userData } = useContext(context);
+  console.log("🚀 ~ file: Chat.js:9 ~ Chat ~ UserData:", userData);
+  const [newMessage, setNewMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [ws, setWs] = useState(null);
+  const [ws, setWs] = useState({});
+  const [chats, setChats] = useState([]);
+  const [selectedChat, setSelectedChat] = useState(null);
+  const ref = useRef(null);
+  const chat_id = props.chat_id
+
   const getData = async () => {
-    const response = await fetch_api('chat', 'GET', `?id=${userData.user_id}`)
-    const chats = response.data.chats
-    console.log("🚀 ~ file: Chat.js:15 ~ getData ~ chats:", chats)
-  }
+    const response = await fetch_api("get-chats", "GET", userData?.user_id);
+    console.log("🚀 ~ file: Chat.js:19 ~ getData ~ response:", response);
+    const chats = response.data.chats;
+    console.log("🚀 ~ file: Chat.js:20 ~ getData ~ chats:", chats);
+    return chats;
+  };
 
   useEffect(() => {
-    // getData()
-  }, [])
-
-
-  useEffect(() => {
-    const websocket = new WebSocket(URL);
-    setWs(websocket);
-
-    websocket.onopen = () => {
-      console.log("connected");
-    };
-
-    websocket.onmessage = (evt) => {
-      const message = JSON.parse(evt.data);
-      console.log("🚀 ~ message:", message);
-      addMessage(message);
-      setNewMessage("");
-    };
-
-    websocket.onclose = () => {
-      console.log("disconnected");
-      setWs(new WebSocket(URL));
-    };
-
-    return () => {
-      websocket.close();
-    };
+    getData().then((chats) => {
+      setChats(chats);
+      console.log("🚀 ~ file: Chat.js:27 ~ getData ~ chats:", chats);
+      initializeWebSocketConnections(chats);
+    });
   }, []);
 
-  const addMessage = (message) => {
-    setMessages((prevMessages) => [message, ...prevMessages]);
+  useEffect(() => {
+    console.log("🚀 ~ file: Chat.js:34 ~ Chat ~ messages:", messages);
+  }, [messages]);
+
+  useEffect(() => {
+    if (chat_id && chats) {
+      chats.forEach(chat => {
+        if (chat_id === chat.id) {
+          setSelectedChat(chat)
+        }
+      })
+    }
+  }, [chat_id, chats]);
+
+  const initializeWebSocketConnections = (chats) => {
+    chats.forEach(async (chat) => {
+      const response = await fetch_api("get-messages", "GET", chat.id);
+      setMessages((prevMessages) => ({
+        ...prevMessages,
+        [chat.id]: response.data.messages,
+      }));
+      const socket = new WebSocket(`${WS_HOST_URL}ws/${chat.id}/`);
+      setWs((prevWs) => ({
+        ...prevWs,
+        [chat.id]: socket,
+      }));
+      socket.onopen = () => {
+        console.log(`WebSocket connection established for room ${chat.id}.`);
+      };
+
+      socket.onmessage = (event) => {
+        const message = JSON.parse(event.data);
+        console.log(
+          "🚀 ~ file: Chat.js:44 ~ chats.forEach ~ message:",
+          message
+        );
+        setMessages((prevMessages) => ({
+          ...prevMessages,
+          [chat.id]: [...(prevMessages[chat.id] || []), message],
+        }));
+
+        setChats((prevChats) => {
+          return [
+            chat,
+            ...prevChats.filter((Pchat) => {
+              return Pchat !== chat;
+            }),
+          ];
+        });
+      };
+
+      socket.onclose = () => {
+        console.log(`WebSocket connection closed for room ${chat.id}.`);
+      };
+    });
   };
 
   const submitMessage = () => {
-    const message = {
-      email: userData.email,
-      message: newMessage,
-      chat_id: "2-5",
-    };
-    ws.send(JSON.stringify(message));
+    if (newMessage.trim() !== "") {
+      const message = {
+        "email": userData.email,
+        "message": newMessage,
+        "chat_id": selectedChat.id,
+      };
+      console.log("🚀 ~ file: Chat.js:99 ~ submitMessage ~ message:", message)
+
+      ws[selectedChat.id].send(JSON.stringify(message));
+      setNewMessage("");
+    }
+  };
+
+  // function scrollToBottom() {
+  //   let objDiv = document.getElementById("chatCenter");
+  //   objDiv.scrollTop = objDiv.scrollHeight;
+  // }
+
+  const scrollToBottom = () => {
+    ref.current.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <div>
       <div className="main-root">
         <div className="main-chat">
-          <div className="chat-top"></div>
-          <div className="chat-center">
-            {messages.reverse().map((message) => (
-              <div className={message.email === userData.email ? 'message1' : 'message2'}>
-                {message.message}
-              </div>
+          <div className="chat-top">
+            {selectedChat && (
+              <h6>
+                {selectedChat?.mentor?.user_id === userData?.user_id
+                  ? `${selectedChat.student.first_name} ${selectedChat.student.last_name}`
+                  : `${selectedChat.mentor.first_name} ${selectedChat.mentor.last_name}`}
+              </h6>
+            )}
+          </div>
+          <div className="chat-center" id="chatCenter">
+            {selectedChat &&
+              messages[selectedChat.id] &&
+              messages[selectedChat.id].map((message, index) => (
+                <div
+                  ref={ref}
+                  key={index}
+                  className={
+                    message.email === userData.email ? "message1" : "message2"
+                  }
+                >
+                  {message.message}
+                </div>
               ))}
           </div>
-          <div className="chat-bottom">
-            <input value={newMessage} onChange={(e)=>setNewMessage(e.target.value)}/>
-            <button onClick={submitMessage}></button>
-          </div>
+          {selectedChat && (
+            <div className="chat-bottom">
+              <input
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyDown={(e) => {
+                  e.key === "Enter" && submitMessage();
+                }}
+              />
+              <button onClick={submitMessage}></button>
+            </div>
+          )}
         </div>
         <div className="main-menu">
-          {[1, 2, 3].map(() => (
-            <div className="content-card">sdfsdfsdfsd</div>
-          ))}
+          <div className="content-card"></div>
+          {chats
+            ? chats.map((chat, index) => (
+                <div
+                  key={index}
+                  className="content-card"
+                  style={
+                    selectedChat?.id === chat.id
+                      ? { backgroundColor: "#C9C9C9" }
+                      : {}
+                  }
+                  onClick={() => setSelectedChat(chat)}
+                >
+                  <div className="img-container">
+                    <img src="https://static.lessoons.co.il/assets/users/profileImages/33035/xl1617525321.jpg.pagespeed.ic.ssdASHvNlu.webp" />
+                  </div>
+                  <div className="name-last-container">
+                    <h6>
+                      {chat.mentor?.user_id === userData?.user_id
+                        ? `${chat.student.first_name} ${chat.student.last_name}`
+                        : `${chat.mentor.first_name} ${chat.mentor.last_name}`}
+                    </h6>
+                    <p>
+                      {messages[chat.id] && messages[chat.id].length > 0
+                        ? messages[chat.id][messages[chat.id].length - 1]
+                            .message.length > 10
+                          ? messages[chat.id][
+                              messages[chat.id].length - 1
+                            ].message.slice(0, 10) + "..."
+                          : messages[chat.id][messages[chat.id].length - 1]
+                              .message
+                        : ""}
+                    </p>
+                  </div>
+                </div>
+              ))
+            : "עדיין אין צאטים"}
         </div>
       </div>
+      {/* <button onClick={handleClick}>Scroll down</button> */}
     </div>
   );
 };

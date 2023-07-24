@@ -9,7 +9,7 @@ import DropDown from "./DropDown";
 
 function Dashboard() {
   const { authTokens, userData } = useContext(context);
-  const { page } = useParams();
+  const { page, id_ } = useParams();
   const [component, setComponent] = useState(page);
   const [profile, setProfile] = useState(
     userData?.type.includes("mentor") ? "mentor" : "student"
@@ -74,7 +74,7 @@ function Dashboard() {
       </div>
       <div className="data-container">
         {component === "edit_profile" && <EditProfile type={profile} />}
-        {component === "chat" && <Chat type={profile} />}
+        {component === "chat" && <Chat type={profile} chat_id={id_ ? id_ : null}/>}
         {component === "set_lesson" && <SetLesson />}
       </div>
     </div>
