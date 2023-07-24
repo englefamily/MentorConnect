@@ -3,3 +3,4 @@ __pycache__/
 /mentorconnect/migrations/
 /.idea/
 /env.py
+/BACKUPS/
