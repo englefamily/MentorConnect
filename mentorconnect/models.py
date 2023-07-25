@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from django.db import models
-from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, EXPERIENCE_CHOICES
+from .helphers import AGE_CHOICES, CITIES_CHOICES, EDUCATION_LEVEL, EDUCATION_COMPLETE, EDUCATION_START, EXPERIENCE_CHOICES, HOUR_CHOICES
 from multiselectfield import MultiSelectField
 
 
@@ -150,3 +150,30 @@ class Feedback(models.Model):
         super().clean()
         if self.student not in self.mentor.students.all():
             raise ValidationError("Invalid feedback: The student is not associated with the mentor.")
+
+class StudySessionSlot(models.Model):
+    mentor = models.ForeignKey(Mentor, on_delete=models.CASCADE, related_name='study_session_slots')
+    date = models.DateField()
+    start_time = models.TimeField(choices=HOUR_CHOICES)
+    end_time = models.TimeField(choices=HOUR_CHOICES)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots')
+
+    class Meta:
+        db_table = 'study_session_slot'
+
+    def __str__(self):
+        return f"ID: {self.pk} Mentor: {self.mentor.first_name} {self.mentor.last_name} From: {self.start_time}, " \
+               f"until: {self.end_time}"
+
+
+class StudySession(models.Model):
+    slot = models.OneToOneField(StudySessionSlot, on_delete=models.CASCADE, related_name='study_session')
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='study_sessions')
+    session_happened = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'study_session'
+
+    def __str__(self):
+        return f"ID: {self.pk} Student: {self.student.first_name} {self.student.last_name} Session: {self.created_at}"

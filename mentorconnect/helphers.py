@@ -1,4 +1,9 @@
+import datetime as dt
+
+
 AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
+
+HOUR_CHOICES = [(dt.time(hour=x),f'{x}:00') for x in range(0,24)]
 
 EDUCATION_START = [(str(year), str(year)) for year in range(1983, 2024)]
 EDUCATION_COMPLETE = [(str(year), str(year)) for year in range(1984, 2031)]

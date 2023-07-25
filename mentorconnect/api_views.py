@@ -1,12 +1,13 @@
 from .models import User, Student, Mentor, Topic, Feedback
 from .forms import RegistrationForm, LoginForm
-from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer
+from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer, StudySessionSerializer, StudySessionSlotSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.views import APIView
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
@@ -608,3 +609,69 @@ def feedback(request):
             }
         )
 
+class StudySessionSlotView(APIView):
+    serializer_class = StudySessionSlotSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        instance = StudySessionSlot.objects.get(pk=pk)
+        serializer = self.serializer_class(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        instance = StudySessionSlot.objects.get(pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, pk=None):
+        if pk is not None:
+            instance = StudySessionSlot.objects.get(pk=pk)
+            mentor_hourly_rate = instance.mentor.teach_online
+            response = self.serializer_class(instance).data
+            response["hourly_rate"] = mentor_hourly_rate
+            return Response(response)
+        instances = StudySessionSlot.objects.all()
+        response = []
+        for instance in instances:
+            slot_data = self.serializer_class(instance).data
+            slot_data["hourly_rate"] = instance.mentor.teach_online
+            response.append(slot_data)
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class StudySessionView(APIView):
+    serializer_class = StudySessionSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def put(self, request, pk):
+        instance = StudySession.objects.get(pk=pk)
+        serializer = self.serializer_class(instance, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        instance = StudySession.objects.get(pk=pk)
+        instance.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    def get(self, request, pk=None):
+        if pk is not None:
+            instance = StudySession.objects.get(pk=pk)
+            serializer = self.serializer_class(instance)
+            return Response(serializer.data)
+        instances = StudySession.objects.all()
+        serializer = self.serializer_class(instances, many=True)
+        return Response(serializer.data)

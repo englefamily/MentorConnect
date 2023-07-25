@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Student, Mentor, Feedback, Topic
+from .models import User, Student, Mentor, Feedback, Topic, StudySession, StudySessionSlot
 from .helphers import CITIES_CHOICES, EXPERIENCE_CHOICES
 from django.contrib.auth.hashers import make_password
 
@@ -100,4 +100,15 @@ class TopicSerializer(serializers.ModelSerializer):
 class FeedbackSerializer(serializers.ModelSerializer):
     class Meta:
         model = Feedback
+        fields = '__all__'
+
+class StudySessionSlotSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudySessionSlot
+        fields = '__all__'
+
+
+class StudySessionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudySession
         fields = '__all__'
