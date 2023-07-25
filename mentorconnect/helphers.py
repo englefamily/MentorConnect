@@ -1,6 +1,8 @@
 import datetime as dt
 
 
+TEACH_LOCATION_CHOICES = [('online', 'online'), ('at_mentor', 'at_mentor'), ('at_student', 'at_student')]
+
 minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
 
 HOUR_CHOICES = [(dt.time(hour=x, minute=m), f'{x}:{m:02d}') for x in range(0, 24) for m in minutes]

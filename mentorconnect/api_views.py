@@ -614,7 +614,7 @@ def feedback(request):
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def study_session_slot_view(request):
+def study_session_slot_view(request, pk=None):
     try:
         match request.method:
             case 'POST':
@@ -639,7 +639,7 @@ def study_session_slot_view(request):
                         }
                     )
             case 'PUT':
-                slot_id = request.query_params.get("id")
+                slot_id = pk
                 slot_instance = StudySessionSlot.objects.get(pk=slot_id)
                 slot_serializer = StudySessionSlotSerializer(
                     instance=slot_instance, data=request.data, partial=True)
@@ -664,7 +664,7 @@ def study_session_slot_view(request):
                     )
             case 'DELETE':
                 try:
-                    slot_id = request.query_params.get("id")
+                    slot_id = pk
                     slot_instance = StudySessionSlot.objects.get(pk=slot_id)
                     slot_instance.delete()
                     return Response("Study Session Slot Deleted")
@@ -672,20 +672,18 @@ def study_session_slot_view(request):
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             case 'GET':
                 try:
-                    slot_id = request.query_params.get("id")
+                    slot_id = pk
                     if slot_id is not None:
-                        slot_instance = StudySessionSlot.objects.get(
-                            pk=slot_id)
-                        mentor_hourly_rate = slot_instance.mentor.teach_online
-                        response = StudySessionSlotSerializer(
-                            slot_instance).data
+                        slot_instance = StudySessionSlot.objects.get(pk=slot_id)
+                        mentor_hourly_rate = slot_instance.mentor.slot.rate
+                        response = StudySessionSlotSerializer(slot_instance).data
                         response["hourly_rate"] = mentor_hourly_rate
                         return Response(response)
                     slots = StudySessionSlot.objects.all()
                     response = []
                     for slot in slots:
                         slot_data = StudySessionSlotSerializer(slot).data
-                        slot_data["hourly_rate"] = slot.mentor.teach_online
+                        slot_data["hourly_rate"] = slot.rate
                         response.append(slot_data)
                     return Response(response, status=status.HTTP_200_OK)
                 except Exception as e:
@@ -701,9 +699,8 @@ def study_session_slot_view(request):
             }
         )
 
-
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
-def study_session_view(request):
+def study_session_view(request, pk=None):
     try:
         match request.method:
             case 'POST':
@@ -728,7 +725,7 @@ def study_session_view(request):
                         }
                     )
             case 'PUT':
-                session_id = request.query_params.get("id")
+                session_id = pk
                 session_instance = StudySession.objects.get(pk=session_id)
                 session_serializer = StudySessionSerializer(
                     instance=session_instance, data=request.data, partial=True)
@@ -753,7 +750,7 @@ def study_session_view(request):
                     )
             case 'DELETE':
                 try:
-                    session_id = request.query_params.get("id")
+                    session_id = pk
                     session_instance = StudySession.objects.get(pk=session_id)
                     session_instance.delete()
                     return Response("Study Session Deleted")
@@ -761,10 +758,9 @@ def study_session_view(request):
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             case 'GET':
                 try:
-                    session_id = request.query_params.get("id")
+                    session_id = pk
                     if session_id is not None:
-                        session_instance = StudySession.objects.get(
-                            pk=session_id)
+                        session_instance = StudySession.objects.get(pk=session_id)
                         return Response(StudySessionSerializer(session_instance).data)
                     sessions = StudySession.objects.all()
                     serializer = StudySessionSerializer(sessions, many=True)
