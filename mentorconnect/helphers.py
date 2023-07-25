@@ -1,7 +1,9 @@
 import datetime as dt
 
 
-HOUR_CHOICES = [(dt.time(hour=x),f'{x}:00') for x in range(0,24)]
+minutes = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55]
+
+HOUR_CHOICES = [(dt.time(hour=x, minute=m), f'{x}:{m:02d}') for x in range(0, 24) for m in minutes]
 
 AGE_CHOICES = [(str(year), str(year)) for year in range(1933, 2007)]
 
