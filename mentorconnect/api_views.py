@@ -4,10 +4,10 @@ from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, F
     StudySessionSlotSerializer, StudySessionSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
+from rest_framework.decorators import (
+    api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.views import APIView
 from rest_framework import status
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
@@ -47,7 +47,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['first_name'] = user.student.first_name
             token['last_name'] = user.student.last_name
         token['type'] = userType
-
 
         return token
 
@@ -111,8 +110,10 @@ def mentor(request):
 
                     if user_token:
                         try:
-                            decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
-                            mentor = User.objects.get(id=decoded_token['user_id']).mentor
+                            decoded_token = jwt.decode(
+                                user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                            mentor = User.objects.get(
+                                id=decoded_token['user_id']).mentor
                         except Exception as error:
                             print(error)
                             return Response(
@@ -144,7 +145,6 @@ def mentor(request):
                     }
                 )
 
-
             case 'PUT':
                 user_token = request.data.get('token')
                 if not user_token:
@@ -157,8 +157,10 @@ def mentor(request):
                     )
 
                 try:
-                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
-                    mentor_instance = User.objects.get(id=decoded_token['user_id']).mentor
+                    decoded_token = jwt.decode(
+                        user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    mentor_instance = User.objects.get(
+                        id=decoded_token['user_id']).mentor
                 except (jwt.DecodeError, User.DoesNotExist) as error:
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
@@ -173,7 +175,8 @@ def mentor(request):
                 if mentor_data.get('user', {}).get('email') == mentor_instance.user.email:
                     mentor_data['user'].pop('email')
 
-                ms = MentorSerializer(instance=mentor_instance, data=mentor_data, partial=True)
+                ms = MentorSerializer(
+                    instance=mentor_instance, data=mentor_data, partial=True)
                 try:
                     ms.is_valid(raise_exception=True)
                     ms.save()
@@ -225,7 +228,8 @@ def mentor(request):
             data={
                 'status': 'fail',
                 'message': 'a server error was thrown',
-                'error': str(ex) # convert to string to make it JSON serializable
+                # convert to string to make it JSON serializable
+                'error': str(ex)
             }
         )
 
@@ -269,7 +273,8 @@ def student(request):
 
                 if user_token:
                     try:
-                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        decoded_token = jwt.decode(
+                            user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
                         print(student.user)
@@ -282,7 +287,8 @@ def student(request):
                                 'message': f'token not valid'
                             }
                         )
-                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
+                    student_serializer = StudentSerializer(
+                        student)  # Serialize the Student instance
                     print(student_serializer.data)
                     return Response(
                         status=status.HTTP_200_OK,
@@ -311,7 +317,8 @@ def student(request):
 
                 if user_token:
                     try:
-                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        decoded_token = jwt.decode(
+                            user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
                         print(student.user)
@@ -324,7 +331,8 @@ def student(request):
                                 'message': f'token not valid'
                             }
                         )
-                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
+                    student_serializer = StudentSerializer(
+                        student)  # Serialize the Student instance
                     print(student_serializer.data)
                     return Response(
                         status=status.HTTP_200_OK,
@@ -359,7 +367,8 @@ def student(request):
                     )
 
                 try:
-                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    decoded_token = jwt.decode(
+                        user_token, settings.SECRET_KEY, algorithms=['HS256'])
                     student_instance = Student.objects.get(
                         user__id=decoded_token['user_id'])  # Retrieve the Student instance
                 except Exception as error:
@@ -377,7 +386,8 @@ def student(request):
                 if student_data.get('user', {}).get('email') == student_instance.user.email:
                     student_data['user'].pop('email')
 
-                student_serializer = StudentSerializer(instance=student_instance, data=student_data, partial=True)
+                student_serializer = StudentSerializer(
+                    instance=student_instance, data=student_data, partial=True)
                 try:
                     student_serializer.is_valid(raise_exception=True)
                     student_serializer.save()
@@ -409,10 +419,10 @@ def student(request):
                 )
 
             case 'DELETE':
-                    user_token = request.query_params.get("token")
-                    user_instance = User.objects.get(pk=user_token)
-                    user_instance.delete()
-                    return Response("Student Deleted")
+                user_token = request.query_params.get("token")
+                user_instance = User.objects.get(pk=user_token)
+                user_instance.delete()
+                return Response("Student Deleted")
 
             case _:
                 return Response(
@@ -422,16 +432,6 @@ def student(request):
                         'message': f'the method {request.method} is not allowed for this url'
                     }
                 )
-
-    # except Exception as ex:
-    #     return Response(
-    #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-    #         data={
-    #             'status': 'fail',
-    #             'message': 'a server error was thrown',
-    #             'error': str(ex)
-    #         }
-    #     )
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -472,7 +472,7 @@ def topic(request):
                     data={
                         'status': 'success',
                         'message': 'retrieved all topics',
-                        'topics': topic_json.data # convert to JSON compatible format
+                        'topics': topic_json.data  # convert to JSON compatible format
                     }
                 )
 
@@ -480,7 +480,8 @@ def topic(request):
                 try:
                     topic_id = request.query_params.get("id")
                     topic_instance = Topic.objects.get(pk=topic_id)
-                    ts = TopicSerializer(instance=topic_instance, data=request.data, partial=True)
+                    ts = TopicSerializer(
+                        instance=topic_instance, data=request.data, partial=True)
                     if ts.is_valid():
                         ts.save()
                         return Response("Topic updated")
@@ -565,7 +566,8 @@ def feedback(request):
                 try:
                     feedback_id = request.query_params.get("id")
                     feedback_instance = Feedback.objects.get(pk=feedback_id)
-                    fs = FeedbackSerializer(instance=feedback_instance, data=request.data, partial=True)
+                    fs = FeedbackSerializer(
+                        instance=feedback_instance, data=request.data, partial=True)
                     if fs.is_valid():
                         fs.save()
                         return Response(
@@ -611,70 +613,171 @@ def feedback(request):
         )
 
 
-class StudySessionSlotView(APIView):
-    serializer_class = StudySessionSlotSerializer
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def study_session_slot_view(request):
+    try:
+        match request.method:
+            case 'POST':
+                new_slot = StudySessionSlotSerializer(data=request.data)
+                if new_slot.is_valid():
+                    new_slot.save()
+                    return Response(
+                        status=status.HTTP_201_CREATED,
+                        data={
+                            "status": 'success',
+                            'message': 'Study Session Slot has been created',
+                            'slot': new_slot.data
+                        }
+                    )
+                else:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'the data provided is incorrect',
+                            'error': new_slot.errors
+                        }
+                    )
+            case 'PUT':
+                slot_id = request.query_params.get("id")
+                slot_instance = StudySessionSlot.objects.get(pk=slot_id)
+                slot_serializer = StudySessionSlotSerializer(
+                    instance=slot_instance, data=request.data, partial=True)
+                if slot_serializer.is_valid():
+                    slot_serializer.save()
+                    return Response(
+                        status=status.HTTP_200_OK,
+                        data={
+                            'status': 'success',
+                            'message': 'Study Session Slot has been updated',
+                            'slot': slot_serializer.data
+                        }
+                    )
+                else:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'the data provided is incorrect',
+                            'error': slot_serializer.errors
+                        }
+                    )
+            case 'DELETE':
+                try:
+                    slot_id = request.query_params.get("id")
+                    slot_instance = StudySessionSlot.objects.get(pk=slot_id)
+                    slot_instance.delete()
+                    return Response("Study Session Slot Deleted")
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            case 'GET':
+                try:
+                    slot_id = request.query_params.get("id")
+                    if slot_id is not None:
+                        slot_instance = StudySessionSlot.objects.get(
+                            pk=slot_id)
+                        mentor_hourly_rate = slot_instance.mentor.teach_online
+                        response = StudySessionSlotSerializer(
+                            slot_instance).data
+                        response["hourly_rate"] = mentor_hourly_rate
+                        return Response(response)
+                    slots = StudySessionSlot.objects.all()
+                    response = []
+                    for slot in slots:
+                        slot_data = StudySessionSlotSerializer(slot).data
+                        slot_data["hourly_rate"] = slot.mentor.teach_online
+                        response.append(slot_data)
+                    return Response(response, status=status.HTTP_200_OK)
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        print(ex)
+        return Response(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            data={
+                'status': 'fail',
+                'message': 'a server error was thrown',
+                'error': str(ex)
+            }
+        )
 
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
 
-    def put(self, request, pk):
-        instance = StudySessionSlot.objects.get(pk=pk)
-        serializer = self.serializer_class(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    def delete(self, request, pk):
-        instance = StudySessionSlot.objects.get(pk=pk)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get(self, request, pk=None):
-        if pk is not None:
-            instance = StudySessionSlot.objects.get(pk=pk)
-            mentor_hourly_rate = instance.mentor.teach_online
-            response = self.serializer_class(instance).data
-            response["hourly_rate"] = mentor_hourly_rate
-            return Response(response)
-        instances = StudySessionSlot.objects.all()
-        response = []
-        for instance in instances:
-            slot_data = self.serializer_class(instance).data
-            slot_data["hourly_rate"] = instance.mentor.teach_online
-            response.append(slot_data)
-        return Response(response, status=status.HTTP_200_OK)
-
-
-class StudySessionView(APIView):
-    serializer_class = StudySessionSerializer
-
-    def post(self, request):
-        serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    def put(self, request, pk):
-        instance = StudySession.objects.get(pk=pk)
-        serializer = self.serializer_class(instance, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    def delete(self, request, pk):
-        instance = StudySession.objects.get(pk=pk)
-        instance.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def get(self, request, pk=None):
-        if pk is not None:
-            instance = StudySession.objects.get(pk=pk)
-            serializer = self.serializer_class(instance)
-            return Response(serializer.data)
-        instances = StudySession.objects.all()
-        serializer = self.serializer_class(instances, many=True)
-        return Response(serializer.data)
-
+@api_view(['GET', 'POST', 'PUT', 'DELETE'])
+def study_session_view(request):
+    try:
+        match request.method:
+            case 'POST':
+                new_session = StudySessionSerializer(data=request.data)
+                if new_session.is_valid():
+                    new_session.save()
+                    return Response(
+                        status=status.HTTP_201_CREATED,
+                        data={
+                            "status": 'success',
+                            'message': 'Study Session has been created',
+                            'session': new_session.data
+                        }
+                    )
+                else:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'the data provided is incorrect',
+                            'error': new_session.errors
+                        }
+                    )
+            case 'PUT':
+                session_id = request.query_params.get("id")
+                session_instance = StudySession.objects.get(pk=session_id)
+                session_serializer = StudySessionSerializer(
+                    instance=session_instance, data=request.data, partial=True)
+                if session_serializer.is_valid():
+                    session_serializer.save()
+                    return Response(
+                        status=status.HTTP_200_OK,
+                        data={
+                            'status': 'success',
+                            'message': 'Study Session has been updated',
+                            'session': session_serializer.data
+                        }
+                    )
+                else:
+                    return Response(
+                        status=status.HTTP_400_BAD_REQUEST,
+                        data={
+                            'status': 'fail',
+                            'message': 'the data provided is incorrect',
+                            'error': session_serializer.errors
+                        }
+                    )
+            case 'DELETE':
+                try:
+                    session_id = request.query_params.get("id")
+                    session_instance = StudySession.objects.get(pk=session_id)
+                    session_instance.delete()
+                    return Response("Study Session Deleted")
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            case 'GET':
+                try:
+                    session_id = request.query_params.get("id")
+                    if session_id is not None:
+                        session_instance = StudySession.objects.get(
+                            pk=session_id)
+                        return Response(StudySessionSerializer(session_instance).data)
+                    sessions = StudySession.objects.all()
+                    serializer = StudySessionSerializer(sessions, many=True)
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                except Exception as e:
+                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    except Exception as ex:
+        print(ex)
+        return Response(
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            data={
+                'status': 'fail',
+                'message': 'a server error was thrown',
+                'error': str(ex)
+            }
+        )
