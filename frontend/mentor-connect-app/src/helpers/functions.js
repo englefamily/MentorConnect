@@ -72,6 +72,25 @@ export async function fetch_api(to, method, data) {
         const response = await api.get(HOST_URL + `text-chat/api/chat/${data}`);
         return response;
       }
+      if (method === 'POST') {
+        const response = await api.post(HOST_URL + `text-chat/api/chat/`, data);
+        return response;
+      }
+    } else if (to === "get-chats") {
+      if (method === 'GET') {
+        const response = await api.get(HOST_URL + `text-chat/api/get-chats/${data}/`);
+        return response;
+      }
+    } else if (to === "get-messages") {
+      if (method === 'GET') {
+        const response = await api.get(HOST_URL + `text-chat/api/get-messages/${data}/`);
+        return response;
+      }
+    } else if (to === "message") {
+      if (method === 'POST') {
+        const response = await api.post(HOST_URL + `text-chat/api/message/`, data);
+        return response;
+      }
     } else if (to === "token") {
       if (method === "POST") {
         const response = await api.post(HOST_URL + "api/token/", data);

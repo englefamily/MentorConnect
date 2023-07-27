@@ -9,6 +9,7 @@ import Login from "./components/modals/LoginModal";
 import ShowMentors from "./components/ShowMentors";
 import Dashboard from "./components/Dashboard";
 import Test from "./components/Test";
+import SendMessage from "./components/modals/MessageModal";
 
 function SiteRoutes() {
   return (
@@ -19,8 +20,9 @@ function SiteRoutes() {
         <Route path="/registerStudent" element={<RegisterStudent />} />
         <Route path="/mentors" element={<ShowMentors />} />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard/:page" element={<Dashboard />} />
+        <Route path="/dashboard/:page/:id_?" element={<Dashboard />} />
         <Route path="/test" element={<Test />} />
+        <Route path="/modal" element={<SendMessage />} />
       </Routes>
     </>
   );

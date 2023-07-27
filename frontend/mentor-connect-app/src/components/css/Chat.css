@@ -2,7 +2,10 @@
   border: 1px solid black;
   display: flex;
   flex-direction: row;
-  min-height: 60vh;
+  height: 200vh;
+  height: 88vh;
+
+  /* max-height: 90vh; */
 }
 
 .main-chat {
@@ -10,6 +13,7 @@
   flex: 2;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
 .chat-top {
@@ -24,12 +28,15 @@
   flex-direction: column;
   padding: 1rem;
   background-color: #C2DEDC;
+  overflow-y: auto;
 }
 
 .message1 {
     text-align: right;
     border: 0.5px solid black;
-    max-width: 10rem;
+    border-radius: 25%;
+    padding: 5px;
+    max-width: 15rem;
     min-width: 4rem;
     margin-left: auto;  
     word-wrap: break-word;
@@ -40,6 +47,8 @@
   .message2 {
     text-align: right;
     border: 0.5px solid black;
+    border-radius: 25%;
+    padding: 5px;
     max-width: 10rem;
     min-width: 4rem;
     margin-right: auto;  
@@ -76,10 +85,41 @@
 .main-menu {
   border: 1px solid black;
   flex: 1;
+  min-width: 10rem;
+  max-width: 15rem;
+  overflow: auto;
 }
 
 .content-card {
   direction: ltr;
+  display: flex;
+  flex-direction: row;
   border: 1px solid black;
-  height: 4rem;
+  height: 4.5rem;
 }
+
+.content-card:hover {
+    cursor: pointer;
+    background-color: #EAEBEA;
+}
+
+.content-card:first-child:hover {
+    cursor: auto;
+    background-color: inherit;
+}
+
+.name-last-container {
+    flex: 2;
+}
+
+.img-container {
+    flex: 1;
+}
+
+.img-container img {
+    border: black solid 2px;
+    max-width: 3rem;
+    max-height: 3rem;
+    border-radius: 50%;
+}
+

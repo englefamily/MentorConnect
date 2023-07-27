@@ -1,0 +1,76 @@
+body.active-modal {
+    overflow-y: hidden;
+}
+
+.bg-modal {
+
+    position: absolute; /* You can also use 'fixed' if you want the div to stay fixed on the viewport */
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    z-index: 1;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.main-modal {
+  border: 2px black solid;
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* background-color: rgb(178, 180, 207); */
+  /* background-color: aqua; */
+  z-index: 2;
+  min-width: 20rem;
+  width: 40vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-content {
+  border: 2px black solid;
+  /* max-width: ; */
+  /* width: 100px; */
+  min-width: 100%;
+  width: 100px;
+  height: auto;
+  direction: rtl;
+  padding: 10px;
+}
+
+.modal-content i {
+    text-align: left;
+    cursor: pointer;;
+}
+
+.modal-content h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  margin-top: 15px;
+}
+
+.register-link {
+  text-align: center;
+  text-decoration: none;
+  color: rgb(41, 55, 95);
+}
+
+.modal-content label {
+  width: auto;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.modal-content input {
+}
+
+.submit-modal {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.error {
+  color: red;
+  font-size: smaller;
+}

@@ -9,8 +9,7 @@ import DropDown from "./DropDown";
 
 function Dashboard() {
   const { authTokens, userData } = useContext(context);
-  const { page } = useParams();
-  const [component, setComponent] = useState(page);
+  const { page, id_ } = useParams();
   const [profile, setProfile] = useState(
     userData?.type.includes("mentor") ? "mentor" : "student"
   );
@@ -50,32 +49,32 @@ function Dashboard() {
         )}
 
         <p
-          onClick={() => window.location.href = "edit_profile"}
+          onClick={() => navigate("/dashboard/edit_profile/")}
           style={
-            component === "edit_profile" ? { backgroundColor: "#00FFCA" } : {}
+            page === "edit_profile" ? { backgroundColor: "#00FFCA" } : {}
           }
         >
           עריכת פרופיל
         </p>
         <p
-          onClick={() => window.location.href = "chat"}
-          style={component === "chat" ? { backgroundColor: "#00FFCA" } : {}}
+          onClick={() => navigate("/dashboard/chat/")}
+          style={page === "chat" ? { backgroundColor: "#00FFCA" } : {}}
         >
           צ'אט
         </p>
         <p
-          onClick={() => window.location.href = "set_lesson"}
+          onClick={() => navigate("/dashboard/set_lesson/")}
           style={
-            component === "set_lesson" ? { backgroundColor: "#00FFCA" } : {}
+            page === "set_lesson" ? { backgroundColor: "#00FFCA" } : {}
           }
         >
           קביעת שיעור
         </p>
       </div>
       <div className="data-container">
-        {component === "edit_profile" && <EditProfile type={profile} />}
-        {component === "chat" && <Chat type={profile} />}
-        {component === "set_lesson" && <SetLesson />}
+        {page === "edit_profile" && <EditProfile type={profile} />}
+        {page === "chat" && <Chat type={profile} chat_id={id_ ? id_ : null}/>}
+        {page === "set_lesson" && <SetLesson />}
       </div>
     </div>
   );

@@ -22,7 +22,7 @@ body.active-modal {
 
 .modal-content {
   border: 2px black solid;
-  max-width: 300px;
+  width: 300px;
   height: auto;
   direction: rtl;
   padding: 10px;
@@ -37,6 +37,12 @@ body.active-modal {
   text-align: center;
   margin-bottom: 20px;
   margin-top: 15px;
+}
+
+.register-link {
+  text-align: center;
+  text-decoration: none;
+  color: rgb(41, 55, 95);
 }
 
 .modal-content label {
