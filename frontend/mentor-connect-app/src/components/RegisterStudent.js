@@ -144,6 +144,10 @@ function RegisterStudent(props) {
 
     if (Object.keys(updatedErrors).length === 0) {
       handleFetch().then((response) => {
+        if (response?.response?.status === 500) {
+        return;
+        }
+        console.log(response)
         const error = response?.response?.data?.errors;
         if (error) {
           let phone_num_error = "";
@@ -170,7 +174,7 @@ function RegisterStudent(props) {
           }));
         } else {
           setStudentCreate(true);
-          window.location.reload()
+//          window.location.reload()
           if (!props.edit) {
             loginUser(studentData.user.email, studentData.user.password);
           }
