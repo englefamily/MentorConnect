@@ -21,5 +21,3 @@ like this for example: #F0EEC8 Good luck!
 
 *** add pagination ***
 
-
-test
