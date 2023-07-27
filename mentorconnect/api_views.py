@@ -1,14 +1,13 @@
-from .models import User, Student, Mentor, Topic, Feedback, StudySessionSlot, StudySession
+from .models import User, Student, Mentor, Topic, Feedback
 from .forms import RegistrationForm, LoginForm
-from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer, \
-    StudySessionSlotSerializer, StudySessionSerializer
+from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer, StudySessionSerializer, StudySessionSlotSerializer
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import (
-    api_view, authentication_classes, permission_classes)
+from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
 from rest_framework.authentication import BasicAuthentication, TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
+from rest_framework.views import APIView
 from django.shortcuts import render
 from django.views.decorators.cache import cache_page
 from django.core.cache import cache
@@ -48,8 +47,8 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['last_name'] = user.student.last_name
         token['type'] = userType
 
-        return token
 
+        return token
 
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
@@ -110,10 +109,8 @@ def mentor(request):
 
                     if user_token:
                         try:
-                            decoded_token = jwt.decode(
-                                user_token, settings.SECRET_KEY, algorithms=['HS256'])
-                            mentor = User.objects.get(
-                                id=decoded_token['user_id']).mentor
+                            decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                            mentor = User.objects.get(id=decoded_token['user_id']).mentor
                         except Exception as error:
                             print(error)
                             return Response(
@@ -145,6 +142,7 @@ def mentor(request):
                     }
                 )
 
+
             case 'PUT':
                 user_token = request.data.get('token')
                 if not user_token:
@@ -157,10 +155,8 @@ def mentor(request):
                     )
 
                 try:
-                    decoded_token = jwt.decode(
-                        user_token, settings.SECRET_KEY, algorithms=['HS256'])
-                    mentor_instance = User.objects.get(
-                        id=decoded_token['user_id']).mentor
+                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    mentor_instance = User.objects.get(id=decoded_token['user_id']).mentor
                 except (jwt.DecodeError, User.DoesNotExist) as error:
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
@@ -175,8 +171,7 @@ def mentor(request):
                 if mentor_data.get('user', {}).get('email') == mentor_instance.user.email:
                     mentor_data['user'].pop('email')
 
-                ms = MentorSerializer(
-                    instance=mentor_instance, data=mentor_data, partial=True)
+                ms = MentorSerializer(instance=mentor_instance, data=mentor_data, partial=True)
                 try:
                     ms.is_valid(raise_exception=True)
                     ms.save()
@@ -228,8 +223,7 @@ def mentor(request):
             data={
                 'status': 'fail',
                 'message': 'a server error was thrown',
-                # convert to string to make it JSON serializable
-                'error': str(ex)
+                'error': str(ex) # convert to string to make it JSON serializable
             }
         )
 
@@ -273,8 +267,7 @@ def student(request):
 
                 if user_token:
                     try:
-                        decoded_token = jwt.decode(
-                            user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
                         print(student.user)
@@ -287,8 +280,7 @@ def student(request):
                                 'message': f'token not valid'
                             }
                         )
-                    student_serializer = StudentSerializer(
-                        student)  # Serialize the Student instance
+                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
                     print(student_serializer.data)
                     return Response(
                         status=status.HTTP_200_OK,
@@ -317,8 +309,7 @@ def student(request):
 
                 if user_token:
                     try:
-                        decoded_token = jwt.decode(
-                            user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                        decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
                         print(student.user)
@@ -331,8 +322,7 @@ def student(request):
                                 'message': f'token not valid'
                             }
                         )
-                    student_serializer = StudentSerializer(
-                        student)  # Serialize the Student instance
+                    student_serializer = StudentSerializer(student)  # Serialize the Student instance
                     print(student_serializer.data)
                     return Response(
                         status=status.HTTP_200_OK,
@@ -367,8 +357,7 @@ def student(request):
                     )
 
                 try:
-                    decoded_token = jwt.decode(
-                        user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                    decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                     student_instance = Student.objects.get(
                         user__id=decoded_token['user_id'])  # Retrieve the Student instance
                 except Exception as error:
@@ -386,8 +375,7 @@ def student(request):
                 if student_data.get('user', {}).get('email') == student_instance.user.email:
                     student_data['user'].pop('email')
 
-                student_serializer = StudentSerializer(
-                    instance=student_instance, data=student_data, partial=True)
+                student_serializer = StudentSerializer(instance=student_instance, data=student_data, partial=True)
                 try:
                     student_serializer.is_valid(raise_exception=True)
                     student_serializer.save()
@@ -418,11 +406,12 @@ def student(request):
                     }
                 )
 
+
             case 'DELETE':
-                user_token = request.query_params.get("token")
-                user_instance = User.objects.get(pk=user_token)
-                user_instance.delete()
-                return Response("Student Deleted")
+                    user_token = request.query_params.get("token")
+                    user_instance = User.objects.get(pk=user_token)
+                    user_instance.delete()
+                    return Response("Student Deleted")
 
             case _:
                 return Response(
@@ -432,6 +421,16 @@ def student(request):
                         'message': f'the method {request.method} is not allowed for this url'
                     }
                 )
+
+    # except Exception as ex:
+    #     return Response(
+    #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         data={
+    #             'status': 'fail',
+    #             'message': 'a server error was thrown',
+    #             'error': str(ex)
+    #         }
+    #     )
 
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
@@ -472,7 +471,7 @@ def topic(request):
                     data={
                         'status': 'success',
                         'message': 'retrieved all topics',
-                        'topics': topic_json.data  # convert to JSON compatible format
+                        'topics': topic_json.data # convert to JSON compatible format
                     }
                 )
 
@@ -480,8 +479,7 @@ def topic(request):
                 try:
                     topic_id = request.query_params.get("id")
                     topic_instance = Topic.objects.get(pk=topic_id)
-                    ts = TopicSerializer(
-                        instance=topic_instance, data=request.data, partial=True)
+                    ts = TopicSerializer(instance=topic_instance, data=request.data, partial=True)
                     if ts.is_valid():
                         ts.save()
                         return Response("Topic updated")
@@ -566,8 +564,7 @@ def feedback(request):
                 try:
                     feedback_id = request.query_params.get("id")
                     feedback_instance = Feedback.objects.get(pk=feedback_id)
-                    fs = FeedbackSerializer(
-                        instance=feedback_instance, data=request.data, partial=True)
+                    fs = FeedbackSerializer(instance=feedback_instance, data=request.data, partial=True)
                     if fs.is_valid():
                         fs.save()
                         return Response(

@@ -8,7 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'password')
+        fields = ('email', 'password', 'id')
 
     def update(self, instance, validated_data):
         if 'password' in validated_data:
@@ -58,8 +58,9 @@ class MentorSerializer(serializers.ModelSerializer):
         total_stars = sum(feedback.stars for feedback in feedbacks)
         if feedbacks.exists():
             average_rating = total_stars / feedbacks.count()
-            return average_rating
-        return 0
+            return {'avg': average_rating, 'count_rating': len(feedbacks)}
+        return {'avg': 0, 'count_rating': 0}
+
 
 
     def to_representation(self, instance):
@@ -82,7 +83,6 @@ class MentorSerializer(serializers.ModelSerializer):
             instance.user.email = user_data.get('email')
             instance.user.save()
         return super().update(instance, validated_data)
-
 
 class TopicSerializer(serializers.ModelSerializer):
     class Meta:
