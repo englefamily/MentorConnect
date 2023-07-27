@@ -3,17 +3,30 @@ from rest_framework.response import Response
 from rest_framework import status
 from .models import Chat, Message
 from .serializers import ChatSerializer, MessageSerializer
-from django.db.models import Q
+from django.db.models import Q, Max
 
 
 @api_view(['GET'])
-def get_messages(request):
+def get_chats(request, user_id):
+    print(user_id)
     # try:
     if True:
-        chat_id = request.query_params.get("id")
         chats = Chat.objects.filter(
-            Q(id__contains=f'{chat_id},') | Q(id__contains=f',{chat_id}')
+            Q(id__contains=f'{user_id}-') | Q(id__contains=f'-{user_id}')
+        ).annotate(last_message_date=Max('messages__date_added')).order_by('-last_message_date')
+        print(chats)
+        chat_serializer = ChatSerializer(chats, many=True)
+        print(chat_serializer.data)
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                'status': 'success',
+                'message': 'retrieved all chats',
+                'chats': chat_serializer.data
+            }
         )
+
+
 
     # except Exception as ex:
     # print(ex)
@@ -25,6 +38,38 @@ def get_messages(request):
     #         'error': str(ex)
     #     }
     # )
+
+@api_view(['GET'])
+def get_messages(request, chat_id):
+    # try:
+    if True:
+        messages = Message.objects.filter(chat_id=chat_id)
+
+        message_serializer = MessageSerializer(messages, many=True)
+        return Response(
+            status=status.HTTP_200_OK,
+            data={
+                'status': 'success',
+                'message': 'retrieved all messages',
+                'messages': message_serializer.data
+            }
+        )
+
+
+
+    # except Exception as ex:
+    # print(ex)
+    # return Response(
+    #     status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #     data={
+    #         'status': 'fail',
+    #         'message': 'a server error was thrown',
+    #         'error': str(ex)
+    #     }
+    # )
+
+
+
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def chat(request):
@@ -58,7 +103,7 @@ def chat(request):
                 chat_id = request.query_params.get("id")
                 if chat_id:
                     chats = Chat.objects.filter(
-                        Q(id__contains=f'{chat_id},') | Q(id__contains=f',{chat_id}')
+                        Q(id__contains=f'{chat_id}-') | Q(id__contains=f'-{chat_id}')
                     )
                     chat_serializer = ChatSerializer(chats, many=True)
                 else:
