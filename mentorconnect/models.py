@@ -66,7 +66,7 @@ class Mentor(models.Model):
     study_cities = MultiSelectField(choices=CITIES_CHOICES, max_length=128, null=True, blank=True)
     self_description_title = models.CharField(null=False, max_length=256)
     self_description_content = models.CharField(null=False, max_length=700)
-    # TODO: The following three fields are decimal - so that the Mentor can input a `rate` for that teaching methods
+    # The following three fields are decimal - so that the Mentor can input a `rate` for that teaching methods:
     teach_at_mentor = models.IntegerField(default=0)
     teach_at_student = models.IntegerField(default=0)
     teach_online = models.IntegerField(default=0)
@@ -157,6 +157,8 @@ class StudySessionSlot(models.Model):
     start_time = models.TimeField(choices=HOUR_CHOICES)
     end_time = models.TimeField(choices=HOUR_CHOICES)
     topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots')
+    # When a StudySessionSlot is created the option to choose the location of the teaching and the hourly rate will be
+    # taken from the `Mentor` model
     teach_method = models.CharField(max_length=20, choices=TEACH_LOCATION_CHOICES)
 
     class Meta:
@@ -182,5 +184,3 @@ class StudySession(models.Model):
 
     def __str__(self):
         return f"ID: {self.pk} Student: {self.student.first_name} {self.student.last_name} Session: {self.created_at}"
-
-
