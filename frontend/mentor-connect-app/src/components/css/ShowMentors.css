@@ -1,37 +1,41 @@
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
 
 html, body {
-  height: 100%;
+  /* height: 100%; */
   margin: 0;
   font-family: "Roboto", sans-serif;
 }
 
+/* Main container */
 .main-div {
-  width: auto;
+  width: 100%;
   direction: rtl;
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  overflow-x: hidden; 
+  max-height: calc(100vh - 4rem);
+  /* overflow-y: scroll;  */
+  overflow-x: hidden;
+  flex: 1; /* Take up remaining available space */
 }
 
+/* Search section */
 .main-search {
   display: flex;
   flex-direction: row;
   gap: 10px;
   justify-content: center;
-  height: 30vh;
-  width: 100vw;
   align-items: center;
+  min-height: 30vh;
+  min-width: 100vw;
   background-image: url('https://www.shutterstock.com/image-vector/web-site-development-maintenance-tools-600w-2087806093.jpg');
   background-size: cover;
-  background-position: center center;
   margin-bottom: 1rem;
 }
 
 .dd-search {
-    height: 2rem;
-    width: auto;
+  height: 2rem;
+  width: auto;
 }
 
 .search-input {
@@ -44,9 +48,10 @@ html, body {
   height: 2rem;
 }
 
+/* Mentors cards */
 .cards-container {
-  max-height: 60vh;
-  /* overflow-y: auto; */
+  /* max-height: 60vh;
+  overflow-y: auto; */
 }
 
 .card-container {
@@ -54,10 +59,11 @@ html, body {
   display: flex;
   flex-direction: row;
   margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 5px;
 }
 
 .right-card {
-  width: auto;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -73,11 +79,11 @@ html, body {
 }
 
 .img-container img {
-    width: 100px; /* Set the width of the image */
-    height: 100px; /* Set the height of the image */
-    border: black solid 2px;
-    border-radius: 50%;
-  }
+  width: 100px; /* Set the width of the image */
+  height: 100px; /* Set the height of the image */
+  border: black solid 2px;
+  border-radius: 50%;
+}
 
 .teachs-container {
   text-align: center;
@@ -93,8 +99,6 @@ html, body {
   flex: 2;
   text-align: right;
   padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-left: 10px;
 }
 
 .center-card h6 {
@@ -134,3 +138,22 @@ html, body {
   justify-content: center;
   align-items: center;
 }
+
+.buttons-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.pagination-bth {
+  background-color: aliceblue;
+  margin-left: 1rem;
+}
+
+.selected-pagination-bth {
+  margin-left: 1rem;
+  background-color: lightgray;
+}
+

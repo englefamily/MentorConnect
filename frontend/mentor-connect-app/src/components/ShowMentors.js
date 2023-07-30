@@ -20,6 +20,9 @@ function ShowMentors() {
   const [error, setError] = useState("");
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [selectedMentorData, setSelectedMentorData] = useState({});
+  const [selectedPage, setSelectedPage] = useState(1);
+  const [pages, setPages] = useState(0);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const fetchData = async () => {
     try {
@@ -35,6 +38,21 @@ function ShowMentors() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (isInitialized) {
+      console.log("Selected page changed:", selectedPage);
+      handleSearch().then(() => {
+        const scrollToDiv = document.getElementById("mentor-container");
+        if (scrollToDiv) {
+          scrollToDiv.scrollIntoView({ behavior: "smooth" });
+        }
+      });
+      // Add any other code you want to execute when 'selectedPage' changes
+    } else {
+      setIsInitialized(true);
+    }
+  }, [selectedPage]);
 
   const handleSelectTopic = (event) => {
     const value = parseInt(event.target.value);
@@ -66,7 +84,7 @@ function ShowMentors() {
     const topicsData = selectedTopics.join(",");
     const citiesData = selectedCities.join(",");
 
-    const resDataParams = `topics=${topicsData}&cities=${citiesData}`;
+    const resDataParams = `topics=${topicsData}&cities=${citiesData}&page=${selectedPage}`;
     const response = await fetch_api("mentor", "GET", resDataParams);
     console.log(
       "🚀 ~ file: ShowMentors.js:64 ~ handleSearch ~ response:",
@@ -77,15 +95,16 @@ function ShowMentors() {
       setError("קיימת בעיה זמנית באתר נסו מאוחר יותר");
       return null;
     }
-    const data = response.data.mentors;
-    setMentors(data);
+    const data = response.data;
+    setPages(data.num_pages);
+    setMentors(data.mentors);
   };
 
   const handleConect = async (mentorName, mentor_id) => {
     if (!userData) {
       return setShowLoginModal(true);
     }
-    setSelectedMentorData({name: mentorName, mentor_id: mentor_id})
+    setSelectedMentorData({ name: mentorName, mentor_id: mentor_id });
     setShowMessageModal(true);
     // const response = await fetch_api("chat", "POST", {
     //   id: `${mentorId}-${userData.user_id}`,
@@ -120,13 +139,15 @@ function ShowMentors() {
 
   return (
     <div className="main-div">
-      {userData && <MessageModal
-        showModal={showMessageModal}
-        setShowModal={setShowMessageModal}
-        message_to={selectedMentorData.name}
-        mentor_id={selectedMentorData.mentor_id}
-        student_id={userData.user_id}
-      />}
+      {userData && (
+        <MessageModal
+          showModal={showMessageModal}
+          setShowModal={setShowMessageModal}
+          message_to={selectedMentorData.name}
+          mentor_id={selectedMentorData.mentor_id}
+          student_id={userData.user_id}
+        />
+      )}
       <div className="main-search">
         <div className="dd-search">
           <DropDown
@@ -152,7 +173,7 @@ function ShowMentors() {
           חפש
         </button>
       </div>
-      <div className="cards-container">
+      <div className="cards-container" id="mentor-container">
         {error && <p>{error}</p>}
         {mentors.length === 0 && <h3>מורים לא נמצאו</h3>}
         {mentors &&
@@ -198,13 +219,31 @@ function ShowMentors() {
                   )}
                 </div>
                 <div className="bth-container">
-                  <button onClick={() => handleConect(`${mentor.first_name} ${mentor.last_name}`, mentor.user.id)}>
+                  <button
+                    onClick={() =>
+                      handleConect(
+                        `${mentor.first_name} ${mentor.last_name}`,
+                        mentor.user.id
+                      )
+                    }
+                  >
                     צור קשר עם {mentor.first_name}
                   </button>
                 </div>
               </div>
             </div>
           ))}
+      </div>
+      <div className="buttons-container">
+        {pages !== 0 && Array.from({ length: pages }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => setSelectedPage(index + 1)}
+            className={selectedPage === index + 1 ? "selected-pagination-bth" : "pagination-bth"}
+          >
+            {index + 1}
+          </button>
+        ))}
       </div>
     </div>
   );

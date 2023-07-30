@@ -14,7 +14,7 @@ const Chat = (props) => {
   const [chats, setChats] = useState([]);
   const [selectedChat, setSelectedChat] = useState(null);
   const [chatLoaded, setChatLoaded] = useState(false);
-  const ref = useRef(null);
+  const scrollContainerRef = useRef(null);
   const chat_id = props.chat_id;
 
   const getData = async () => {
@@ -35,6 +35,7 @@ const Chat = (props) => {
 
   useEffect(() => {
     console.log("🚀 ~ file: Chat.js:34 ~ Chat ~ messages:", messages);
+    handleScrollDown()
   }, [messages]);
 
   useEffect(() => {
@@ -49,6 +50,10 @@ const Chat = (props) => {
       setChatLoaded(true);
     }
   }, [chats]);
+
+  useEffect(() => {
+    handleScrollDown()
+  }, [selectedChat])
 
   const initializeWebSocketConnections = (chats) => {
     chats.forEach(async (chat) => {
@@ -93,6 +98,13 @@ const Chat = (props) => {
     });
   };
 
+  const handleScrollDown = () => {
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.scrollTop = scrollContainer.scrollHeight;
+    }
+  };
+
   const submitMessage = () => {
     if (newMessage.trim() !== "") {
       const message = {
@@ -120,12 +132,12 @@ const Chat = (props) => {
               </h6>
             )}
           </div>
-          <div className="chat-center" id="chatCenter">
+          <div className="chat-center" id="chatCenter" ref={scrollContainerRef}>
             {selectedChat &&
               messages[selectedChat.id] &&
               messages[selectedChat.id].map((message, index) => (
                 <div
-                  ref={ref}
+                  
                   key={index}
                   className={
                     message.email === userData.email ? "message1" : "message2"
