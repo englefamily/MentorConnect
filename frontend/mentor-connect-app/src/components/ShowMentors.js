@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import "./css/ShowMentors.css";
 import { fetch_api, transformData } from "../helpers/functions";
 import DropDown from "./DropDown";
-import { CITIES_CHOICES } from "../helpers/avariables";
+import { CITIES_CHOICES, FE_URL, HOST_URL } from "../helpers/avariables";
 import Rating from "./Rating";
 import context from "../Context";
 import { useNavigate } from "react-router-dom";
@@ -96,11 +96,13 @@ function ShowMentors() {
       return null;
     }
     const data = response.data;
+    console.log("🚀 ~ file: ShowMentors.js:99 ~ handleSearch ~ data:", data)
     setPages(data.num_pages);
     setMentors(data.mentors);
   };
 
-  const handleConect = async (mentorName, mentor_id) => {
+  const handleConect = async (e ,mentorName, mentor_id) => {
+    e.stopPropagation()
     if (!userData) {
       return setShowLoginModal(true);
     }
@@ -179,7 +181,7 @@ function ShowMentors() {
         {mentors &&
           !error &&
           mentors.map((mentor, index) => (
-            <div className="card-container" key={index}>
+            <div className="card-container" key={index} onClick={() => {window.open(`${FE_URL}mentor/${mentor.id}/`)}}>
               <div className="right-card">
                 <div className="img-container">
                   <img src="https://www.kanlomdim.co.il/assets/userfiles/3027//profileimage.jpg?v=2" />
@@ -212,16 +214,13 @@ function ShowMentors() {
                 </div>
                 <div className="price-container">
                   מחיר:{" "}
-                  {Math.max(
-                    mentor.teach_at_mentor,
-                    mentor.teach_online,
-                    mentor.teach_at_student
-                  )}
+                  {mentor.price_range}
                 </div>
                 <div className="bth-container">
                   <button
-                    onClick={() =>
+                    onClick={(e) =>
                       handleConect(
+                        e,
                         `${mentor.first_name} ${mentor.last_name}`,
                         mentor.user.id
                       )

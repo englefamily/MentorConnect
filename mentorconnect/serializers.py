@@ -47,6 +47,7 @@ class MentorSerializer(serializers.ModelSerializer):
     study_cities = serializers.MultipleChoiceField(choices=CITIES_CHOICES)
     experience_with = serializers.MultipleChoiceField(choices=EXPERIENCE_CHOICES)
     rating = serializers.SerializerMethodField()
+    price_range = serializers.SerializerMethodField()
 
     class Meta:
         model = Mentor
@@ -60,6 +61,15 @@ class MentorSerializer(serializers.ModelSerializer):
             average_rating = total_stars / feedbacks.count()
             return {'avg': average_rating, 'count_rating': len(feedbacks)}
         return {'avg': 0, 'count_rating': 0}
+    
+    def get_price_range(self, obj):
+        min_price = min(filter(lambda x: True if x != 0 else False ,[obj.teach_online, obj.teach_at_student, obj.teach_at_mentor]))
+        max_price = max(filter(lambda x: True if x != 0 else False ,[obj.teach_online, obj.teach_at_student, obj.teach_at_mentor]))
+        if min_price == max_price:
+            return min_price
+        
+        return f'{min_price}-{max_price}'
+        
 
 
 

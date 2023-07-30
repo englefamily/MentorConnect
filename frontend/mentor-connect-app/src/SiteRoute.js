@@ -10,6 +10,7 @@ import ShowMentors from "./components/ShowMentors";
 import Dashboard from "./components/Dashboard";
 import Test from "./components/Test";
 import SendMessage from "./components/modals/MessageModal";
+import ShowMentor from "./components/ShowMentor";
 
 function SiteRoutes() {
   return (
@@ -19,6 +20,7 @@ function SiteRoutes() {
         <Route path="/registerMentor" element={<RegisterMentor />} />
         <Route path="/registerStudent" element={<RegisterStudent />} />
         <Route path="/mentors" element={<ShowMentors />} />
+        <Route path="/mentor/:mentorId" element={<ShowMentor />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard/:page/:id_?" element={<Dashboard />} />
         <Route path="/test" element={<Test />} />

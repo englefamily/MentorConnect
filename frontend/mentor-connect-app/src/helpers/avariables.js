@@ -1,4 +1,5 @@
 export const HOST_URL = "http://127.0.0.1:8000/";
+export const FE_URL = "http://127.0.0.1:3000/";
 
 export const WS_HOST_URL = "ws://127.0.0.1:8000/";
 
