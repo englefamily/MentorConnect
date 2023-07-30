@@ -1,6 +1,7 @@
-from .models import User, Student, Mentor, Topic, Feedback
+from .models import User, Student, Mentor, Topic, Feedback, StudySession, StudySessionSlot
 from .forms import RegistrationForm, LoginForm
-from .serializers import MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer, StudySessionSerializer, StudySessionSlotSerializer
+from .serializers import (MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer,
+                          StudySessionSerializer, StudySessionSlotSerializer)
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
