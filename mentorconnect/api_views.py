@@ -18,6 +18,7 @@ from django.db.models import Count, Q
 import jwt
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
+from django.core.paginator import Paginator
 
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -87,11 +88,12 @@ def mentor(request):
                 user_token = request.query_params.get("token")
                 topics_param = request.query_params.get("topics")
                 cities_param = request.query_params.get("cities")
+                page_number = request.query_params.get("page")
 
                 mentors = Mentor.objects
+                
 
-                if request.query_params:
-
+                if user_token or topics_param or cities_param:
                     if cities_param:
                         cities_lst = cities_param.split(',')
                         conditions = Q()
@@ -131,15 +133,43 @@ def mentor(request):
                         )
                 else:
                     mentors = mentors.all()
+                    
+                if page_number:
+                    paginator = Paginator(mentors, 5)
+
+                    try:
+                        mentors = paginator.get_page(page_number)
+                    except Exception as e:
+                        print(e)
+                        return Response(
+                            status=status.HTTP_400_BAD_REQUEST,
+                            data={
+                                'status': 'fail',
+                                'message': 'Invalid page number'
+                            }
+                        )
 
                 mentors_json = MentorSerializer(mentors, many=True)
+                if page_number:
+                    data = {
+                        'status': 'success',
+                        'message': 'retrieved mentors',
+                        'mentors': mentors_json.data,
+                        'num_pages': mentors.paginator.num_pages,
+                        'current_page': mentors.number,
+                        'has_previous': mentors.has_previous(),
+                        'has_next': mentors.has_next(),
+                    }
+                else:
+                    data = {
+                        'status': 'success',
+                        'message': 'retrieved mentors',
+                        'mentors': mentors_json.data,
+                    }
+
                 return Response(
                     status=status.HTTP_200_OK,
-                    data={
-                        'status': 'success',
-                        'message': 'retrieved all mentors',
-                        'mentors': mentors_json.data  # convert to JSON compatible format
-                    }
+                    data=data
                 )
 
 
