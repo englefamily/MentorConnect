@@ -55,7 +55,7 @@ html, body {
 }
 
 .card-container {
-  background-color: rgba(8, 131, 149, 0.2);
+  background-color: #05BFDB;
   display: flex;
   flex-direction: row;
   margin-top: 1rem;
@@ -149,12 +149,12 @@ html, body {
 }
 
 .pagination-bth {
-  background-color: aliceblue;
+  background-color: #088395;
   margin-left: 1rem;
 }
 
 .selected-pagination-bth {
   margin-left: 1rem;
-  background-color: lightgray;
+  background-color: #05BFDB;
 }
 

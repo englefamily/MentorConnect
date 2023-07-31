@@ -19,7 +19,7 @@
 .chat-top {
   height: 4rem;
   border: 1px solid black;
-  background-color: #116A7B;
+  background-color: #0A4D68;
 }
 
 .chat-center {
@@ -27,7 +27,7 @@
   display: flex;
   flex-direction: column;
   padding: 1rem;
-  background-color: #C2DEDC;
+  background-color: #F0EEC8;
   overflow-y: auto;
 }
 
@@ -40,7 +40,7 @@
     min-width: 4rem;
     margin-left: auto;  
     word-wrap: break-word;
-    background-color: #ECE5C7;
+    background-color: #00FFCA;
     margin-bottom: 3px;
   }
   
@@ -53,7 +53,7 @@
     min-width: 4rem;
     margin-right: auto;  
     word-wrap: break-word;
-    background-color: whitesmoke;
+    background-color: #05BFDB;
     margin-bottom: 3px;
     
   }
@@ -69,7 +69,7 @@
 .chat-bottom input {
   height: 3rem;
   flex-grow: 1;
-  background-color: #CDC2AE;
+  background-color: #F0EEC8;
 }
 
 .chat-bottom button {
@@ -100,7 +100,7 @@
 
 .content-card:hover {
     cursor: pointer;
-    background-color: #EAEBEA;
+    background-color: #088395;
 }
 
 .content-card:first-child:hover {

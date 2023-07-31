@@ -11,7 +11,7 @@ from agora_token_builder import RtcTokenBuilder
 from django.http import JsonResponse
 # to generate number for uid
 from random
-# to configure experation times for tokens
+# to configure expiration times for tokens
 import time
 
 # Build token with uid

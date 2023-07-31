@@ -1,5 +1,5 @@
 .drop-down {
-    background-color: white;
+    background-color: #F0EEC8;
     border-radius: 5px;
     border: none;
     text-align: right;
@@ -14,7 +14,7 @@
 .search-res {
     list-style: none;
     border: 2px black solid;
-    background-color: whitesmoke;
+    background-color: #00FFCA;
     max-height: 50vh;
     width: 190px;
     overflow-y: auto;

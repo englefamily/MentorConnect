@@ -820,3 +820,14 @@ def study_session_view(request, pk=None):
                 'error': str(ex)
             }
         )
+# Function to receive user_id ad the associated student and returns all the study sessions associated with the student,
+# and that StudySession.student_approved = False
+def get_student_study_sessions(user_id):
+    try:
+        student = Student.objects.get(user_id=user_id)
+        sessions = StudySession.objects.filter(student=student, student_approved=False)
+        serializer = StudySessionSerializer(sessions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        print(e)
+        return None

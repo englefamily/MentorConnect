@@ -1,6 +1,6 @@
 const APP_ID = "de3b68dea39d4e2ea71981a4e5277def"
 const TOKEN = "007eJxTYNDgbvrGGpRckxd1cL81+7KNk5fzLM1s9/7xkMXho5Kg/zcFhpRU4yQzi5TURGPLFJNUo9REc0NLC8NEk1RTI3PzlNQ0lrq8lIZARoZ3he1MjAwQCOILMvim5hXllzjn5+WlJpc4ZySWMDAAALGxI8I="
-const CHANNEL = "MenrotConnectChat"
+const CHANNEL = "MentorConnectChat"
 
 const client = AgoraRTC.createClient({mode:'rtc', codec:'vp8'})
 
@@ -16,10 +16,10 @@ let joinAndDisplayLocalStream = async () => {
 
     localTracks = await AgoraRTC.createMicrophoneAndCameraTracls()
 
-    let player = `<div Class="video-continer" id="user-container-${UID}"> 
+    let player = `<div Class="video-container" id="user-container-${UID}">
                     <div class="video-player" id="user-${UID}"</div>
                 </div>`
-    document.getElementById('video-straems').insertAdjacentHTML('beforeend',  player)
+    document.getElementById('video-streams').insertAdjacentHTML('beforeend',  player)
 
     localTracks[1].play(`user-${UID}`)
 
