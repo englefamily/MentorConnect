@@ -91,6 +91,11 @@ export async function fetch_api(to, method, data) {
         const response = await api.post(HOST_URL + `text-chat/api/message/`, data);
         return response;
       }
+    }else if (to === "students_mentor_chats") {
+      if (method === 'GET') {
+        const response = await api.get(HOST_URL + `api/students_mentor_chats/${data}/`);
+        return response;
+      }
     } else if (to === "token") {
       if (method === "POST") {
         const response = await api.post(HOST_URL + "api/token/", data);

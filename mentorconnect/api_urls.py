@@ -18,4 +18,5 @@ urlpatterns = [
     path('study_session_slot/<int:pk>/', api_views.study_session_slot_view, name='study_session_slot_detail'),
     path('study_session/', api_views.study_session_view, name='study_session_crud'),
     path('study_session/<int:pk>/', api_views.study_session_view, name='study_session_detail'),
+    path('students_mentor_chats/<int:user_id>/', api_views.students_mentor_chats, name='study_session_detail'),
 ]

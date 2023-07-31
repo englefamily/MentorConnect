@@ -1,41 +1,42 @@
-// import React, { useContext, useCallback, useState } from "react";
-// import context from "../Context";
-// import axios from 'axios';
+import React, { useContext, useCallback, useState, useEffect } from "react";
+import context from "../Context";
+import axios from 'axios';
+import { fetch_api } from "../helpers/functions";
 
-// function SetLesson() {
-//   const { userData } = useContext(context);
-//   const [ form, setForm ] = useState({}); // Store Slot & Session values
-//   const [ response, setResponse ] = useState(null); // Manage & store API response
+function SetLesson() {
+  const { userData } = useContext(context);
+  const [students, setStudents] = useState([])
 
-//    // confirm user is a `mentor`
-//    if (userData.userRole !== "mentor") {
-//      return (
-//       <div>Only mentors can create Study Sessions</div>
-//       );
-//    }
+  const getStudents = async () => {
+    try {
+      const response = await fetch_api("students_mentor_chats", "GET", userData.user_id);
+      const student = response.data.students;
+      console.log("🚀 ~ file: SetLesson.js:13 ~ getStudents ~ student:", student)
 
-//   const handleChange = useCallback((event) => {
-//     setForm(f => ({ ...f, [event.target.name]: event.target.value }));
-//   }, []);
+      setStudents(student)
+    } catch (error) {
+      console.error(error);
+    }
+  }
 
-//   const createLesson = async (e) => {
-//     e.preventDefault();
-//   }
 
-//   return (
-//     <div>
-//       set lesson
-//       {userData.user_id}
-//       {/* <DropDown
-//         subjects={true}
-//         placeholder="עיר\אזור"
-//         objects={CITIES_CHOICES}
-//         name="city_residence"
-//         value={mentorData.city_residence}
-//         onChange={handleChange}
-//       /> */}
-//     </div>
-//   );
-// }
+  useEffect(()=>{
+    getStudents()
+  }, [])
 
-// export default SetLesson;
+  return (
+    <div>
+      {students && students.map((student)=>student.first_name)}
+      {/* <DropDown
+        subjects={true}
+        placeholder="עיר\אזור"
+        objects={CITIES_CHOICES}
+        name="city_residence"
+        value={mentorData.city_residence}
+        onChange={handleChange}
+      /> */}
+    </div>
+  );
+}
+
+export default SetLesson;

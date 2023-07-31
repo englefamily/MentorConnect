@@ -4,6 +4,7 @@ from .helphers import CITIES_CHOICES, EXPERIENCE_CHOICES
 from django.contrib.auth.hashers import make_password
 from datetime import datetime, time
 from collections import OrderedDict
+from TextChat import models as tc_models
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -161,4 +162,23 @@ class StudySessionSerializer(serializers.ModelSerializer):
                 slot_serializer.save()
         return super().update(instance, validated_data)
 
+
+class StudentsFromChatsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = tc_models.Chat
+        fields = '__all__'
+
+    def to_representation(self, instance):
+        # Modify the serialized response here
+        representation = super().to_representation(instance)
+        # representation = []
+        representation['first_name'] = instance.student.student.first_name
+        representation['last_name'] = instance.student.student.last_name
+        
+        print(representation)
+        return representation
+
     
+
+

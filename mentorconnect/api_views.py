@@ -1,7 +1,7 @@
 from .models import User, Student, Mentor, Topic, Feedback, StudySession, StudySessionSlot
 from .forms import RegistrationForm, LoginForm
 from .serializers import (MentorSerializer, StudentSerializer, TopicSerializer, FeedbackSerializer,
-                          StudySessionSerializer, StudySessionSlotSerializer)
+                          StudySessionSerializer, StudySessionSlotSerializer, StudentsFromChatsSerializer)
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import (api_view, authentication_classes, permission_classes)
@@ -55,6 +55,18 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 class MyTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
+
+@api_view(['GET'])
+def students_mentor_chats(request, user_id):
+    user = User.objects.get(id=user_id)
+    chats_serializer = StudentsFromChatsSerializer(user.mentor_chats, many=True)
+    return Response(
+            status=status.HTTP_200_OK,
+            data={
+                'status': 'success',
+                'students': chats_serializer.data
+            }
+        )
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def mentor(request):
