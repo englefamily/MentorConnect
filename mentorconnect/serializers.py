@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import User, Student, Mentor, Feedback, Topic, StudySession, StudySessionSlot
 from .helphers import CITIES_CHOICES, EXPERIENCE_CHOICES
 from django.contrib.auth.hashers import make_password
+from datetime import datetime, time
+from collections import OrderedDict
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,6 +18,16 @@ class UserSerializer(serializers.ModelSerializer):
             hashed_password = make_password(password)
             instance.password = hashed_password
         return super().update(instance, validated_data)
+    
+    def create(self, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            hashed_password = make_password(password)
+            validated_data['password'] = hashed_password
+        print('validated_data')
+        return super().create(validated_data)
+    
+
 
 
 class StudentSerializer(serializers.ModelSerializer):
@@ -113,6 +125,40 @@ class StudySessionSlotSerializer(serializers.ModelSerializer):
 
 
 class StudySessionSerializer(serializers.ModelSerializer):
+    slot = StudySessionSlotSerializer(partial=True)
     class Meta:
         model = StudySession
         fields = '__all__'
+
+    def to_representation(self, instance):
+        # Modify the serialized response here
+        representation = super().to_representation(instance)
+        teach_method = instance.teach_method
+        representation['hourly_rate'] = getattr(instance.slot.mentor, f'teach_{instance.teach_method}')
+        
+        print(representation)
+        return representation
+    
+    def create(self, validated_data):
+        slot_data = validated_data.pop('slot')
+        slot = StudySessionSlot.objects.create(**slot_data)  # Create a new User instance
+        study_session = StudySession.objects.create(slot=slot, **validated_data)
+        return study_session
+
+    def update(self, instance, validated_data):
+        slot_data = validated_data.pop('slot', {})
+        if slot_data:
+            
+            data = OrderedDict([
+                ('id', 1),
+                ('date', slot_data['date']),
+                ('start_time', slot_data['start_time']),
+                ('end_time', slot_data['end_time']),
+                ('mentor', 1)
+            ])
+            slot_serializer = StudySessionSlotSerializer(instance.slot, data=data)
+            if slot_serializer.is_valid():
+                slot_serializer.save()
+        return super().update(instance, validated_data)
+
+    

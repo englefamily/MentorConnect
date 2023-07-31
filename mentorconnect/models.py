@@ -156,10 +156,8 @@ class StudySessionSlot(models.Model):
     date = models.DateField()
     start_time = models.TimeField(choices=HOUR_CHOICES)
     end_time = models.TimeField(choices=HOUR_CHOICES)
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots')
     # When a StudySessionSlot is created the option to choose the location of the teaching and the hourly rate will be
     # taken from the `Mentor` model
-    teach_method = models.CharField(max_length=20, choices=TEACH_LOCATION_CHOICES)
 
     class Meta:
         db_table = 'study_session_slot'
@@ -168,15 +166,18 @@ class StudySessionSlot(models.Model):
         return f"ID: {self.pk} Mentor: {self.mentor.first_name} {self.mentor.last_name} From: {self.start_time}, " \
                f"until: {self.end_time}"
 
-    @property
-    def rate(self):
-        return getattr(self.mentor, f'teach_{self.teach_method}')
+    # @property
+    # def rate(self):
+    #     return getattr(self.mentor, f'teach_{self.teach_method}')
 
 
 class StudySession(models.Model):
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, related_name='slots', null=True, blank=True)
+    teach_method = models.CharField(max_length=20, choices=TEACH_LOCATION_CHOICES, null=True, blank=True)
     slot = models.OneToOneField(StudySessionSlot, on_delete=models.CASCADE, related_name='study_session')
     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='study_sessions')
     session_happened = models.BooleanField(default=False)
+    student_approved = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

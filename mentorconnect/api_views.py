@@ -87,6 +87,7 @@ def mentor(request):
             case 'GET':
                 # todo add order by lisense and stars
                 user_token = request.query_params.get("token")
+                user_id = request.query_params.get("id")
                 topics_param = request.query_params.get("topics")
                 cities_param = request.query_params.get("cities")
                 page_number = request.query_params.get("page")
@@ -110,19 +111,23 @@ def mentor(request):
                             .annotate(match_count=Count('topics')) \
                             .order_by('-match_count')
 
-                    if user_token:
-                        try:
-                            decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
-                            mentor = User.objects.get(id=decoded_token['user_id']).mentor
-                        except Exception as error:
-                            print(error)
-                            return Response(
-                                status=status.HTTP_400_BAD_REQUEST,
-                                data={
-                                    'status': 'fail',
-                                    'message': f'token not valid'
-                                }
-                            )
+                    if user_token or user_id:
+                        if user_token:
+                            try:
+                                decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
+                                mentor = User.objects.get(id=decoded_token['user_id']).mentor
+                            except Exception as error:
+                                print(error)
+                                return Response(
+                                    status=status.HTTP_400_BAD_REQUEST,
+                                    data={
+                                        'status': 'fail',
+                                        'message': f'token not valid'
+                                    }
+                                )
+                        elif user_id:
+                            mentor.objects.get(id=user_id)
+
                         mentor_json = MentorSerializer(mentor)
                         return Response(
                             status=status.HTTP_200_OK,
@@ -703,16 +708,12 @@ def study_session_slot_view(request, pk=None):
                     slot_id = pk
                     if slot_id is not None:
                         slot_instance = StudySessionSlot.objects.get(pk=slot_id)
-                        mentor_hourly_rate = slot_instance.mentor.slot.rate
+                        # mentor_hourly_rate = slot_instance.mentor.slot.rate
                         response = StudySessionSlotSerializer(slot_instance).data
-                        response["hourly_rate"] = mentor_hourly_rate
+                        # response["hourly_rate"] = mentor_hourly_rate
                         return Response(response)
                     slots = StudySessionSlot.objects.all()
-                    response = []
-                    for slot in slots:
-                        slot_data = StudySessionSlotSerializer(slot).data
-                        slot_data["hourly_rate"] = slot.rate
-                        response.append(slot_data)
+                    response = StudySessionSlotSerializer(slots, many=True).data
                     return Response(response, status=status.HTTP_200_OK)
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -754,6 +755,7 @@ def study_session_view(request, pk=None):
                     )
             case 'PUT':
                 session_id = pk
+                print(request.data)
                 session_instance = StudySession.objects.get(pk=session_id)
                 session_serializer = StudySessionSerializer(
                     instance=session_instance, data=request.data, partial=True)
@@ -784,6 +786,7 @@ def study_session_view(request, pk=None):
                     return Response("Study Session Deleted")
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
             case 'GET':
                 try:
                     session_id = pk

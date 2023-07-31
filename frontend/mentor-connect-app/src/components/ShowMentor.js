@@ -5,8 +5,16 @@ function ShowMentor() {
 const { mentorId } = useParams()
 
   return (
-    <div>
-      {mentorId}
+    <div className='main-div'>
+      <div className='header'>
+        
+      </div>
+      <div className=''>
+
+      </div>
+      <div className=''>
+
+      </div>
     </div>
   )
 }

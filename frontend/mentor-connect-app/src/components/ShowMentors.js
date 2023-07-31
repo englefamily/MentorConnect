@@ -181,7 +181,8 @@ function ShowMentors() {
         {mentors &&
           !error &&
           mentors.map((mentor, index) => (
-            <div className="card-container" key={index} onClick={() => {window.open(`${FE_URL}mentor/${mentor.id}/`)}}>
+            <div className="card-container" key={index}>
+               {/* onClick={() => {window.open(`${FE_URL}mentor/${mentor.id}/`)}} */}
               <div className="right-card">
                 <div className="img-container">
                   <img src="https://www.kanlomdim.co.il/assets/userfiles/3027//profileimage.jpg?v=2" />
