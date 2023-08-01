@@ -30,12 +30,14 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         try:
             user.mentor
             userType += ['mentor']
+            token['mentor_id'] = user.mentor.id
         except Exception as error:
             print(error)
 
         try:
             user.student
             userType += ['student']
+            token['student_id'] = user.student.id
         except Exception as error:
             print(error)
 
@@ -60,11 +62,13 @@ class MyTokenObtainPairView(TokenObtainPairView):
 def students_mentor_chats(request, user_id):
     user = User.objects.get(id=user_id)
     chats_serializer = StudentsFromChatsSerializer(user.mentor_chats, many=True)
+    mentor_serializer = MentorSerializer(user.mentor)
     return Response(
             status=status.HTTP_200_OK,
             data={
                 'status': 'success',
-                'students': chats_serializer.data
+                'students': chats_serializer.data,
+                'mentor': mentor_serializer.data
             }
         )
 

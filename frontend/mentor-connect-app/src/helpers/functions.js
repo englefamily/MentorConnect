@@ -91,7 +91,12 @@ export async function fetch_api(to, method, data) {
         const response = await api.post(HOST_URL + `text-chat/api/message/`, data);
         return response;
       }
-    }else if (to === "students_mentor_chats") {
+    } else if (to === "study_session") {
+      if (method === 'POST') {
+        const response = await api.post(HOST_URL + `api/study_session/`, data);
+        return response;
+      }
+    } else if (to === "students_mentor_chats") {
       if (method === 'GET') {
         const response = await api.get(HOST_URL + `api/students_mentor_chats/${data}/`);
         return response;
@@ -122,11 +127,11 @@ export const transformData = (data) => {
   data.forEach((item) => {
     const { field, name, id } = item;
 
-    if (!transformedData[name]) {
-      transformedData[name] = [];
+    if (!transformedData[field]) {
+      transformedData[field] = [];
     }
 
-    transformedData[name].push({ name: field, value: id });
+    transformedData[field].push({ name: name, value: id });
   });
 
   return transformedData;

@@ -175,6 +175,7 @@ class StudentsFromChatsSerializer(serializers.ModelSerializer):
         # representation = []
         representation['first_name'] = instance.student.student.first_name
         representation['last_name'] = instance.student.student.last_name
+        representation['id'] = instance.student.student.id
         
         print(representation)
         return representation

@@ -94,7 +94,6 @@ const DropDown = (props) => {
       });
       return res;
     } else if (props.subjects) {
-
       const res = props.objects.filter((item) => {
         if (
           item.name.toLowerCase().includes(searchInput.toLowerCase())
