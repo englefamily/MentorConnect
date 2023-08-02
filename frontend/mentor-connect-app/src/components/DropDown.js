@@ -126,9 +126,6 @@ const DropDown = (props) => {
       {(isOpen) && (
         <div
           className="search-res"
-          // onBlur={() => {
-          //   setIsOpen(false);
-          // }}
           ref={searchResRef}
           tabIndex={0}
         >
@@ -150,7 +147,7 @@ const DropDown = (props) => {
                             onChange={handleSelected}
                             type="checkbox"
                           />
-                          <label className="labelCheckbox" htmlFor={index}>{name}</label>
+                          <label htmlFor={index}>{name}</label>
                           <br />
                         </React.Fragment>
                       );

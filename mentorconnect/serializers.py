@@ -25,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
             hashed_password = make_password(password)
             validated_data['password'] = hashed_password
-        print('validated_data')
+        
         return super().create(validated_data)
     
 
@@ -137,7 +137,7 @@ class StudySessionSerializer(serializers.ModelSerializer):
         teach_method = instance.teach_method
         representation['hourly_rate'] = getattr(instance.slot.mentor, f'teach_{instance.teach_method}')
         
-        print(representation)
+        
         return representation
     
     def create(self, validated_data):
@@ -177,7 +177,7 @@ class StudentsFromChatsSerializer(serializers.ModelSerializer):
         representation['last_name'] = instance.student.student.last_name
         representation['id'] = instance.student.student.id
         
-        print(representation)
+        
         return representation
 
     
