@@ -41,7 +41,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         except Exception as error:
             print(error)
 
-        print(userType)
+        
         token['email'] = user.email
         if 'mentor' in userType:
             token['first_name'] = user.mentor.first_name
@@ -91,7 +91,7 @@ def mentor(request):
                         }
                     )
                 else:
-                    print(new_mentor.errors)
+                    
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
@@ -133,7 +133,7 @@ def mentor(request):
                                 decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                                 mentor = User.objects.get(id=decoded_token['user_id']).mentor
                             except Exception as error:
-                                print(error)
+                                
                                 return Response(
                                     status=status.HTTP_400_BAD_REQUEST,
                                     data={
@@ -162,7 +162,7 @@ def mentor(request):
                     try:
                         mentors = paginator.get_page(page_number)
                     except Exception as e:
-                        print(e)
+                        
                         return Response(
                             status=status.HTTP_400_BAD_REQUEST,
                             data={
@@ -303,7 +303,7 @@ def student(request):
                         }
                     )
                 else:
-                    print(new_student.errors)
+                    
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
@@ -322,9 +322,9 @@ def student(request):
                         decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
-                        print(student.user)
+                        
                     except Exception as error:
-                        print(error)
+                        
                         return Response(
                             status=status.HTTP_400_BAD_REQUEST,
                             data={
@@ -333,7 +333,7 @@ def student(request):
                             }
                         )
                     student_serializer = StudentSerializer(student)  # Serialize the Student instance
-                    print(student_serializer.data)
+                    
                     return Response(
                         status=status.HTTP_200_OK,
                         data={
@@ -364,9 +364,9 @@ def student(request):
                         decoded_token = jwt.decode(user_token, settings.SECRET_KEY, algorithms=['HS256'])
                         student = Student.objects.get(
                             user__id=decoded_token['user_id'])  # Retrieve the Student instance
-                        print(student.user)
+                        
                     except Exception as error:
-                        print(error)
+                        
                         return Response(
                             status=status.HTTP_400_BAD_REQUEST,
                             data={
@@ -375,7 +375,7 @@ def student(request):
                             }
                         )
                     student_serializer = StudentSerializer(student)  # Serialize the Student instance
-                    print(student_serializer.data)
+                    
                     return Response(
                         status=status.HTTP_200_OK,
                         data={
@@ -413,7 +413,7 @@ def student(request):
                     student_instance = Student.objects.get(
                         user__id=decoded_token['user_id'])  # Retrieve the Student instance
                 except Exception as error:
-                    print(error)
+                    
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                         data={
@@ -559,7 +559,7 @@ def topic(request):
                 )
 
     except Exception as ex:
-        print(ex)
+        
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={
@@ -651,7 +651,7 @@ def feedback(request):
                 )
 
     except Exception as ex:
-        print(ex)
+        
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={
@@ -734,7 +734,7 @@ def study_session_slot_view(request, pk=None):
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     except Exception as ex:
-        print(ex)
+        
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={
@@ -771,7 +771,7 @@ def study_session_view(request, pk=None):
                     )
             case 'PUT':
                 session_id = pk
-                print(request.data)
+                
                 session_instance = StudySession.objects.get(pk=session_id)
                 session_serializer = StudySessionSerializer(
                     instance=session_instance, data=request.data, partial=True)
@@ -805,8 +805,18 @@ def study_session_view(request, pk=None):
                 
             case 'GET':
                 try:
+                    mentor_id = request.query_params.get("mentor_id")
+
                     session_id = pk
-                    if session_id is not None:
+
+                    if mentor_id:
+                        print(mentor_id)
+                        session_instance = StudySession.objects.filter(slot__mentor_id=mentor_id)
+                        print("🚀 ~ file: api_views.py:815 ~ session_instance:", session_instance)
+                        session_serializer = StudySessionSerializer(session_instance, many=True)
+                        return Response(data=session_serializer.data)
+
+                    elif session_id:
                         session_instance = StudySession.objects.get(pk=session_id)
                         return Response(StudySessionSerializer(session_instance).data)
                     sessions = StudySession.objects.all()
@@ -814,8 +824,9 @@ def study_session_view(request, pk=None):
                     return Response(serializer.data, status=status.HTTP_200_OK)
                 except Exception as e:
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                
     except Exception as ex:
-        print(ex)
+        
         return Response(
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             data={

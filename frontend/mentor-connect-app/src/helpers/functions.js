@@ -95,6 +95,9 @@ export async function fetch_api(to, method, data) {
       if (method === 'POST') {
         const response = await api.post(HOST_URL + `api/study_session/`, data);
         return response;
+      } else if (method === 'GET') {
+        const response = await api.get(HOST_URL + `api/study_session/?${data}`)
+        return response
       }
     } else if (to === "students_mentor_chats") {
       if (method === 'GET') {

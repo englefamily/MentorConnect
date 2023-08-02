@@ -4,7 +4,9 @@
     border: none;
     text-align: right;
     direction: rtl;
-    
+    /* width: 5px; */
+    margin: 0 auto;
+    position: relative; /* Add relative positioning */
 }
 
 .search-input {
@@ -20,8 +22,9 @@
     overflow-y: auto;
     direction: rtl;
     min-width: 30vw;
-    position: relative;
-    /* top: 0; */
+    position: absolute; /* Change to absolute positioning */
+    top: 100%; /* Position the "search-res" below the "search-input" class */
+    left: auto; /* Align the "search-res" with the left side of the "search-input" class */
     z-index: 2;
 }
 
@@ -31,8 +34,12 @@
 
 .sub-list {
     list-style: none;
-    margin-left: 1rem;
+    margin-left: 1rem;
     margin-bottom: 0;
+}
+
+.search-res input[type="checkbox"] {
+    margin-left: 5px; 
 }
 
 .search-res li {
@@ -40,5 +47,6 @@
 }
 
 .labelCheckbox {
-    margin-right: 2px;
+    
 }
+

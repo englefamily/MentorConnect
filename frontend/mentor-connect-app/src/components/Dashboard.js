@@ -2,10 +2,10 @@ import React, { useContext, useEffect, useState } from "react";
 import "./css/Dashboard.css";
 import EditProfile from "./edit_profile";
 import Chat from "./Chat";
-import SetLesson from "./SetLesson";
 import { useNavigate, useParams } from "react-router-dom";
 import context from "../Context";
 import DropDown from "./DropDown";
+import ShowLessons from "./ShowLessons.js";
 
 function Dashboard() {
   const { authTokens, userData } = useContext(context);
@@ -74,7 +74,7 @@ function Dashboard() {
       <div className="data-container">
         {page === "edit_profile" && <EditProfile type={profile} />}
         {page === "chat" && <Chat type={profile} chat_id={id_ ? id_ : null}/>}
-        {page === "set_lesson" && <SetLesson />}
+        {page === "set_lesson" && <ShowLessons />}
       </div>
     </div>
   );

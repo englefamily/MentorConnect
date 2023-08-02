@@ -28,7 +28,7 @@ function ShowMentors() {
     try {
       const response = await fetch_api("topic", "GET");
       const topics = response.data.topics;
-      console.log(topics);
+      console.log("🚀 ~ file: ShowMentors.js:31 ~ fetchData ~ topics:", topics)
       setTopics(transformData(topics));
     } catch (error) {
       console.error(error);
