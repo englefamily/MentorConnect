@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from datetime import datetime, time
 from collections import OrderedDict
 from TextChat import models as tc_models
+from datetime import datetime
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -127,9 +128,38 @@ class StudySessionSlotSerializer(serializers.ModelSerializer):
 
 class StudySessionSerializer(serializers.ModelSerializer):
     slot = StudySessionSlotSerializer(partial=True)
+    topic_name = serializers.SerializerMethodField()
+    mentor_name = serializers.SerializerMethodField()
+    student_name = serializers.SerializerMethodField()
+    date_passed = serializers.SerializerMethodField()
+
     class Meta:
         model = StudySession
         fields = '__all__'
+
+    def get_topic_name(self, obj):
+        return obj.topic.name
+    
+    def get_student_name(self, obj):
+        return f'{obj.student.first_name} {obj.student.last_name}'
+    
+    def get_mentor_name(self, obj):
+        return f'{obj.slot.mentor.first_name} {obj.slot.mentor.last_name}'
+    
+    def get_date_passed(self, obj):
+        target_datetime_str = f"{obj.slot.date}, {obj.slot.end_time}"
+        target_datetime_obj = datetime.strptime(target_datetime_str, "%Y-%m-%d, %H:%M:%S")
+
+        # Get the current datetime
+        current_datetime_obj = datetime.now()
+
+        # Compare the target datetime with the current datetime
+        if current_datetime_obj >= target_datetime_obj:
+            return True
+        else:
+            return False
+
+    
 
     def to_representation(self, instance):
         # Modify the serialized response here

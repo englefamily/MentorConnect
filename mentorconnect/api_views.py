@@ -805,14 +805,20 @@ def study_session_view(request, pk=None):
                 
             case 'GET':
                 try:
-                    mentor_id = request.query_params.get("mentor_id")
+                    user_id = request.query_params.get("user_id")
+                    user_type = request.query_params.get("user_type")
 
                     session_id = pk
 
-                    if mentor_id:
-                        print(mentor_id)
-                        session_instance = StudySession.objects.filter(slot__mentor_id=mentor_id)
-                        print("🚀 ~ file: api_views.py:815 ~ session_instance:", session_instance)
+                    if user_id:
+                        if user_type == 'mentor':
+                            mentor_id = Mentor.objects.get(user_id=user_id).id
+                            session_instance = StudySession.objects.filter(slot__mentor_id=mentor_id)
+                        else:
+                            student_id = Student.objects.get(user_id=user_id).id 
+                            print("🚀 ~ file: api_views.py:819 ~ student_id:", student_id)
+                            session_instance = StudySession.objects.filter(student_id=student_id)
+                            print("🚀 ~ file: api_views.py:817 ~ session_instance:", session_instance)
                         session_serializer = StudySessionSerializer(session_instance, many=True)
                         return Response(data=session_serializer.data)
 
