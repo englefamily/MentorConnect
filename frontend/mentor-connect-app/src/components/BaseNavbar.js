@@ -14,7 +14,7 @@ function BaseNavbar() {
       <nav className="main-nav">
         <ul className="nav-list">
           <li className="nav-item">
-            <a href="/">
+            <a href="/mentors">
               <img src={logo} alt="Logo" className="nav-logo" />
             </a>
           </li>

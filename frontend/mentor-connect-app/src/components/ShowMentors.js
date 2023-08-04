@@ -201,7 +201,7 @@ function ShowMentors() {
                 <h6>סוג השכלה: </h6> <span>{mentor.education_level}</span>
                 <br />
                 <h6>השכלה:</h6>{" "}
-                <span>{mentor.topics.map((topic) => topic.field + ", ")}</span>
+                <span>{mentor.topics.map((topic) => topic.name + ", ")}</span>
                 <br />
                 <h6>ערי לימוד: </h6>
                 <span>{mentor.study_cities.map((city) => city + ", ")}</span>
