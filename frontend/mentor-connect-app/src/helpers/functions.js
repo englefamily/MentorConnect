@@ -98,6 +98,9 @@ export async function fetch_api(to, method, data) {
       } else if (method === 'GET') {
         const response = await api.get(HOST_URL + `api/study_session/?${data}`)
         return response
+      } else if (method === 'PUT') {
+        const response = await api.put(HOST_URL + `api/study_session/${data.id}/`, data.data)
+        return response
       }
     } else if (to === "students_mentor_chats") {
       if (method === 'GET') {

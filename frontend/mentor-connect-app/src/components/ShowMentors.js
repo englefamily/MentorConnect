@@ -185,7 +185,7 @@ function ShowMentors() {
                {/* onClick={() => {window.open(`${FE_URL}mentor/${mentor.id}/`)}} */}
               <div className="right-card">
                 <div className="img-container">
-                  <img src="https://www.kanlomdim.co.il/assets/userfiles/3027//profileimage.jpg?v=2" />
+                  <img />
                 </div>
                 <div className="teachs-container">
                   {mentor.teach_online !== 0 && <p>מלמד אולניין</p>}

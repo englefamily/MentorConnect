@@ -137,7 +137,6 @@ const Chat = (props) => {
               messages[selectedChat.id] &&
               messages[selectedChat.id].map((message, index) => (
                 <div
-                  
                   key={index}
                   className={
                     message.email === userData.email ? "message1" : "message2"

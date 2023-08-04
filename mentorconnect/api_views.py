@@ -16,6 +16,7 @@ from django.core.cache import cache
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.db.models import Count, Q
+from django.db.models import Case, When, Value, BooleanField
 import jwt
 from django.conf import settings
 from rest_framework.exceptions import ValidationError
@@ -746,7 +747,8 @@ def study_session_slot_view(request, pk=None):
 
 @api_view(['GET', 'POST', 'PUT', 'DELETE'])
 def study_session_view(request, pk=None):
-    try:
+    # try:
+    if True:
         match request.method:
             case 'POST':
                 new_session = StudySessionSerializer(data=request.data)
@@ -776,6 +778,7 @@ def study_session_view(request, pk=None):
                 session_serializer = StudySessionSerializer(
                     instance=session_instance, data=request.data, partial=True)
                 if session_serializer.is_valid():
+                    print("🚀 ~ file: api_views.py:779 ~ session_serializer:", session_serializer)
                     session_serializer.save()
                     return Response(
                         status=status.HTTP_200_OK,
@@ -804,7 +807,8 @@ def study_session_view(request, pk=None):
                     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
             case 'GET':
-                try:
+                # try:
+                if True:
                     user_id = request.query_params.get("user_id")
                     user_type = request.query_params.get("user_type")
 
@@ -819,6 +823,15 @@ def study_session_view(request, pk=None):
                             print("🚀 ~ file: api_views.py:819 ~ student_id:", student_id)
                             session_instance = StudySession.objects.filter(student_id=student_id)
                             print("🚀 ~ file: api_views.py:817 ~ session_instance:", session_instance)
+                        session_instance.filter()
+                        session_instance = session_instance.annotate(
+                            session_happened_last=Case(
+                                When(session_happened=True, then=Value(False)),
+                                default=Value(True),
+                                output_field=BooleanField()
+                            )
+                        )
+                        session_instance = session_instance.order_by('-session_happened_last', 'slot__date', 'slot__start_time')
                         session_serializer = StudySessionSerializer(session_instance, many=True)
                         return Response(data=session_serializer.data)
 
@@ -828,16 +841,16 @@ def study_session_view(request, pk=None):
                     sessions = StudySession.objects.all()
                     serializer = StudySessionSerializer(sessions, many=True)
                     return Response(serializer.data, status=status.HTTP_200_OK)
-                except Exception as e:
-                    return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                # except Exception as e:
+                #     return Response(f'Error: {e}', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
                 
-    except Exception as ex:
+    # except Exception as ex:
         
-        return Response(
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            data={
-                'status': 'fail',
-                'message': 'a server error was thrown',
-                'error': str(ex)
-            }
-        )
+    #     return Response(
+    #         status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    #         data={
+    #             'status': 'fail',
+    #             'message': 'a server error was thrown',
+    #             'error': str(ex)
+    #         }
+    #     )

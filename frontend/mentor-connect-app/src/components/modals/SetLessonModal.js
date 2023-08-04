@@ -182,6 +182,7 @@ function SetLessonModal(props) {
           setErrors(["קיימת בעיה זמנית באתר בקביעת שיעור, נסה מאוחר יותר"]);
           return;
         }
+        window.location.reload()
       });
     } catch (error) {
       console.error(error);

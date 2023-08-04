@@ -16,6 +16,14 @@ function App() {
     // setHeight(elementRef.current.clientHeight);
   }, []);
 
+    useEffect(() => {
+      document.title = 'MentorConnect'; // Set the title here
+      return () => {
+        // Optionally, you can reset the title when the component unmounts
+        document.title = 'MentorConnect';
+      };
+    }, []);
+
   return (
     <>
       <BaseNavbar />

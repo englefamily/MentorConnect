@@ -74,6 +74,34 @@ function ShowLessons() {
     );
   }, [students, mentorData, topics]);
 
+  const handleApprove = (event) => {
+    fetch_api("study_session", "PUT", {
+      id: event.target.id,
+      data: { student_approved: true },
+    }).then((response) => {
+      if (response.status !== 200) {
+        window.alert("בעיה זמנית באישור המפגש, אנא נסה מאוחר יותר");
+        return;
+      }
+      window.alert('השיעור אושר בהצלחה');
+      window.location.reload();
+    });
+  };
+
+  const handleComplete = (event) => {
+    fetch_api("study_session", "PUT", {
+      id: event.target.id,
+      data: { session_happened: true },
+    }).then((response) => {
+      if (response.status !== 200) {
+        window.alert("בעיה זמנית בסימון השיעור כהושלם, אנא נסה מאוחר יותר");
+        return;
+      }
+      window.alert("השיעור סומן כהושלם");
+      window.location.reload();
+    });
+  };
+
   return (
     <div className="main-div">
       {userData?.type.includes("mentor") && (
@@ -92,7 +120,7 @@ function ShowLessons() {
       )}
       <h2>שיעורים</h2>
       <div className="cards-container">
-        {studySessions.length > 0 &&
+        {studySessions &&
           studySessions.map((study_session) => (
             <div className="ss-card" key={study_session.id}>
               <div className="first-column">
@@ -126,8 +154,9 @@ function ShowLessons() {
                     "סטטוס: "}
                 </strong>
                 <label>
-                  {(userData.type.includes("mentor") &&
-                    study_session.student_approved && !study_session.date_passed) &&
+                  {userData.type.includes("mentor") &&
+                    study_session.student_approved &&
+                    !study_session.date_passed &&
                     "התלמיד אישור את המפגש"}
                 </label>
                 <label>
@@ -136,21 +165,31 @@ function ShowLessons() {
                     "מחכה לאישור התלמיד"}
                 </label>
                 <label>
-                  {(userData.type.includes("student") &&
-                    study_session.student_approved && !study_session.session_happened) &&
+                  {userData.type.includes("student") &&
+                    study_session.student_approved &&
+                    !study_session.session_happened &&
                     "אישרת את המפגש"}
                 </label>
                 <label>
                   {userData.type.includes("student") &&
                     !study_session.student_approved && (
-                      <button className="apr-bth">אשר</button>
+                      <button
+                        className="apr-bth"
+                        id={study_session.id}
+                        onClick={handleApprove}
+                      >
+                        אשר
+                      </button>
                     )}
                 </label>
                 <label>
-                  {(userData.type.includes("mentor") &&
+                  {userData.type.includes("mentor") &&
                     study_session.student_approved &&
-                    study_session.date_passed && !study_session.session_happened) && (
-                      <button className="cml-bth">שיעור הושלם</button>
+                    study_session.date_passed &&
+                    !study_session.session_happened && (
+                      <button className="cml-bth" id={study_session.id} onClick={handleComplete}>
+                        סימון השיעור כהושלם
+                      </button>
                     )}
                 </label>
                 <label>
