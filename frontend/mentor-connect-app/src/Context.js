@@ -20,6 +20,7 @@ export const Provider = ({ children }) => {
   );
   const [loading, setLoading] = useState(true);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const navigate = useNavigate()
 
   useEffect(() => {
     let timeout = null;
@@ -44,9 +45,11 @@ export const Provider = ({ children }) => {
       email: email,
       password: password,
     };
+    console.log("🚀 ~ file: Context.js:49 ~ loginUser ~ data:", data)
     const response = await fetch_api("token", "POST", data);
     if (response.status === 200) {
       setAuthTokens(response.data);
+      console.log("🚀 ~ file: Context.js:52 ~ loginUser ~ response.data:", response.data)
       setUserData(jwt_decode(response.data.access));
       localStorage.setItem("authTokens", JSON.stringify(response.data));
       console.log(jwt_decode(response.data.access));

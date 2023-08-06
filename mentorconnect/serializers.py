@@ -6,6 +6,7 @@ from datetime import datetime, time
 from collections import OrderedDict
 from TextChat import models as tc_models
 from datetime import datetime
+from django.db import transaction
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -96,10 +97,31 @@ class MentorSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user_data = validated_data.pop('user')
         topics_data = validated_data.pop('topics')
-        user = User.objects.create_user(**user_data)  # Create a new User instance
-        mentor = Mentor.objects.create(user=user, **validated_data)
-        mentor.topics.add(*topics_data)
-        return mentor
+
+        try:
+            with transaction.atomic():
+                user = User.objects.create_user(**user_data)  # Create a new User instance
+                mentor = Mentor.objects.create(user=user, **validated_data)
+
+                student_data = {
+                    'user': user,
+                    'first_name': validated_data['first_name'],
+                    'last_name': validated_data['last_name'],
+                    'phone_num': validated_data['phone_num'],
+                    # Add other student data here
+                }
+                student = Student.objects.create(**student_data)
+
+                mentor.topics.add(*topics_data)
+
+                return mentor
+
+        except Exception as e:
+            # If an exception occurs, the transaction will be rolled back, and no objects will be created.
+            # You can add any handling you need for the exception here.
+            print(f"Error: {e}")
+            raise e
+
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', {})

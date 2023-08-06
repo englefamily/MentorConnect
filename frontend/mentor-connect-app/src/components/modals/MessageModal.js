@@ -5,7 +5,7 @@ import { fetch_api } from "../../helpers/functions";
 import { useNavigate } from "react-router-dom";
 
 export default function MessageModal(props) {
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [showMessageModal, setShowMessageModal] = useState(true);
   const navigate = useNavigate();
@@ -17,13 +17,13 @@ export default function MessageModal(props) {
   });
 
   const toggleModal = () => {
-    setError('')
+    setError("");
     props.setShowModal(false);
   };
 
   const handleSend = async (event) => {
     if (!message) {
-      setError('שדה נדרש')
+      setError("שדה נדרש");
       return;
     }
     const data = {
@@ -32,7 +32,10 @@ export default function MessageModal(props) {
       content: message,
     };
     const response = await fetch_api("message", "POST", data);
-    console.log("🚀 ~ file: MessageModal.js:30 ~ handleSend ~ response:", response)
+    console.log(
+      "🚀 ~ file: MessageModal.js:30 ~ handleSend ~ response:",
+      response
+    );
     if (response?.status === 201) {
       navigate(`/dashboard/chat/${props.mentor_id}-${props.student_id}/`);
       return;

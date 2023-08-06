@@ -292,7 +292,13 @@ const RegisterMentor = (props) => {
     setErrors(updatedErrors);
     if (Object.keys(updatedErrors).length === 0) {
       handleFetch().then((response) => {
-        const error = response?.response?.data?.errors;
+        console.log("🚀 ~ file: RegisterMentor.js:295 ~ handleFetch ~ response:", response)
+        // if (response?.response?.status === 500) {
+        //   return;
+        //   }
+          
+        const error = response?.response?.data?.error;
+        console.log("🚀 ~ file: RegisterMentor.js:301 ~ handleFetch ~ error:", error === "UNIQUE constraint failed: student.phone_num")
         if (error) {
           let phone_num_error = "";
           let email_error = "";
@@ -305,25 +311,35 @@ const RegisterMentor = (props) => {
           }
 
           if (
-            error?.phone_num != undefined &&
-            error?.phone_num[0] === "mentor with this phone num already exists."
+            error?.phone_num !== undefined &&
+            (error?.phone_num[0] === "mentor with this phone num already exists.")
           ) {
             phone_num_error = "מספר הפאלפון כבר קיים במערכת";
           }
-
+          if (
+            error !== undefined &&
+            (error === "UNIQUE constraint failed: student.phone_num")
+          ) {
+            phone_num_error = "מספר הפאלפון כבר קיים במערכת";
+          }
           setErrors((prevErrors) => ({
             ...prevErrors,
             ["user.email"]: email_error,
             ["phone_num"]: phone_num_error,
           }));
         } else {
-          setMentorCreated(true);
-          if (!props.edit) {
-            loginUser(mentorData.user.email, mentorData.user.password);
-            navigate("/");
+          if (props.edit) {
+          // window.location.reload()
+          return ;
           }
-          window.location.reload()
+          loginUser(mentorData.user.email, mentorData.user.password).then((res) => {
+            if (res !== null){
+            navigate("/dashboard/edit_profile");
+          }
+          })
+          
         }
+        
       });
     }
   };

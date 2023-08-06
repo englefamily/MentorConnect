@@ -28,7 +28,6 @@ const Chat = (props) => {
   useEffect(() => {
     getData().then((chats) => {
       setChats(chats);
-      console.log("🚀 ~ file: Chat.js:27 ~ getData ~ chats:", chats);
       initializeWebSocketConnections(chats);
     });
   }, []);
@@ -41,7 +40,7 @@ const Chat = (props) => {
   useEffect(() => {
     if (chat_id && chats.length && !chatLoaded) {
       chats.forEach((chat) => {
-        if (chat_id === chat.id) {
+        if (chat_id === chat?.id) {
           setSelectedChat(chat);
         }
       });
@@ -79,7 +78,7 @@ const Chat = (props) => {
         );
         setMessages((prevMessages) => ({
           ...prevMessages,
-          [chat.id]: [...(prevMessages[chat.id] || []), message],
+          [chat?.id]: [...(prevMessages[chat?.id] || []), message],
         }));
 
         setChats((prevChats) => {
@@ -93,7 +92,7 @@ const Chat = (props) => {
       };
 
       socket.onclose = () => {
-        console.log(`WebSocket connection closed for room ${chat.id}.`);
+        console.log(`WebSocket connection closed for room ${chat?.id}.`);
       };
     });
   };
@@ -110,11 +109,11 @@ const Chat = (props) => {
       const message = {
         email: userData.email,
         message: newMessage,
-        chat_id: selectedChat.id,
+        chat_id: selectedChat?.id,
       };
       console.log("🚀 ~ file: Chat.js:99 ~ submitMessage ~ message:", message);
 
-      ws[selectedChat.id].send(JSON.stringify(message));
+      ws[selectedChat?.id].send(JSON.stringify(message));
       setNewMessage("");
     }
   };
@@ -128,14 +127,14 @@ const Chat = (props) => {
               <h6>
                 {selectedChat?.mentor?.user_id === userData?.user_id
                   ? `${selectedChat.student.first_name} ${selectedChat.student.last_name}`
-                  : `${selectedChat.mentor.first_name} ${selectedChat.mentor.last_name}`}
+                  : `${selectedChat?.mentor.first_name} ${selectedChat?.mentor.last_name}`}
               </h6>
             )}
           </div>
           <div className="chat-center" id="chatCenter" ref={scrollContainerRef}>
             {selectedChat &&
-              messages[selectedChat.id] &&
-              messages[selectedChat.id].map((message, index) => (
+              messages[selectedChat?.id] &&
+              messages[selectedChat?.id].map((message, index) => (
                 <div
                   key={index}
                   className={
@@ -167,7 +166,7 @@ const Chat = (props) => {
                 key={index}
                 className="content-card"
                 style={
-                  selectedChat?.id === chat.id
+                  selectedChat?.id === chat?.id
                     ? { backgroundColor: "#C9C9C9" }
                     : {}
                 }
@@ -178,18 +177,18 @@ const Chat = (props) => {
                 </div>
                 <div className="name-last-container">
                   <h6>
-                    {chat.mentor?.user_id === userData?.user_id
+                    {chat?.mentor?.user_id === userData?.user_id
                       ? `${chat.student.first_name} ${chat.student.last_name}`
-                      : `${chat.mentor.first_name} ${chat.mentor.last_name}`}
+                      : `${chat?.mentor.first_name} ${chat?.mentor.last_name}`}
                   </h6>
                   <p>
-                    {messages[chat.id] && messages[chat.id].length > 0
-                      ? messages[chat.id][messages[chat.id].length - 1].message
+                    {messages[chat?.id] && messages[chat?.id].length > 0
+                      ? messages[chat?.id][messages[chat?.id].length - 1].message
                           .length > 10
-                        ? messages[chat.id][
-                            messages[chat.id].length - 1
+                        ? messages[chat?.id][
+                            messages[chat?.id].length - 1
                           ].message.slice(0, 10) + "..."
-                        : messages[chat.id][messages[chat.id].length - 1]
+                        : messages[chat?.id][messages[chat?.id].length - 1]
                             .message
                       : ""}
                   </p>

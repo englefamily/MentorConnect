@@ -188,7 +188,6 @@ function RegisterStudent(props) {
     if (props.edit) {
       studentData["token"] = authTokens?.access;
       console.log("🚀 ~ file: RegisterStudent.js:180 ~ handleFetch ~ studentData:", studentData)
-      
       res = await fetch_api("student", "PUT", studentData);
     } else {
       res = await fetch_api("student", "POST", studentData);
