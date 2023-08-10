@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'channels',
     'mentorconnect',
     'TextChat',
+    'VideoChat',
 ]
 
 
@@ -104,7 +105,9 @@ ROOT_URLCONF = 'mcproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR / 'VideoChat/videochat/templates'
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

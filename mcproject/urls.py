@@ -22,4 +22,5 @@ urlpatterns = [
     path('', include("mentorconnect.urls")),
     path('api/', include("mentorconnect.api_urls")),
     path('text-chat/api/', include("TextChat.api_urls")),
+    path('videochat/', include("VideoChat.videochat.urls")),
 ]

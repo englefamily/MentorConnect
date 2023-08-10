@@ -21,6 +21,8 @@ const DropDown = (props) => {
   const searchResRef = useRef(null);
   const dropdownRef = useRef(null);
 
+  const [selectedValue, setSelectedValue] = useState("");
+
   const handleSelected = (event) => {
     props.onChange(event);
   };
@@ -120,7 +122,7 @@ const DropDown = (props) => {
           openSelected();
         }}
         onChange={handleSearchInputChange}
-        placeholder={props.placeholder}
+        placeholder={selectedValue ? selectedValue : props.placeholder}
         name="search_bar"
       />
       {(isOpen) && (
@@ -144,7 +146,7 @@ const DropDown = (props) => {
                             value={value}
                             name={props.name}
                             checked={props.value.includes(value)}
-                            onChange={handleSelected}
+                            onChange={(e)=>{handleSelected(e); setSelectedValue(name)}}
                             type="checkbox"
                           />
                           <label htmlFor={index}>{name}</label>
